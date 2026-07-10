@@ -28,21 +28,38 @@
             <a href="#contact">Inquire</a>
         </nav>
         <section id="hero">
-            <span>01 — freelance web developer</span>
-            <h1>Real code. No templates. <span>No Shortcuts.</span></h1>
+            <div class="hero-main">
+                <span>01 — freelance web developer</span>
+                <h1>Real code. No templates. <span>No Shortcuts.</span></h1>
 
-            <div class="glass-backdrop">
-                <div class="glass-panel">
-                    <p>The spark that makes your fire roar.</p>
+                <div class="glass-backdrop">
+                    <div class="glass-panel">
+                        <p>The spark that makes your fire roar.</p>
+                    </div>
+                </div>
+
+                <a href="#contact">Get a Quote</a>
+                <a href="#work">View showcase</a>
+
+                <div class="scroll-hint">
+                    <span>Scroll</span>
+                    <div class="scroll-line"></div>
                 </div>
             </div>
 
-            <a href="#contact">Get a Quote</a>
-            <a href="#work">View showcase</a>
-
-            <div class="scroll-hint">
-                <span>Scroll</span>
-                <div class="scroll-line"></div>
+            <div class="glass-backdrop" id="contact">
+                <form class="glass-panel" name="contact" method="POST" data-netlify="true">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" required>
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" required></textarea>
+                    <p hidden>
+                        <label>Don't fill this out: <input name="bot-field"></label>
+                    </p>
+                    <button type="submit">Send</button>
+                </form>
             </div>
         </section>
         <section id="work">
@@ -101,25 +118,6 @@
                         <li class="reveal">Free visual mockups with consultation BEFORE spending any money</li>
                     </ul>
                 </div>
-            </div>
-        </section>
-        <section id="contact">
-            <span>04 &mdash; Contact</span>
-            <h2>Get in Touch</h2>
-            <p>If you're interested in working together or have any questions, feel free to reach out.</p>
-            <div class="glass-backdrop">
-                <form name="contact" class="glass-panel" method="POST" data-netlify="true">
-                    <label for="name">Name</label>
-                    <input type="text" id="name" name="name" required>
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required>
-                    <label for="message">Message</label>
-                    <textarea id="message" name="message" required></textarea>
-                    <p hidden>
-                        <label>Don't fill this out: <input name="bot-field"></label>
-                    </p>
-                    <button type="submit">Send</button>
-                </form>
             </div>
         </section>
         <footer>
