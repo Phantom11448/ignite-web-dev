@@ -43,3 +43,31 @@ const revealObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.reveal').forEach(el => {
   revealObserver.observe(el);
 });
+document.querySelectorAll('.media-cycle').forEach((cycle) => {
+    const slides = cycle.querySelectorAll('.slide');
+    let current = 0;
+
+    function showNext() {
+        slides[current].classList.remove('active');
+        if (slides[current].tagName === 'VIDEO') {
+            slides[current].pause();
+            slides[current].currentTime = 0;
+        }
+        current = (current + 1) % slides.length;
+        slides[current].classList.add('active');
+        if (slides[current].tagName === 'VIDEO') {
+            slides[current].currentTime = 0;
+            slides[current].play();
+            slides[current].onended = showNext;
+        } else {
+            setTimeout(showNext, 3000);
+        }
+    }
+
+    if (slides[0].tagName === 'VIDEO') {
+        slides[0].play();
+        slides[0].onended = showNext;
+    } else {
+        setTimeout(showNext, 3000);
+    }
+});
