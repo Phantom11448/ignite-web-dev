@@ -398,6 +398,7 @@ footer {
     overflow: hidden;
     margin-bottom: 20px;
     background: #1f1d22;
+    cursor: pointer;
 }
 .media-cycle .slide {
     position: absolute;
@@ -412,14 +413,13 @@ footer {
 .media-cycle .slide.active {
     opacity: 1;
 }
-/* Below 700px wide (phones), switch the 3-column work
-   grid to a single column so cards stack vertically
-   instead of squeezing into unreadable slivers */
+
 @media (max-width: 700px) {
     .work-grid {
         grid-template-columns: 1fr;
     }
 }
+
 .lightbox {
     position: fixed;
     top: 0;
@@ -460,8 +460,25 @@ footer {
     padding: 0;
     margin: 0;
 }
-
-/* makes each card's media area visually clickable */
-.media-cycle {
+.lightbox-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(23, 22, 26, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--text);
+    font-size: 1.5rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.lightbox-prev {
+    left: 24px;
+}
+.lightbox-next {
+    right: 24px;
 }

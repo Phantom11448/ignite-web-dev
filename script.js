@@ -21,6 +21,14 @@ function animateRing() {
 }
 animateRing();
 
+document.addEventListener('touchstart', (e) => {
+    const touch = e.touches[0];
+    mouseX = touch.clientX;
+    mouseY = touch.clientY;
+    dot.style.left = mouseX + 'px';
+    dot.style.top = mouseY + 'px';
+});
+
 const clickableElements = document.querySelectorAll('a, button');
 clickableElements.forEach(el => {
   el.addEventListener('mouseenter', () => {
@@ -43,6 +51,7 @@ const revealObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.reveal').forEach(el => {
   revealObserver.observe(el);
 });
+
 document.querySelectorAll('.media-cycle').forEach((cycle) => {
     const slides = cycle.querySelectorAll('.slide');
     let current = 0;
@@ -71,59 +80,71 @@ document.querySelectorAll('.media-cycle').forEach((cycle) => {
         setTimeout(showNext, 3000);
     }
 });
-// TOUCH SUPPORT: reuses the exact same mouseX/mouseY variables
-// and animateRing loop already driving the desktop cursor —
-// we're just updating those same coordinates from touch events
-// instead of mouse events, so the dot/ring "jump" to wherever
-// you last tapped
-document.addEventListener('touchstart', (e) => {
-    const touch = e.touches[0];
-    mouseX = touch.clientX;
-    mouseY = touch.clientY;
 
-    // snap the dot instantly to the touch point
-    dot.style.left = mouseX + 'px';
-    dot.style.top = mouseY + 'px';
-});
 const lightbox = document.getElementById('lightbox');
 const lightboxContent = document.getElementById('lightboxContent');
 const lightboxClose = document.getElementById('lightboxClose');
+const lightboxPrev = document.getElementById('lightboxPrev');
+const lightboxNext = document.getElementById('lightboxNext');
+
+let lightboxSlides = [];
+let lightboxIndex = 0;
+
+function renderLightboxSlide() {
+    lightboxContent.innerHTML = '';
+    const slideData = lightboxSlides[lightboxIndex];
+
+    if (slideData.type === 'video') {
+        const video = document.createElement('video');
+        video.src = slideData.src;
+        video.controls = true;
+        video.autoplay = true;
+        video.muted = true;
+        lightboxContent.appendChild(video);
+    } else {
+        const img = document.createElement('img');
+        img.src = slideData.src;
+        img.alt = slideData.alt;
+        lightboxContent.appendChild(img);
+    }
+}
 
 document.querySelectorAll('.media-cycle').forEach((cycle) => {
     cycle.addEventListener('click', () => {
-        // find whichever slide is currently showing in THIS card
-        const activeSlide = cycle.querySelector('.slide.active');
-        if (!activeSlide) return;
+        const slideEls = cycle.querySelectorAll('.slide');
+        lightboxSlides = Array.from(slideEls).map((el) => ({
+            type: el.tagName === 'VIDEO' ? 'video' : 'image',
+            src: el.src,
+            alt: el.alt || ''
+        }));
 
-        // clear out whatever was in the lightbox before, then
-        // build a fresh, larger version of the clicked media
-        lightboxContent.innerHTML = '';
-        if (activeSlide.tagName === 'VIDEO') {
-            const video = document.createElement('video');
-            video.src = activeSlide.src;
-            video.controls = true;
-            video.autoplay = true;
-            video.muted = true;
-            lightboxContent.appendChild(video);
-        } else {
-            const img = document.createElement('img');
-            img.src = activeSlide.src;
-            img.alt = activeSlide.alt;
-            lightboxContent.appendChild(img);
-        }
+        const activeEl = cycle.querySelector('.slide.active');
+        lightboxIndex = Array.from(slideEls).indexOf(activeEl);
 
+        renderLightboxSlide();
         lightbox.classList.add('open');
     });
 });
 
 function closeLightbox() {
     lightbox.classList.remove('open');
-    lightboxContent.innerHTML = ''; // stops any playing video
+    lightboxContent.innerHTML = '';
+}
+
+function showPrev() {
+    lightboxIndex = (lightboxIndex - 1 + lightboxSlides.length) % lightboxSlides.length;
+    renderLightboxSlide();
+}
+
+function showNext() {
+    lightboxIndex = (lightboxIndex + 1) % lightboxSlides.length;
+    renderLightboxSlide();
 }
 
 lightboxClose.addEventListener('click', closeLightbox);
+lightboxPrev.addEventListener('click', showPrev);
+lightboxNext.addEventListener('click', showNext);
 
-// clicking the dark background (not the image itself) also closes it
 lightbox.addEventListener('click', (e) => {
     if (e.target === lightbox) closeLightbox();
 });
