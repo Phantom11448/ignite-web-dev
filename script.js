@@ -114,7 +114,7 @@ document.querySelectorAll('.media-cycle').forEach((cycle) => {
         const slideEls = cycle.querySelectorAll('.slide');
         lightboxSlides = Array.from(slideEls).map((el) => ({
             type: el.tagName === 'VIDEO' ? 'video' : 'image',
-            src: el.src,
+            src: el.dataset.full || el.src,
             alt: el.alt || ''
         }));
 
