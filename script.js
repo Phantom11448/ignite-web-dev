@@ -71,3 +71,17 @@ document.querySelectorAll('.media-cycle').forEach((cycle) => {
         setTimeout(showNext, 3000);
     }
 });
+// TOUCH SUPPORT: reuses the exact same mouseX/mouseY variables
+// and animateRing loop already driving the desktop cursor —
+// we're just updating those same coordinates from touch events
+// instead of mouse events, so the dot/ring "jump" to wherever
+// you last tapped
+document.addEventListener('touchstart', (e) => {
+    const touch = e.touches[0];
+    mouseX = touch.clientX;
+    mouseY = touch.clientY;
+
+    // snap the dot instantly to the touch point
+    dot.style.left = mouseX + 'px';
+    dot.style.top = mouseY + 'px';
+});
