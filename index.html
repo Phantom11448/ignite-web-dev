@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Ignite Web Dev — Custom Websites for Small Businesses</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+        <link rel="shortcut icon" href="images/favicon.ico">
+        <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <div class="cursor-dot"></div>
+        <div class="cursor-ring"></div>
+        <nav>
+            <a href="#hero" aria-label="Ignite Web Dev, back to top">
+                <img src="images/ignite-logo.png" class="logo" alt="Ignite Web Dev logo">
+            </a>
+            <ul>
+                <li><a href="#contact">Contact</a></li>
+                <li><a href="#work">Work</a></li>
+                <li><a href="#about">About</a></li>
+            </ul>
+            <a href="#contact">Inquire</a>
+        </nav>
+        <section id="hero">
+            <span>01 — freelance web developer</span>
+            <h1>Real code. No templates. <span>No Shortcuts.</span></h1>
+
+            <div class="glass-backdrop">
+                <div class="glass-panel">
+                    <p>The spark that makes your fire roar.</p>
+                </div>
+            </div>
+
+            <a href="#contact">Get a Quote</a>
+            <a href="#work">View showcase</a>
+
+            <div class="scroll-hint">
+                <span>Scroll</span>
+                <div class="scroll-line"></div>
+            </div>
+        </section>
+        <section id="work">
+            <span>02 &mdash; Selected work</span>
+            <h2>Showcase</h2>
+            <div class="work-grid">
+                <div class="work-card reveal">
+                    <div>image placeholder</div>
+                    <h3>ColdSide Study</h3>
+                    <p>A study app to help pass the EPA 608 Exam</p>
+                    <span>Stack: HTML, CSS, Javascript</span>
+                </div>
+                <div class="work-card reveal">
+                    <div>image placeholder</div>
+                    <h3>Signal Lost</h3>
+                    <p>HTML lessons</p>
+                    <span>Stack: React, Vite</span>
+                </div>
+                <div class="work-card reveal">
+                    <div>image placeholder</div>
+                    <h3>customer project</h3>
+                    <p>coming soon.</p>
+                </div>
+            </div>
+        </section>
+        <section id="about">
+            <span>03 &mdash; About</span>
+            <h2>About Ignite Web Dev</h2>
+            <div class="glass-backdrop">
+                <div class="glass-panel">
+                    <p class="reveal">There's a litany of I.T. certifications, web development projects, and lifetimes worth of computer experience backing this workhorse. We're the type of nuts that check things five times before clicking save — We genuinely can't leave a problem half-solved. That obsessive streak means fewer bugs, fewer "wait, can you fix this" emails, and a site that actually works the way it's supposed to the first time.</p>
+                    <p class="reveal">Working freelance means you're talking straight to the person building your site — no account managers, no corporate approval chains, no handoffs between five different people. Some of us work in small businesses by day, so we understand exactly what you need your website to do: bring in customers, load fast, and not waste your time with problems.</p>
+                    <ul>
+                        <li class="reveal">Custom-built websites, no templates or shortcuts</li>
+                        <li class="reveal">Custom-built apps tailored to your business needs</li>
+                        <li class="reveal">Fast load times</li>
+                        <li class="reveal">Custom animations tailored to your business</li>
+                        <li class="reveal">Free visual mockups with consultation BEFORE spending any money</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <section id="contact">
+            <span>04 &mdash; Contact</span>
+            <h2>Get in Touch</h2>
+            <p>If you're interested in working together or have any questions, feel free to reach out.</p>
+            <div class="glass-backdrop">
+                <form class="glass-panel" name="contact" data-netlify="true">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" required>
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" required></textarea>
+                    <p hidden>
+                        <label>Don't fill this out: <input name="bot-field"></label>
+                    </p>
+                    <button type="submit">Send</button>
+                </form>
+            </div>
+        </section>
+        <footer>
+            <span>ignite.webdev</span>
+            <span>&copy; 2026. All rights reserved.</span>
+        </footer>
+        <script src="script.js"></script>
+    </body>
+</html>
