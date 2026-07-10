@@ -485,3 +485,11 @@ footer {
 .lightbox-next {
     right: 24px;
 }
+#contact {
+    padding: 100px 40px 140px;
+}
+
+#contact .glass-panel {
+    border: 1px solid rgba(255, 107, 53, 0.3);
+    box-shadow: 0 0 60px rgba(255, 107, 53, 0.08);
+}
