@@ -85,3 +85,45 @@ document.addEventListener('touchstart', (e) => {
     dot.style.left = mouseX + 'px';
     dot.style.top = mouseY + 'px';
 });
+const lightbox = document.getElementById('lightbox');
+const lightboxContent = document.getElementById('lightboxContent');
+const lightboxClose = document.getElementById('lightboxClose');
+
+document.querySelectorAll('.media-cycle').forEach((cycle) => {
+    cycle.addEventListener('click', () => {
+        // find whichever slide is currently showing in THIS card
+        const activeSlide = cycle.querySelector('.slide.active');
+        if (!activeSlide) return;
+
+        // clear out whatever was in the lightbox before, then
+        // build a fresh, larger version of the clicked media
+        lightboxContent.innerHTML = '';
+        if (activeSlide.tagName === 'VIDEO') {
+            const video = document.createElement('video');
+            video.src = activeSlide.src;
+            video.controls = true;
+            video.autoplay = true;
+            video.muted = true;
+            lightboxContent.appendChild(video);
+        } else {
+            const img = document.createElement('img');
+            img.src = activeSlide.src;
+            img.alt = activeSlide.alt;
+            lightboxContent.appendChild(img);
+        }
+
+        lightbox.classList.add('open');
+    });
+});
+
+function closeLightbox() {
+    lightbox.classList.remove('open');
+    lightboxContent.innerHTML = ''; // stops any playing video
+}
+
+lightboxClose.addEventListener('click', closeLightbox);
+
+// clicking the dark background (not the image itself) also closes it
+lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox) closeLightbox();
+});
