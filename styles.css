@@ -412,3 +412,11 @@ footer {
 .media-cycle .slide.active {
     opacity: 1;
 }
+/* Below 700px wide (phones), switch the 3-column work
+   grid to a single column so cards stack vertically
+   instead of squeezing into unreadable slivers */
+@media (max-width: 700px) {
+    .work-grid {
+        grid-template-columns: 1fr;
+    }
+}
