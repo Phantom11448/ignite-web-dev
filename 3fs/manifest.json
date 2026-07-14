@@ -1,0 +1,31 @@
+{
+  "_copyright": "\u00a9 2026 IgniteWebDev. All Rights Reserved.",
+  "name": "3FS \u2014 Three Flowers",
+  "short_name": "3FS",
+  "description": "Real-time multiplayer card game. Two players. One winner. No mercy.",
+  "start_url": "/3fs/index.html",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#050810",
+  "theme_color": "#050810",
+  "categories": [
+    "games",
+    "entertainment"
+  ],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "lang": "en-US",
+  "scope": "/3fs/"
+}
