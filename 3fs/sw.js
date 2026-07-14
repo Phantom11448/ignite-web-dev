@@ -1,6 +1,6 @@
 // 3FS Service Worker — v1.4
 // © 2026 IgniteWebDev. All Rights Reserved.
-const CACHE_NAME = '3fs-v37';
+const CACHE_NAME = '3fs-v38';
 const ASSETS = [
   './index.html',
   './styles.css',
@@ -63,7 +63,8 @@ self.addEventListener('fetch', e => {
   if (url.hostname.includes('firebase') ||
       url.hostname.includes('googleapis') ||
       url.hostname.includes('gstatic') ||
-      url.hostname.includes('fonts.')) {
+      url.hostname.includes('fonts.') ||
+      url.pathname.endsWith('.mp4')) {
     return;
   }
   e.respondWith(
