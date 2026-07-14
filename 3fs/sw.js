@@ -68,12 +68,13 @@ self.addEventListener('fetch', e => {
     return;
   }
   e.respondWith(
-    fetch(e.request, { cache: 'no-store' })
-      .then(response => {
+    caches.match(e.request).then(cached => {
+      const networkFetch = fetch(e.request).then(response => {
         const clone = response.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
         return response;
-      })
-      .catch(() => caches.match(e.request))
+      }).catch(() => cached);
+      return cached || networkFetch;
+    })
   );
 });
