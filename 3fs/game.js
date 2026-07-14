@@ -1286,7 +1286,6 @@ function restartGame(){
 
 // Init avatar picker on load
 document.addEventListener("DOMContentLoaded", function(){
-  initAvatarPicker();
   if(typeof initProfile === 'function') initProfile();
 });
 
@@ -2088,6 +2087,7 @@ function skipIntro(){
 function hideIntro(){
   const overlay = document.getElementById('intro-overlay');
   if(overlay) overlay.remove();
+  initAvatarPicker();
 }
 
 if(document.readyState === 'loading'){
