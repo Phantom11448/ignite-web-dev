@@ -1,6 +1,6 @@
 // 3FS Service Worker — v1.4
 // © 2026 IgniteWebDev. All Rights Reserved.
-const CACHE_NAME = '3fs-v39';
+const CACHE_NAME = '3fs-v40';
 const ASSETS = [
   './index.html',
   './styles.css',
@@ -17,6 +17,7 @@ const ASSETS = [
   './coin-tails.png',
   './winner-wooch.mp4',
   './winner-phantom.mp4',
+  './winner-phantom-mobile.mp4',
   './winner-hustler.mp4',
   './winner-bartender.mp4',
   './winner-biker.mp4',

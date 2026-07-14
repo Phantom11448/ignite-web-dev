@@ -463,11 +463,13 @@ button:disabled { opacity: 0.35; cursor: default; }
 .winner-box {
   position: absolute; inset: 0; z-index: 2;
   display: flex; flex-direction: column; align-items: center;
+  justify-content: flex-end;
   text-align: center;
-  padding: 4vh 1.5rem 0;
+  padding: 0 1.5rem 4vh;
   background: none; border: none; box-shadow: none; backdrop-filter: none;
   pointer-events: none;
 }
+.winner-box button { pointer-events: auto; }
 .winner-box h2 {
   font-family: 'Oswald', sans-serif; font-size: 1.8rem;
   color: var(--neon-yellow); text-shadow: 0 0 10px #ffe60080;

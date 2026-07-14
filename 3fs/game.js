@@ -1845,6 +1845,7 @@ function restartGameCPU(){
 // a plain dark overlay (no video) for avatars that don't have one yet.
 // ============================================================
 const WINNER_VIDEO_AVATARS = ['wooch','phantom','hustler','bartender','femme-fatale','highroller','biker','punk']; // add keys here as more clips get made
+const WINNER_VIDEO_MOBILE_AVATARS = ['phantom']; // avatars that also have a dedicated -mobile.mp4 clip
 
 function avatarKeyFromFile(avatarFile){
   // 'avatar-wooch.png' -> 'wooch'
@@ -1857,7 +1858,8 @@ function setWinnerVideo(avatarFile){
   if(!video) return;
   const key=avatarKeyFromFile(avatarFile);
   if(key && WINNER_VIDEO_AVATARS.includes(key)){
-    video.src='./winner-'+key+'.mp4';
+    const useMobile = window.innerWidth <= 700 && WINNER_VIDEO_MOBILE_AVATARS.includes(key);
+    video.src = useMobile ? './winner-'+key+'-mobile.mp4' : './winner-'+key+'.mp4';
     video.style.display='block';
     video.currentTime=0;
     video.play().catch(()=>{});
