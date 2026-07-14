@@ -1,6 +1,6 @@
 // 3FS Service Worker — v1.4
 // © 2026 IgniteWebDev. All Rights Reserved.
-const CACHE_NAME = '3fs-v36';
+const CACHE_NAME = '3fs-v37';
 const ASSETS = [
   './index.html',
   './styles.css',
