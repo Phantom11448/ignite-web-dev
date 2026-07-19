@@ -21,6 +21,18 @@
 // reusing FIREBASE_SERVICE_ACCOUNT_JSON) and requires the verified uid to
 // equal businessId before creating a session. See the security audit's
 // "checkout session has no authorization check" finding.
+//
+// DEPLOY NOTE: this file's source has been clean of jwks-rsa/jose since
+// the authorization fix above was written — it only ever used
+// getAuth().verifyIdToken(). A stale Netlify build (from before this
+// file existed in its current form) left jwks-rsa/jose baked into the
+// deployed function bundle's node_modules, causing a fatal
+// ERR_REQUIRE_ESM crash at cold start on every invocation. Netlify's
+// content-addressed deploys dedupe by commit, so a "Clear cache and
+// deploy" against an unchanged commit silently reused that same broken
+// bundle instead of rebuilding it. This comment exists to change the
+// file's content so the next deploy can't be deduped and actually
+// reruns npm install against the (already clean) package.json.
 // -----------------------------------------------------------------------
 
 const Stripe = require("stripe");
