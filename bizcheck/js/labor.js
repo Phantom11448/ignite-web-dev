@@ -20,14 +20,33 @@ import {
 /**
  * Logs hours worked by a crew member on a job.
  * hourlyRate is optional — some owners may not track a per-entry rate.
+ * hours and hourlyRate are both coerced to numbers and validated here (not
+ * just left to `hours || 0`, which only catches falsy values — a truthy
+ * non-numeric string would otherwise pass through unchanged and later
+ * silently corrupt sumLaborCost()/sumLaborHours() via NaN propagation).
+ * Throws instead of writing bad data; callers should catch this and show
+ * the message inline.
  */
 export async function addLaborEntry(businessId, jobId, { userId, date, hours, hourlyRate }) {
+  const numericHours = Number(hours);
+  if (isNaN(numericHours) || numericHours < 0) {
+    throw new Error("Hours must be a valid non-negative number.");
+  }
+
+  let numericHourlyRate = null;
+  if (hourlyRate !== undefined && hourlyRate !== null && hourlyRate !== "") {
+    numericHourlyRate = Number(hourlyRate);
+    if (isNaN(numericHourlyRate) || numericHourlyRate < 0) {
+      throw new Error("Hourly rate must be a valid non-negative number.");
+    }
+  }
+
   const laborRef = collection(db, paths.laborEntries(businessId, jobId));
   const docRef = await addDoc(laborRef, {
     user_id: userId,
     date: date || serverTimestamp(),
-    hours: hours || 0,
-    hourly_rate: hourlyRate ?? null,
+    hours: numericHours,
+    hourly_rate: numericHourlyRate,
   });
   return docRef.id;
 }

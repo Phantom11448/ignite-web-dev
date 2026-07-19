@@ -17,16 +17,29 @@ import {
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/** Logs a new expense against a job. categoryId refers to a categories/{id} doc. */
+/**
+ * Logs a new expense against a job. categoryId refers to a categories/{id} doc.
+ * amount is coerced to a number and validated here (not just left to
+ * `amount || 0`, which only catches falsy values — a truthy non-numeric
+ * string like "abc" would otherwise pass through unchanged and later
+ * silently corrupt sumExpenses()'s running total). Throws instead of
+ * writing bad data; callers should catch this and show the message inline
+ * rather than letting a malformed request reach Firestore only to be
+ * rejected by firestore.rules with a generic permission error.
+ */
 export async function addExpense(
   businessId,
   jobId,
   { categoryId, amount, date, photoUrl, loggedBy, notes }
 ) {
+  const numericAmount = Number(amount);
+  if (isNaN(numericAmount) || numericAmount < 0) {
+    throw new Error("Amount must be a valid non-negative number.");
+  }
   const expensesRef = collection(db, paths.expenses(businessId, jobId));
   const docRef = await addDoc(expensesRef, {
     category_id: categoryId,
-    amount: amount || 0,
+    amount: numericAmount,
     date: date || serverTimestamp(),
     photo_url: photoUrl || null,
     logged_by: loggedBy,

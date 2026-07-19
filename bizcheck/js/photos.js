@@ -24,6 +24,25 @@
 const CLOUD_NAME = "wilm6inz";
 const UPLOAD_PRESET = "hdit2a2l";
 
+// Allowlist of file types accepted for any photo upload (receipts, job
+// notes, bulletin posts — all three share uploadToCloudinary below).
+// Deliberately excludes image/svg+xml even though it's technically an
+// image MIME type: SVGs can embed <script> tags and are a known XSS
+// vector, so they're never allowed here regardless of what a receipt/
+// note/post photo might reasonably be.
+const ALLOWED_PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
+
+/**
+ * Thrown by uploadToCloudinary when a file's type isn't in
+ * ALLOWED_PHOTO_TYPES. Exported as its own class (not a plain Error) so
+ * callers can tell "you picked the wrong kind of file" — worth showing
+ * this exact message to the user — apart from "the upload itself failed"
+ * (network error, Cloudinary outage, etc.) — better shown as a generic
+ * retry message. See job-detail-screen.js and bulletin-screen.js's
+ * upload catch blocks for where that distinction is used.
+ */
+export class InvalidPhotoTypeError extends Error {}
+
 /**
  * Uploads a receipt photo for one expense and returns its public URL.
  * See uploadToCloudinary below for the compression/upload details shared
@@ -60,8 +79,17 @@ export function uploadBulletinPhoto(businessId, postId, file) {
  * endpoint, scoped under the given folder path. Shared core behind both
  * exported upload functions above — they only differ in which folder
  * the photo lands in.
+ *
+ * File-type validation lives here (not per call site) so every caller —
+ * receipts, job notes, bulletin photos — gets the same check for free.
+ * Rejects immediately, before any compression or network call, if the
+ * file isn't one of ALLOWED_PHOTO_TYPES.
  */
 async function uploadToCloudinary(folder, file) {
+  if (!ALLOWED_PHOTO_TYPES.includes(file.type)) {
+    throw new InvalidPhotoTypeError("Please select a photo file (JPEG, PNG, WEBP, or HEIC).");
+  }
+
   const compressed = await compressImage(file);
 
   const formData = new FormData();
@@ -89,8 +117,11 @@ const JPEG_QUALITY = 0.7;
 /**
  * Resizes an image file down to MAX_DIMENSION on its longest side and
  * re-encodes it as a compressed JPEG. Falls back to the original file if
- * anything about the compression step fails (e.g. an unusual file type) —
- * a slightly slower upload beats a broken one.
+ * compression itself fails on an otherwise-valid image (e.g. a corrupted
+ * file, or a HEIC the browser can't decode into a bitmap) — a slightly
+ * slower upload beats a broken one. This fallback only ever runs on a
+ * file that already passed uploadToCloudinary's ALLOWED_PHOTO_TYPES check
+ * above, never as a way to smuggle a rejected file type through.
  */
 async function compressImage(file) {
   try {

@@ -146,7 +146,7 @@ export function renderTeamScreen(container, { businessId }) {
       <div class="job-card-main rate-edit-form">
         <label for="rate-input-${member.id}">Hourly Rate ($) for ${escapeHtml(member.name || member.email)}</label>
         <input type="number" id="rate-input-${member.id}" min="0" step="0.01"
-          value="${hasRate ? member.default_hourly_rate : ""}" />
+          value="${hasRate ? escapeHtml(member.default_hourly_rate) : ""}" />
       </div>
       <div class="job-card-actions">
         <button type="button" class="save-rate-btn">Save</button>
@@ -169,7 +169,11 @@ export function renderTeamScreen(container, { businessId }) {
 }
 
 function escapeHtml(str) {
-  const div = document.createElement("div");
-  div.textContent = str;
-  return div.innerHTML;
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }

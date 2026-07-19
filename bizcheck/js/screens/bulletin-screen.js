@@ -11,7 +11,7 @@
 // -----------------------------------------------------------------------
 
 import { createPost, getPosts, updatePost, deletePost } from "../bulletin.js";
-import { uploadBulletinPhoto } from "../photos.js";
+import { uploadBulletinPhoto, InvalidPhotoTypeError } from "../photos.js";
 
 /**
  * Renders the Bulletin Board screen into `container`. userName is stamped
@@ -85,8 +85,13 @@ export function renderBulletinScreen(container, { businessId, userId, userName, 
         const photoUrl = await uploadBulletinPhoto(businessId, postId, photoFile);
         await updatePost(businessId, postId, { photo_url: photoUrl });
       } catch (err) {
+        // A rejected file type gets its own specific message (err.message
+        // from photos.js); any other upload failure gets the generic one.
         console.error("Bulletin photo upload failed:", err);
-        statusEl.textContent = "Post saved, but the photo failed to upload.";
+        statusEl.textContent =
+          err instanceof InvalidPhotoTypeError
+            ? err.message
+            : "Post saved, but the photo failed to upload.";
         submitBtn.disabled = false;
         return;
       }
@@ -158,7 +163,11 @@ function toDate(value) {
 }
 
 function escapeHtml(str) {
-  const div = document.createElement("div");
-  div.textContent = str;
-  return div.innerHTML;
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }

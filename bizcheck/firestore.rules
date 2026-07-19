@@ -77,6 +77,22 @@ service cloud.firestore {
       return isBusinessMember(businessId) && roleOf(businessId) in ['owner', 'supervisor'];
     }
 
+    // --- Field-shape validation helpers -----------------------------------
+    // Firestore rules are the real enforcement for data shape (client-side
+    // checks in expenses.js/labor.js/revenue-entries.js exist too, but only
+    // to give a fast, friendly error before a request ever reaches here —
+    // they are not the source of truth). Used below by expenses,
+    // labor_entries, and revenue_entries.
+    function isNonNegativeNumber(value) {
+      return value is number && value >= 0;
+    }
+
+    // Same as isNonNegativeNumber, but also accepts null — used for fields
+    // like hourly_rate that are legitimately unset (no rate assigned yet).
+    function isNonNegativeNumberOrNull(value) {
+      return value == null || (value is number && value >= 0);
+    }
+
     // --- Subscription/trial access gating ---------------------------------
     // businessDoc/isInTrial/hasActiveAccess mirror the exact logic in
     // app.html's client-side hasAccess() computation — keep both in sync if
@@ -172,7 +188,11 @@ service cloud.firestore {
         allow read: if isBusinessMember(businessId) && hasActiveAccess(businessId);
         allow create: if isBusinessMember(businessId) && hasActiveAccess(businessId);
         allow delete: if (isSupervisorOrAbove(businessId) || (isBusinessMember(businessId) && resource.data.posted_by == request.auth.uid)) && hasActiveAccess(businessId);
-        allow update: if isBusinessMember(businessId) && resource.data.posted_by == request.auth.uid && hasActiveAccess(businessId);
+        // posted_by (who actually wrote the post) can never be reassigned
+        // by the author's own edit — same diff().affectedKeys() pattern
+        // used for subscriptionFields() and the other creator fields above.
+        allow update: if isBusinessMember(businessId) && resource.data.posted_by == request.auth.uid && hasActiveAccess(businessId) &&
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['posted_by']);
       }
 
       match /jobs/{jobId} {
@@ -184,16 +204,37 @@ service cloud.firestore {
         match /expenses/{expenseId} {
           allow read: if isBusinessMember(businessId) && hasActiveAccess(businessId);
           // Anyone active (including crew) can log a new expense/receipt.
-          allow create: if isBusinessMember(businessId) && hasActiveAccess(businessId);
-          // Only supervisor/owner can correct an existing entry.
-          allow update, delete: if isSupervisorOrAbove(businessId) && hasActiveAccess(businessId);
+          // amount must be a real non-negative number — a negative amount
+          // would artificially inflate the job's calculated profit.
+          allow create: if isBusinessMember(businessId) && hasActiveAccess(businessId) &&
+            isNonNegativeNumber(request.resource.data.amount);
+          // Only supervisor/owner can correct an existing entry, amount
+          // still has to be a valid non-negative number, and logged_by
+          // (who originally logged it) can never be reassigned by that
+          // correction — same diff().affectedKeys() pattern used for
+          // subscriptionFields() above.
+          allow update: if isSupervisorOrAbove(businessId) && hasActiveAccess(businessId) &&
+            isNonNegativeNumber(request.resource.data.amount) &&
+            !request.resource.data.diff(resource.data).affectedKeys().hasAny(['logged_by']);
+          allow delete: if isSupervisorOrAbove(businessId) && hasActiveAccess(businessId);
         }
 
         match /labor_entries/{laborEntryId} {
           allow read: if isBusinessMember(businessId) && hasActiveAccess(businessId);
-          // Anyone active (including crew) can log their own hours.
-          allow create: if isBusinessMember(businessId) && hasActiveAccess(businessId);
-          allow update, delete: if isSupervisorOrAbove(businessId) && hasActiveAccess(businessId);
+          // Anyone active (including crew) can log their own hours. hours
+          // must be a real non-negative number; hourly_rate is optional
+          // (owner/supervisor sets it later) but if present must also be a
+          // non-negative number, or explicitly null.
+          allow create: if isBusinessMember(businessId) && hasActiveAccess(businessId) &&
+            isNonNegativeNumber(request.resource.data.hours) &&
+            isNonNegativeNumberOrNull(request.resource.data.get('hourly_rate', null));
+          // Same shape validation on correction, plus user_id (whose hours
+          // these are) can never be reassigned by that correction.
+          allow update: if isSupervisorOrAbove(businessId) && hasActiveAccess(businessId) &&
+            isNonNegativeNumber(request.resource.data.hours) &&
+            isNonNegativeNumberOrNull(request.resource.data.get('hourly_rate', null)) &&
+            !request.resource.data.diff(resource.data).affectedKeys().hasAny(['user_id']);
+          allow delete: if isSupervisorOrAbove(businessId) && hasActiveAccess(businessId);
         }
 
         match /revenue_entries/{revenueEntryId} {
@@ -203,8 +244,16 @@ service cloud.firestore {
           // — don't break), but crew can never write. Unlike expenses/
           // labor_entries, crew doesn't even get create access here —
           // logging a price change is a supervisor/owner-only action.
+          // amount must be a real number, but — unlike expenses/labor —
+          // there's deliberately no sign constraint: a negative amount is
+          // a valid discount/reduction, not a mistake. create/update are
+          // split out from delete (rather than one blanket "allow write")
+          // so that referencing request.resource.data below never runs on
+          // a delete request, where request.resource is null.
           allow read: if isBusinessMember(businessId) && hasActiveAccess(businessId);
-          allow write: if isSupervisorOrAbove(businessId) && hasActiveAccess(businessId);
+          allow create, update: if isSupervisorOrAbove(businessId) && hasActiveAccess(businessId) &&
+            request.resource.data.amount is number;
+          allow delete: if isSupervisorOrAbove(businessId) && hasActiveAccess(businessId);
         }
 
         match /job_notes/{noteId} {
@@ -212,10 +261,14 @@ service cloud.firestore {
           // no reason to restrict this beyond normal business membership —
           // same open pattern as expenses/labor_entries: anyone active
           // (including crew) can log a note or photo, only supervisor/
-          // owner can correct/remove one that's already there.
+          // owner can correct/remove one that's already there. logged_by
+          // (who originally logged the note) can never be reassigned by
+          // that correction.
           allow read: if isBusinessMember(businessId) && hasActiveAccess(businessId);
           allow create: if isBusinessMember(businessId) && hasActiveAccess(businessId);
-          allow update, delete: if isSupervisorOrAbove(businessId) && hasActiveAccess(businessId);
+          allow update: if isSupervisorOrAbove(businessId) && hasActiveAccess(businessId) &&
+            !request.resource.data.diff(resource.data).affectedKeys().hasAny(['logged_by']);
+          allow delete: if isSupervisorOrAbove(businessId) && hasActiveAccess(businessId);
         }
       }
     }

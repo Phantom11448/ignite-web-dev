@@ -28,7 +28,7 @@ import { addRevenueEntry, getRevenueEntriesForJob } from "../revenue-entries.js"
 import { addJobNote, getJobNotesForJob, updateJobNote } from "../job-notes.js";
 import { getJobProfitability } from "../dashboard.js";
 import { getUserProfile, getTeamMembers } from "../auth.js";
-import { uploadReceiptPhoto, uploadJobNotePhoto } from "../photos.js";
+import { uploadReceiptPhoto, uploadJobNotePhoto, InvalidPhotoTypeError } from "../photos.js";
 import { extractTotalFromReceipt } from "../ocr.js";
 
 /**
@@ -175,6 +175,8 @@ export function renderJobDetailScreen(container, { businessId, jobId, userId, ro
                         <input type="text" id="revenue-reason-other" placeholder="Enter a reason" hidden />
                       </div>
 
+                      <p class="field-hint error" id="revenue-error" hidden></p>
+
                       <div class="form-actions" id="revenue-save-actions" hidden>
                         <button type="button" id="save-revenue-entry">Save</button>
                       </div>
@@ -244,6 +246,8 @@ export function renderJobDetailScreen(container, { businessId, jobId, userId, ro
             <label for="expense-notes">Notes (optional)</label>
             <input type="text" id="expense-notes" />
 
+            <p class="field-hint error" id="expense-error" hidden></p>
+
             <div class="form-actions">
               <button type="submit" id="expense-submit-btn">Add Expense</button>
             </div>
@@ -279,7 +283,9 @@ export function renderJobDetailScreen(container, { businessId, jobId, userId, ro
                 : ""
             }
 
-            <div class="form-actions"><button type="submit">Add Labor Entry</button></div>
+            <p class="field-hint error" id="labor-error" hidden></p>
+
+            <div class="form-actions"><button type="submit" id="labor-submit-btn">Add Labor Entry</button></div>
           </form>
           ${
             canSeeCosts
@@ -341,6 +347,7 @@ export function renderJobDetailScreen(container, { businessId, jobId, userId, ro
       const reasonOtherInput = container.querySelector("#revenue-reason-other");
       const saveActions = container.querySelector("#revenue-save-actions");
       const saveBtn = container.querySelector("#save-revenue-entry");
+      const revenueErrorEl = container.querySelector("#revenue-error");
 
       // Guided tap flow, not a traditional form: direction is a toggle
       // (tap either button anytime before Save to change your mind), the
@@ -362,6 +369,7 @@ export function renderJobDetailScreen(container, { businessId, jobId, userId, ro
         amountStep.hidden = true;
         reasonStep.hidden = true;
         saveActions.hidden = true;
+        revenueErrorEl.hidden = true;
       }
 
       logRevenueBtn.addEventListener("click", () => {
@@ -408,13 +416,26 @@ export function renderJobDetailScreen(container, { businessId, jobId, userId, ro
         const reason =
           selectedReasonKey === "Other" ? reasonOtherInput.value.trim() || null : selectedReasonKey;
 
+        revenueErrorEl.hidden = true;
         saveBtn.disabled = true;
-        await addRevenueEntry(businessId, jobId, {
-          amount: signedAmount,
-          date: new Date(),
-          reason,
-          loggedBy: userId,
-        });
+        try {
+          await addRevenueEntry(businessId, jobId, {
+            amount: signedAmount,
+            date: new Date(),
+            reason,
+            loggedBy: userId,
+          });
+        } catch (err) {
+          // addRevenueEntry throws before ever calling Firestore if amount
+          // isn't a valid number — surface that here instead of letting it
+          // reach the console as an unhandled rejection.
+          console.error("Failed to log revenue change:", err);
+          revenueErrorEl.textContent =
+            err.message || "Couldn't save this revenue change. Please try again.";
+          revenueErrorEl.hidden = false;
+          saveBtn.disabled = false;
+          return;
+        }
 
         resetRevenueFlow();
         revenueFlow.hidden = true;
@@ -461,9 +482,14 @@ export function renderJobDetailScreen(container, { businessId, jobId, userId, ro
             await updateJobNote(businessId, jobId, noteId, { photo_url: photoUrl });
           } catch (err) {
             // Same reasoning as the expense photo failure path — don't
-            // reload here, the note itself already saved fine.
+            // reload here, the note itself already saved fine. A rejected
+            // file type gets its own specific message (err.message from
+            // photos.js); any other upload failure gets the generic one.
             console.error("Job note photo upload failed:", err);
-            jobNoteStatusEl.textContent = "Note saved, but the photo failed to upload.";
+            jobNoteStatusEl.textContent =
+              err instanceof InvalidPhotoTypeError
+                ? err.message
+                : "Note saved, but the photo failed to upload.";
             jobNoteSubmitBtn.disabled = false;
             return;
           }
@@ -511,8 +537,10 @@ export function renderJobDetailScreen(container, { businessId, jobId, userId, ro
         event.preventDefault();
         const submitBtn = container.querySelector("#expense-submit-btn");
         const statusEl = container.querySelector("#expense-upload-status");
+        const errorEl = container.querySelector("#expense-error");
         const photoFile = photoInput.files[0] || null;
 
+        errorEl.hidden = true;
         submitBtn.disabled = true;
 
         // If a photo was just picked, let OCR finish filling the amount
@@ -530,13 +558,27 @@ export function renderJobDetailScreen(container, { businessId, jobId, userId, ro
         // Photo needs an expenseId to be scoped under in Storage, so the
         // expense doc is created first, then (if a photo was picked)
         // uploaded and patched onto that same doc as photo_url.
-        const expenseId = await addExpense(businessId, jobId, {
-          categoryId: categoryInput ? categoryInput.value || null : null,
-          amount: parseFloat(amountInput.value) || 0,
-          date: dateInput.value ? new Date(dateInput.value) : new Date(),
-          loggedBy: userId,
-          notes: container.querySelector("#expense-notes").value || null,
-        });
+        let expenseId;
+        try {
+          expenseId = await addExpense(businessId, jobId, {
+            categoryId: categoryInput ? categoryInput.value || null : null,
+            amount: parseFloat(amountInput.value) || 0,
+            date: dateInput.value ? new Date(dateInput.value) : new Date(),
+            loggedBy: userId,
+            notes: container.querySelector("#expense-notes").value || null,
+          });
+        } catch (err) {
+          // addExpense throws before ever calling Firestore if amount isn't
+          // a valid non-negative number (e.g. a negative value typed past
+          // the input's min="0" hint) — surface that here instead of a
+          // silent write or an unhandled rejection.
+          console.error("Failed to save expense:", err);
+          errorEl.textContent =
+            err.message || "Couldn't save this expense. Please check the amount and try again.";
+          errorEl.hidden = false;
+          submitBtn.disabled = false;
+          return;
+        }
 
         if (photoFile) {
           statusEl.textContent = "Uploading photo…";
@@ -549,8 +591,14 @@ export function renderJobDetailScreen(container, { businessId, jobId, userId, ro
             // message instantly. The expense itself already saved fine;
             // only the photo attach failed, so leave the form as-is with
             // the error visible instead of hiding it behind a fresh render.
+            // A rejected file type gets its own specific message
+            // (err.message from photos.js); any other upload failure gets
+            // the generic one.
             console.error("Receipt photo upload failed:", err);
-            statusEl.textContent = "Expense saved, but the photo failed to upload. You can leave it as-is — the amount and category were recorded.";
+            statusEl.textContent =
+              err instanceof InvalidPhotoTypeError
+                ? err.message
+                : "Expense saved, but the photo failed to upload. You can leave it as-is — the amount and category were recorded.";
             submitBtn.disabled = false;
             return;
           }
@@ -564,16 +612,35 @@ export function renderJobDetailScreen(container, { businessId, jobId, userId, ro
     const laborForm = container.querySelector("#new-labor-form");
     laborForm.addEventListener("submit", async (event) => {
       event.preventDefault();
-      await addLaborEntry(businessId, jobId, {
-        userId,
-        hours: parseFloat(container.querySelector("#labor-hours").value) || 0,
-        // Every entry is logged for yourself, so it always uses your own
-        // profile's default_hourly_rate — nobody manually types a rate in.
-        // If it's null (not set yet), owner/supervisor can fill it in later
-        // via the "Set Rate" button on the entry itself.
-        hourlyRate: ownDefaultRate,
-        date: new Date(container.querySelector("#labor-date").value),
-      });
+      const laborSubmitBtn = container.querySelector("#labor-submit-btn");
+      const laborErrorEl = container.querySelector("#labor-error");
+
+      laborErrorEl.hidden = true;
+      laborSubmitBtn.disabled = true;
+      try {
+        await addLaborEntry(businessId, jobId, {
+          userId,
+          hours: parseFloat(container.querySelector("#labor-hours").value) || 0,
+          // Every entry is logged for yourself, so it always uses your own
+          // profile's default_hourly_rate — nobody manually types a rate in.
+          // If it's null (not set yet), owner/supervisor can fill it in later
+          // via the "Set Rate" button on the entry itself.
+          hourlyRate: ownDefaultRate,
+          date: new Date(container.querySelector("#labor-date").value),
+        });
+      } catch (err) {
+        // addLaborEntry throws before ever calling Firestore if hours isn't
+        // a valid non-negative number (e.g. a negative value typed past the
+        // input's min="0" hint) — surface that here instead of a silent
+        // write or an unhandled rejection.
+        console.error("Failed to save labor entry:", err);
+        laborErrorEl.textContent =
+          err.message || "Couldn't save this labor entry. Please check the hours and try again.";
+        laborErrorEl.hidden = false;
+        laborSubmitBtn.disabled = false;
+        return;
+      }
+      laborSubmitBtn.disabled = false;
       await load();
     });
   }
@@ -682,7 +749,7 @@ export function renderJobDetailScreen(container, { businessId, jobId, userId, ro
     const loggedByName = memberNameById[entry.user_id] || "Unknown";
     row.innerHTML = `
       <div class="job-card-main">
-        <h3>${entry.hours} hrs</h3>
+        <h3>${escapeHtml(entry.hours)} hrs</h3>
         <p class="job-meta">
           ${date ? date.toLocaleDateString() : ""} &middot; ${escapeHtml(loggedByName)}
           ${hasRate ? ` &middot; $${entry.hourly_rate}/hr &middot; $${cost.toFixed(2)}` : " &middot; no rate set"}
@@ -705,7 +772,7 @@ export function renderJobDetailScreen(container, { businessId, jobId, userId, ro
             date ? date.toLocaleDateString() : "this entry"
           }</label>
           <input type="number" id="rate-input-${entry.id}" min="0" step="0.01"
-            value="${hasRate ? entry.hourly_rate : ""}" />
+            value="${hasRate ? escapeHtml(entry.hourly_rate) : ""}" />
         </div>
         <div class="job-card-actions">
           <button type="button" class="save-rate-btn">Save</button>
@@ -750,9 +817,13 @@ function todayInputValue() {
 }
 
 function escapeHtml(str) {
-  const div = document.createElement("div");
-  div.textContent = str;
-  return div.innerHTML;
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 /**

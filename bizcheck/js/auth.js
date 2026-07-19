@@ -14,6 +14,7 @@ import {
   setPersistence,
   browserLocalPersistence,
   browserSessionPersistence,
+  sendPasswordResetEmail,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   collection,
@@ -104,6 +105,25 @@ export async function logIn(email, password, rememberMe = true) {
 /** Logs the current user out. */
 export function logOut() {
   return signOut(auth);
+}
+
+/**
+ * Sends a password reset email via Firebase Auth's built-in hosted flow —
+ * Firebase handles the actual password-change step securely on its own
+ * hosted page; this only triggers the email. Works for owner, supervisor,
+ * or crew accounts alike (they're all just Firebase Auth users).
+ *
+ * Throws the same way logIn/signUpOwner do on failure (a malformed email,
+ * a network error, rate limiting). IMPORTANT: depending on the Firebase
+ * project's email enumeration protection setting, this may also throw
+ * auth/user-not-found for an email with no account — callers MUST treat
+ * that specific error identically to success (same generic on-screen
+ * message) rather than surfacing it, or this becomes an account
+ * enumeration vector. See index.html's reset-password submit handler for
+ * where that's handled.
+ */
+export function sendPasswordReset(email) {
+  return sendPasswordResetEmail(auth, email);
 }
 
 /** Subscribes to auth state changes. Returns the unsubscribe function. */

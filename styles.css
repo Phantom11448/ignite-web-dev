@@ -486,3 +486,72 @@ footer {
 #contact.glass-backdrop {
     margin-top: 8px;
 }
+
+/* --- "View all projects" link (homepage) + /projects.html page --- */
+.view-all-wrap {
+    margin-top: 40px;
+    text-align: center;
+}
+.view-all-link {
+    display: inline-block;
+    color: var(--ember);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 12px 24px;
+    border: 1px solid rgba(255, 107, 53, 0.4);
+    border-radius: 4px;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+.view-all-link:hover {
+    background: rgba(255, 107, 53, 0.1);
+    border-color: var(--ember);
+}
+
+.back-link {
+    display: inline-block;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-bottom: 32px;
+}
+.back-link:hover {
+    color: var(--ember);
+}
+
+a.project-card {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+a.project-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 107, 53, 0.4);
+}
+.project-cta {
+    display: inline-block;
+    margin-top: 14px;
+    font-size: 0.85rem;
+    color: var(--ember);
+}
+.project-unlinked {
+    display: inline-block;
+    margin-top: 14px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-style: italic;
+}
+#all-projects {
+    padding: 100px 40px;
+}
+#all-projects > span {
+    color: var(--ember);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    display: block;
+}
+#all-projects h2 {
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    margin-bottom: 48px;
+}

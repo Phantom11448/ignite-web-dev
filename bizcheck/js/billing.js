@@ -16,8 +16,9 @@
 // Checkout URL to redirect the browser to.
 // -----------------------------------------------------------------------
 
-import { db, paths } from "./firebase-config.js";
+import { auth, db, paths } from "./firebase-config.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getIdToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 /** Fetches the business doc, including its (read-only, server-managed) subscription fields. */
 export async function getBusiness(businessId) {
@@ -30,11 +31,26 @@ export async function getBusiness(businessId) {
  * Checkout URL to redirect the browser to. businessId becomes the
  * session's client_reference_id, which is how
  * bizcheck-stripe-webhook.js later knows which business just paid.
+ *
+ * Sends the current user's Firebase ID token as a Bearer token —
+ * bizcheck-create-checkout-session.js verifies it server-side and
+ * confirms the token's uid actually matches businessId before creating a
+ * session, so a caller can't request checkout for a business they don't
+ * own just by knowing/guessing its id (businessId is the same value as
+ * the owner's own Firebase uid — see signUpOwner in auth.js).
  */
 export async function createCheckoutSession(businessId, email) {
+  if (!auth.currentUser) {
+    throw new Error("You must be signed in to start checkout.");
+  }
+  const idToken = await getIdToken(auth.currentUser);
+
   const response = await fetch("/.netlify/functions/bizcheck-create-checkout-session", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${idToken}`,
+    },
     body: JSON.stringify({ businessId, email }),
   });
 

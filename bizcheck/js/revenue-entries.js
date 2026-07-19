@@ -27,16 +27,26 @@ import {
 /**
  * Logs a revenue change against a job. Use a positive amount for a price
  * increase (change order, upsell, the job's initial agreed price) and a
- * negative amount for a discount/reduction.
+ * negative amount for a discount/reduction — unlike expenses/labor hours,
+ * amount is intentionally NOT restricted to non-negative here. It's still
+ * coerced to a number and validated as a real number (not just left to
+ * `amount || 0`, which only catches falsy values — a truthy non-numeric
+ * string would otherwise pass through unchanged and later silently corrupt
+ * sumRevenueEntries() via NaN propagation). Throws instead of writing bad
+ * data; callers should catch this and show the message inline.
  */
 export async function addRevenueEntry(
   businessId,
   jobId,
   { amount, date, reason, loggedBy }
 ) {
+  const numericAmount = Number(amount);
+  if (isNaN(numericAmount)) {
+    throw new Error("Amount must be a valid number.");
+  }
   const revenueEntriesRef = collection(db, paths.revenueEntries(businessId, jobId));
   const docRef = await addDoc(revenueEntriesRef, {
-    amount: amount || 0,
+    amount: numericAmount,
     date: date || serverTimestamp(),
     reason: reason || null,
     logged_by: loggedBy,

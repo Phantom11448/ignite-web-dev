@@ -27,6 +27,8 @@
         <label class="label-required" for="login-password">Password</label>
         <input type="password" id="login-password" required />
 
+        <button type="button" id="forgot-password-link" class="link-btn">Forgot password?</button>
+
         <label class="checkbox-label" for="login-remember-me">
           <input type="checkbox" id="login-remember-me" checked />
           Remember me on this device
@@ -34,6 +36,20 @@
 
         <button type="submit">Log In</button>
         <p id="login-error" class="error" hidden></p>
+      </form>
+    </section>
+
+    <section id="reset-password-section" hidden>
+      <h2>Reset Password</h2>
+      <form id="reset-password-form">
+        <label class="label-required" for="reset-email">Email</label>
+        <input type="email" id="reset-email" required />
+
+        <button type="submit">Send Reset Link</button>
+        <button type="button" id="back-to-login-link" class="link-btn">&larr; Back to Log In</button>
+
+        <p id="reset-password-message" class="field-hint" hidden></p>
+        <p id="reset-password-error" class="error" hidden></p>
       </form>
     </section>
 
@@ -75,10 +91,14 @@
 
   <script type="module" src="/bizcheck/js/firebase-config.js"></script>
   <script type="module">
-    import { signUpOwner, logIn, observeAuthState } from "/bizcheck/js/auth.js";
+    import { signUpOwner, logIn, observeAuthState, sendPasswordReset } from "/bizcheck/js/auth.js";
 
     const loginErrorEl = document.getElementById("login-error");
     const signupErrorEl = document.getElementById("signup-error");
+    const loginSection = document.getElementById("login-section");
+    const resetSection = document.getElementById("reset-password-section");
+    const resetMessageEl = document.getElementById("reset-password-message");
+    const resetErrorEl = document.getElementById("reset-password-error");
 
     // Guards the "already logged in, skip to app" auto-redirect below.
     // createUserWithEmailAndPassword() signs the new account in immediately
@@ -138,6 +158,59 @@
       } catch (err) {
         isSubmittingForm = false;
         showError(loginErrorEl, err);
+      }
+    });
+
+    document.getElementById("forgot-password-link").addEventListener("click", () => {
+      loginErrorEl.hidden = true;
+      resetMessageEl.hidden = true;
+      resetErrorEl.hidden = true;
+      document.getElementById("reset-email").value = document.getElementById("login-email").value;
+      loginSection.hidden = true;
+      resetSection.hidden = false;
+    });
+
+    document.getElementById("back-to-login-link").addEventListener("click", () => {
+      resetSection.hidden = true;
+      loginSection.hidden = false;
+    });
+
+    // Security requirement (see security audit): never reveal whether a
+    // given email is a registered account. Both "email sent" and "no
+    // account with that email" show the exact same generic message —
+    // otherwise this form becomes a way to enumerate which emails have
+    // BizCheck accounts. Only errors unrelated to account existence
+    // (malformed email, network failure, rate limiting) get a distinct
+    // message via friendlyAuthError.
+    document.getElementById("reset-password-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      resetMessageEl.hidden = true;
+      resetErrorEl.hidden = true;
+      const submitBtn = e.target.querySelector("button[type=submit]");
+      submitBtn.disabled = true;
+      const GENERIC_RESET_MESSAGE =
+        "If an account exists with that email, a password reset link has been sent.";
+
+      try {
+        await sendPasswordReset(document.getElementById("reset-email").value);
+        resetMessageEl.textContent = GENERIC_RESET_MESSAGE;
+        resetMessageEl.hidden = false;
+      } catch (err) {
+        const code = err?.code || "";
+        if (code === "auth/user-not-found" || code === "auth/invalid-credential") {
+          // Depending on this Firebase project's email enumeration
+          // protection setting, a nonexistent email may throw instead of
+          // silently resolving — either way, show the identical success
+          // message. Logged to console so this is still debuggable.
+          console.error("Password reset requested for an email with no matching account:", err);
+          resetMessageEl.textContent = GENERIC_RESET_MESSAGE;
+          resetMessageEl.hidden = false;
+        } else {
+          resetErrorEl.textContent = friendlyAuthError(err);
+          resetErrorEl.hidden = false;
+        }
+      } finally {
+        submitBtn.disabled = false;
       }
     });
 

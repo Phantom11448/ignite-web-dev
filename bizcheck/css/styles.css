@@ -244,6 +244,23 @@ button:active {
   padding-left: 0.6rem;
 }
 
+/* Text-style button used for lightweight in-form navigation, e.g. the
+   login screen's "Forgot password?" / "Back to Log In" — not a full
+   button, just a link that happens to be a <button> for a11y/JS reasons. */
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-primary-light);
+  font-size: 0.85rem;
+  text-decoration: underline;
+  cursor: pointer;
+  align-self: flex-start;
+}
+.link-btn:hover {
+  color: var(--color-primary);
+}
+
 /* App shell */
 .app-header {
   display: flex;
@@ -818,6 +835,29 @@ button:active {
   color: var(--color-muted);
 }
 
+/* Export panel (Billing screen) — CSV data export, sits below the
+   billing panel on the same screen. */
+.export-panel {
+  margin-top: 1.25rem;
+}
+
+.export-heading {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 1rem;
+  color: var(--color-muted);
+  margin: 0 0 0.5rem;
+}
+
+.export-panel .field-hint {
+  margin: 0 0 0.75rem;
+}
+
+.export-panel #export-status {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+}
+
 /* Checkout return banner (app.html) — shown once after redirecting back
    from Stripe Checkout, success or cancelled. */
 .checkout-banner {
@@ -842,6 +882,29 @@ button:active {
   border-color: var(--color-border);
   color: var(--color-muted);
   background: var(--color-surface);
+}
+
+/* Trial-countdown warning banner (app.html) — shown on every screen
+   during the final week before a trial expires (once it actually expires,
+   the locked-out screen takes over instead). Noticeable but not alarming:
+   the same orange used for "past due" billing status, not the red used
+   for .error. */
+.trial-banner {
+  margin: 0 var(--spacing);
+  margin-top: var(--spacing);
+  padding: 0.75rem 1.1rem;
+  border-radius: 10px;
+  border: 1px solid var(--color-primary);
+  background: rgba(255, 87, 34, 0.1);
+  color: var(--color-primary-light);
+  font-size: 0.9rem;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
 }
 
 /* Locked-out screen — shown instead of any normal screen once a

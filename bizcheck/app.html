@@ -21,11 +21,13 @@
       <button data-screen="categories">Categories</button>
       <button data-screen="team">Team</button>
       <button data-screen="dashboard">Dashboard</button>
+      <button data-screen="billing">Billing</button>
       <button id="logout-btn">Log Out</button>
     </nav>
   </header>
 
   <div id="checkout-banner" class="checkout-banner" hidden></div>
+  <div id="trial-banner" class="trial-banner" hidden></div>
 
   <main id="app-content">
     <!-- Screen content is injected here per data-screen selection.
@@ -43,6 +45,7 @@
     import { renderJobDetailScreen } from "/bizcheck/js/screens/job-detail-screen.js";
     import { renderDashboardScreen } from "/bizcheck/js/screens/dashboard-screen.js";
     import { renderTeamScreen } from "/bizcheck/js/screens/team-screen.js";
+    import { renderBillingScreen } from "/bizcheck/js/screens/billing-screen.js";
     import { renderLockedOutScreen } from "/bizcheck/js/screens/locked-out-screen.js";
 
     const contentEl = document.getElementById("app-content");
@@ -50,6 +53,8 @@
     const categoriesNavBtn = document.querySelector('[data-screen="categories"]');
     const dashboardNavBtn = document.querySelector('[data-screen="dashboard"]');
     const teamNavBtn = document.querySelector('[data-screen="team"]');
+    const billingNavBtn = document.querySelector('[data-screen="billing"]');
+    const trialBannerEl = document.getElementById("trial-banner");
     let currentUser = null;
     let currentRole = null;
     let currentUserName = null;
@@ -144,6 +149,7 @@
       currentHasAccess = hasActiveAccess(currentBusiness);
 
       applyNavVisibility(currentRole, currentHasAccess);
+      updateTrialBanner(currentBusiness, currentRole, currentHasAccess);
       showScreen("jobs"); // land on Jobs after login (or the locked-out screen, if access is denied)
     });
 
@@ -172,6 +178,53 @@
       categoriesNavBtn.hidden = role === "crew";
       dashboardNavBtn.hidden = role !== "owner";
       teamNavBtn.hidden = role !== "owner";
+      billingNavBtn.hidden = role !== "owner";
+    }
+
+    // Trial-countdown warning banner — a lighter-weight heads-up shown for
+    // the final week of the trial, before the full locked-out screen (see
+    // renderLockedOutScreen above) takes over once the trial actually
+    // expires. Only relevant while NOT subscribed — an active subscription
+    // never sees this regardless of how old the business is. Visible on
+    // every screen (lives outside #app-content, right below the nav), and
+    // stays up for as long as the underlying condition is true — unlike
+    // the checkout banner above, this isn't a one-time/URL-triggered
+    // message, so it isn't stripped or dismissed on its own.
+    function updateTrialBanner(business, role, hasAccess) {
+      trialBannerEl.innerHTML = "";
+      trialBannerEl.hidden = true;
+
+      // hasAccess already mirrors this same 30-day math (see
+      // hasActiveAccess above) — once it's false, the locked-out screen is
+      // showing instead, and this banner has nothing useful to add.
+      if (!business || !hasAccess || business.subscription_status === "active") return;
+      if (!business.created_at) return;
+
+      const trialEnd = new Date(
+        business.created_at.toDate ? business.created_at.toDate() : business.created_at
+      );
+      trialEnd.setDate(trialEnd.getDate() + 30);
+      const daysRemaining = Math.ceil((trialEnd - new Date()) / (1000 * 60 * 60 * 24));
+
+      if (!(daysRemaining > 0 && daysRemaining <= 7)) return;
+
+      const dayWord = daysRemaining === 1 ? "day" : "days";
+
+      if (role === "owner") {
+        const message = document.createElement("span");
+        message.textContent = `Your free trial ends in ${daysRemaining} ${dayWord}.`;
+        const actionBtn = document.createElement("button");
+        actionBtn.type = "button";
+        actionBtn.className = "link-btn";
+        actionBtn.textContent = "Subscribe to keep access →";
+        actionBtn.addEventListener("click", () => showScreen("billing"));
+        trialBannerEl.appendChild(message);
+        trialBannerEl.appendChild(actionBtn);
+      } else {
+        trialBannerEl.textContent = `This business's free trial ends in ${daysRemaining} ${dayWord}. Contact the account owner to subscribe.`;
+      }
+
+      trialBannerEl.hidden = false;
     }
 
     function showScreen(screen) {
@@ -206,10 +259,12 @@
       } else if (screen === "categories" && currentRole !== "crew") {
         renderCategoriesScreen(contentEl, { businessId, role: currentRole });
       } else if (screen === "dashboard" && currentRole === "owner") {
-        renderDashboardScreen(contentEl, { businessId, userEmail: currentUser.email });
+        renderDashboardScreen(contentEl, { businessId });
       } else if (screen === "team" && currentRole === "owner") {
         renderTeamScreen(contentEl, { businessId });
-      } else if (screen === "categories" || screen === "dashboard" || screen === "team") {
+      } else if (screen === "billing" && currentRole === "owner") {
+        renderBillingScreen(contentEl, { businessId, userEmail: currentUser.email });
+      } else if (screen === "categories" || screen === "dashboard" || screen === "team" || screen === "billing") {
         // Role changed since page load, or someone bypassed the hidden nav
         // button — Firestore rules still block the underlying reads/writes,
         // this is just the UI-side message.

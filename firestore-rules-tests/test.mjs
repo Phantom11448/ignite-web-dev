@@ -198,3 +198,267 @@ test("the owner's own user profile doc stays readable even after lockout", async
   const ownerDb = testEnv.authenticatedContext("owner1").firestore();
   await assertSucceeds(getDoc(doc(ownerDb, "businesses/biz-expired6/users/owner1")));
 });
+
+// --- Field-shape validation (amount/hours numeric checks, system-field
+// reassignment protection) added alongside the security-audit fix that
+// closed "no server-side validation on Firestore writes" ------------------
+//
+// All businesses below are seeded 5 days old (well inside the trial
+// window) so hasActiveAccess() is never the reason a write passes or
+// fails in these tests — only the new validation logic is under test.
+
+/** Adds one team member + one job doc to an already-seeded business. */
+async function seedJobAndMember({ businessId, memberUid, role, jobId = "job1" }) {
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    const db = context.firestore();
+    await setDoc(doc(db, `businesses/${businessId}/users/${memberUid}`), {
+      name: `Test ${role}`,
+      role,
+      email: `${memberUid}@test.com`,
+      active: true,
+    });
+    await setDoc(doc(db, `businesses/${businessId}/jobs/${jobId}`), {
+      customer_name: "Test Job",
+      status: "active",
+    });
+  });
+}
+
+// expenses ------------------------------------------------------------
+
+test("expenses: crew CAN create an expense with a valid non-negative amount", async () => {
+  await seedBusiness({ businessId: "biz-exp1", ownerUid: "owner1", daysAgo: 5 });
+  await seedJobAndMember({ businessId: "biz-exp1", memberUid: "crew1", role: "crew" });
+  const crewDb = testEnv.authenticatedContext("crew1").firestore();
+  await assertSucceeds(
+    addDoc(collection(crewDb, "businesses/biz-exp1/jobs/job1/expenses"), {
+      category_id: null,
+      amount: 42.5,
+      logged_by: "crew1",
+      notes: null,
+    })
+  );
+});
+
+test("expenses: crew CANNOT create an expense with a negative amount", async () => {
+  await seedBusiness({ businessId: "biz-exp2", ownerUid: "owner1", daysAgo: 5 });
+  await seedJobAndMember({ businessId: "biz-exp2", memberUid: "crew1", role: "crew" });
+  const crewDb = testEnv.authenticatedContext("crew1").firestore();
+  await assertFails(
+    addDoc(collection(crewDb, "businesses/biz-exp2/jobs/job1/expenses"), {
+      amount: -5,
+      logged_by: "crew1",
+    })
+  );
+});
+
+test("expenses: crew CANNOT create an expense with a non-numeric amount", async () => {
+  await seedBusiness({ businessId: "biz-exp3", ownerUid: "owner1", daysAgo: 5 });
+  await seedJobAndMember({ businessId: "biz-exp3", memberUid: "crew1", role: "crew" });
+  const crewDb = testEnv.authenticatedContext("crew1").firestore();
+  await assertFails(
+    addDoc(collection(crewDb, "businesses/biz-exp3/jobs/job1/expenses"), {
+      amount: "fifty",
+      logged_by: "crew1",
+    })
+  );
+});
+
+test("expenses: supervisor CAN correct an existing expense's amount without touching logged_by", async () => {
+  await seedBusiness({ businessId: "biz-exp4", ownerUid: "owner1", daysAgo: 5 });
+  await seedJobAndMember({ businessId: "biz-exp4", memberUid: "sup1", role: "supervisor" });
+  let expenseRef;
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    expenseRef = doc(collection(context.firestore(), "businesses/biz-exp4/jobs/job1/expenses"));
+    await setDoc(expenseRef, { amount: 10, logged_by: "crew1" });
+  });
+  const supDb = testEnv.authenticatedContext("sup1").firestore();
+  await assertSucceeds(
+    setDoc(doc(supDb, expenseRef.path), { amount: 15, logged_by: "crew1" })
+  );
+});
+
+test("expenses: supervisor CANNOT reassign logged_by on an existing expense", async () => {
+  await seedBusiness({ businessId: "biz-exp5", ownerUid: "owner1", daysAgo: 5 });
+  await seedJobAndMember({ businessId: "biz-exp5", memberUid: "sup1", role: "supervisor" });
+  let expenseRef;
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    expenseRef = doc(collection(context.firestore(), "businesses/biz-exp5/jobs/job1/expenses"));
+    await setDoc(expenseRef, { amount: 10, logged_by: "crew1" });
+  });
+  const supDb = testEnv.authenticatedContext("sup1").firestore();
+  await assertFails(
+    setDoc(doc(supDb, expenseRef.path), { amount: 10, logged_by: "sup1" })
+  );
+});
+
+// labor_entries ---------------------------------------------------------
+
+test("labor_entries: crew CAN create a labor entry with valid non-negative hours and no rate set", async () => {
+  await seedBusiness({ businessId: "biz-lab1", ownerUid: "owner1", daysAgo: 5 });
+  await seedJobAndMember({ businessId: "biz-lab1", memberUid: "crew1", role: "crew" });
+  const crewDb = testEnv.authenticatedContext("crew1").firestore();
+  await assertSucceeds(
+    addDoc(collection(crewDb, "businesses/biz-lab1/jobs/job1/labor_entries"), {
+      user_id: "crew1",
+      hours: 8,
+      hourly_rate: null,
+    })
+  );
+});
+
+test("labor_entries: crew CANNOT create a labor entry with negative hours", async () => {
+  await seedBusiness({ businessId: "biz-lab2", ownerUid: "owner1", daysAgo: 5 });
+  await seedJobAndMember({ businessId: "biz-lab2", memberUid: "crew1", role: "crew" });
+  const crewDb = testEnv.authenticatedContext("crew1").firestore();
+  await assertFails(
+    addDoc(collection(crewDb, "businesses/biz-lab2/jobs/job1/labor_entries"), {
+      user_id: "crew1",
+      hours: -2,
+      hourly_rate: null,
+    })
+  );
+});
+
+test("labor_entries: crew CANNOT create a labor entry with a negative hourly_rate", async () => {
+  await seedBusiness({ businessId: "biz-lab3", ownerUid: "owner1", daysAgo: 5 });
+  await seedJobAndMember({ businessId: "biz-lab3", memberUid: "crew1", role: "crew" });
+  const crewDb = testEnv.authenticatedContext("crew1").firestore();
+  await assertFails(
+    addDoc(collection(crewDb, "businesses/biz-lab3/jobs/job1/labor_entries"), {
+      user_id: "crew1",
+      hours: 8,
+      hourly_rate: -25,
+    })
+  );
+});
+
+test("labor_entries: supervisor CAN correct hours on an existing entry without touching user_id", async () => {
+  await seedBusiness({ businessId: "biz-lab4", ownerUid: "owner1", daysAgo: 5 });
+  await seedJobAndMember({ businessId: "biz-lab4", memberUid: "sup1", role: "supervisor" });
+  let entryRef;
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    entryRef = doc(collection(context.firestore(), "businesses/biz-lab4/jobs/job1/labor_entries"));
+    await setDoc(entryRef, { user_id: "crew1", hours: 8, hourly_rate: null });
+  });
+  const supDb = testEnv.authenticatedContext("sup1").firestore();
+  await assertSucceeds(
+    setDoc(doc(supDb, entryRef.path), { user_id: "crew1", hours: 6, hourly_rate: null })
+  );
+});
+
+test("labor_entries: supervisor CANNOT reassign user_id on an existing entry", async () => {
+  await seedBusiness({ businessId: "biz-lab5", ownerUid: "owner1", daysAgo: 5 });
+  await seedJobAndMember({ businessId: "biz-lab5", memberUid: "sup1", role: "supervisor" });
+  let entryRef;
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    entryRef = doc(collection(context.firestore(), "businesses/biz-lab5/jobs/job1/labor_entries"));
+    await setDoc(entryRef, { user_id: "crew1", hours: 8, hourly_rate: null });
+  });
+  const supDb = testEnv.authenticatedContext("sup1").firestore();
+  await assertFails(
+    setDoc(doc(supDb, entryRef.path), { user_id: "sup1", hours: 8, hourly_rate: null })
+  );
+});
+
+// revenue_entries ---------------------------------------------------------
+
+test("revenue_entries: supervisor CAN create an entry with a negative amount (discount is valid)", async () => {
+  await seedBusiness({ businessId: "biz-rev1", ownerUid: "owner1", daysAgo: 5 });
+  await seedJobAndMember({ businessId: "biz-rev1", memberUid: "sup1", role: "supervisor" });
+  const supDb = testEnv.authenticatedContext("sup1").firestore();
+  await assertSucceeds(
+    addDoc(collection(supDb, "businesses/biz-rev1/jobs/job1/revenue_entries"), {
+      amount: -250,
+      reason: "Customer Discount",
+      logged_by: "sup1",
+    })
+  );
+});
+
+test("revenue_entries: supervisor CANNOT create an entry with a non-numeric amount", async () => {
+  await seedBusiness({ businessId: "biz-rev2", ownerUid: "owner1", daysAgo: 5 });
+  await seedJobAndMember({ businessId: "biz-rev2", memberUid: "sup1", role: "supervisor" });
+  const supDb = testEnv.authenticatedContext("sup1").firestore();
+  await assertFails(
+    addDoc(collection(supDb, "businesses/biz-rev2/jobs/job1/revenue_entries"), {
+      amount: "fifty",
+      reason: null,
+      logged_by: "sup1",
+    })
+  );
+});
+
+test("revenue_entries: supervisor CAN update an entry's amount to another valid number (positive or negative)", async () => {
+  await seedBusiness({ businessId: "biz-rev3", ownerUid: "owner1", daysAgo: 5 });
+  await seedJobAndMember({ businessId: "biz-rev3", memberUid: "sup1", role: "supervisor" });
+  let entryRef;
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    entryRef = doc(collection(context.firestore(), "businesses/biz-rev3/jobs/job1/revenue_entries"));
+    await setDoc(entryRef, { amount: 500, reason: null, logged_by: "sup1" });
+  });
+  const supDb = testEnv.authenticatedContext("sup1").firestore();
+  await assertSucceeds(
+    setDoc(doc(supDb, entryRef.path), { amount: -100, reason: "Price Match", logged_by: "sup1" })
+  );
+});
+
+// bulletin_posts ---------------------------------------------------------
+
+test("bulletin_posts: author CAN edit their own post's text without touching posted_by", async () => {
+  await seedBusiness({ businessId: "biz-bul1", ownerUid: "owner1", daysAgo: 5 });
+  await seedJobAndMember({ businessId: "biz-bul1", memberUid: "crew1", role: "crew" });
+  let postRef;
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    postRef = doc(collection(context.firestore(), "businesses/biz-bul1/bulletin_posts"));
+    await setDoc(postRef, { text: "hello", posted_by: "crew1", posted_by_name: "Test crew" });
+  });
+  const crewDb = testEnv.authenticatedContext("crew1").firestore();
+  await assertSucceeds(
+    setDoc(doc(crewDb, postRef.path), { text: "hello (edited)", posted_by: "crew1", posted_by_name: "Test crew" })
+  );
+});
+
+test("bulletin_posts: author CANNOT reassign posted_by on their own post", async () => {
+  await seedBusiness({ businessId: "biz-bul2", ownerUid: "owner1", daysAgo: 5 });
+  await seedJobAndMember({ businessId: "biz-bul2", memberUid: "crew1", role: "crew" });
+  let postRef;
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    postRef = doc(collection(context.firestore(), "businesses/biz-bul2/bulletin_posts"));
+    await setDoc(postRef, { text: "hello", posted_by: "crew1", posted_by_name: "Test crew" });
+  });
+  const crewDb = testEnv.authenticatedContext("crew1").firestore();
+  await assertFails(
+    setDoc(doc(crewDb, postRef.path), { text: "hello", posted_by: "owner1", posted_by_name: "Test crew" })
+  );
+});
+
+// job_notes ---------------------------------------------------------
+
+test("job_notes: supervisor CAN correct a note's text without touching logged_by", async () => {
+  await seedBusiness({ businessId: "biz-note1", ownerUid: "owner1", daysAgo: 5 });
+  await seedJobAndMember({ businessId: "biz-note1", memberUid: "sup1", role: "supervisor" });
+  let noteRef;
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    noteRef = doc(collection(context.firestore(), "businesses/biz-note1/jobs/job1/job_notes"));
+    await setDoc(noteRef, { text: "Ceiling damage", photo_url: null, logged_by: "crew1" });
+  });
+  const supDb = testEnv.authenticatedContext("sup1").firestore();
+  await assertSucceeds(
+    setDoc(doc(supDb, noteRef.path), { text: "Ceiling damage (fixed)", photo_url: null, logged_by: "crew1" })
+  );
+});
+
+test("job_notes: supervisor CANNOT reassign logged_by on an existing note", async () => {
+  await seedBusiness({ businessId: "biz-note2", ownerUid: "owner1", daysAgo: 5 });
+  await seedJobAndMember({ businessId: "biz-note2", memberUid: "sup1", role: "supervisor" });
+  let noteRef;
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    noteRef = doc(collection(context.firestore(), "businesses/biz-note2/jobs/job1/job_notes"));
+    await setDoc(noteRef, { text: "Ceiling damage", photo_url: null, logged_by: "crew1" });
+  });
+  const supDb = testEnv.authenticatedContext("sup1").firestore();
+  await assertFails(
+    setDoc(doc(supDb, noteRef.path), { text: "Ceiling damage", photo_url: null, logged_by: "sup1" })
+  );
+});

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>All Projects — Ignite Web Dev</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+        <link rel="shortcut icon" href="images/favicon.ico">
+        <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <div class="cursor-dot"></div>
+        <div class="cursor-ring"></div>
+        <nav>
+            <a href="index.html" aria-label="Ignite Web Dev, back to home">
+                <img src="images/ignite-logo.png" class="logo" alt="Ignite Web Dev logo">
+            </a>
+            <ul>
+                <li><a href="index.html#contact">Contact</a></li>
+                <li><a href="index.html#work">Work</a></li>
+                <li><a href="index.html#about">About</a></li>
+            </ul>
+            <a href="index.html#contact">Inquire</a>
+        </nav>
+        <section id="all-projects">
+            <a href="index.html" class="back-link">&larr; Back to home</a>
+            <span>01 &mdash; Full portfolio</span>
+            <h2>All Projects</h2>
+            <div class="work-grid">
+                <div class="work-card">
+                    <h3>ColdSide Study</h3>
+                    <p>A study app to help pass the EPA 608 Exam</p>
+                    <span>Stack: HTML, CSS, Javascript</span>
+                    <span class="project-unlinked">Link not currently available</span>
+                </div>
+                <div class="work-card">
+                    <h3>Signal Lost</h3>
+                    <p>HTML lessons</p>
+                    <span>Stack: React, Vite</span>
+                    <span class="project-unlinked">Link not currently available</span>
+                </div>
+                <a href="https://ignitewebdev.com/3fs/" class="work-card project-card">
+                    <h3>3FS</h3>
+                    <p>A fast-paced card game PWA, built from scratch with vanilla HTML, CSS, and JavaScript.</p>
+                    <span class="project-cta">Visit project &rarr;</span>
+                </a>
+                <a href="https://ignitewebdev.com/bizcheck/" class="work-card project-card">
+                    <h3>BizCheck</h3>
+                    <p>Job-costing software for trade and service businesses — track expenses, labor hours, and profitability per job in real time, right from the field.</p>
+                    <span class="project-cta">Visit project &rarr;</span>
+                </a>
+            </div>
+        </section>
+        <footer>
+            <span>ignite.webdev</span>
+            <span>&copy; 2026. All rights reserved.</span>
+        </footer>
+        <div class="lightbox" id="lightbox">
+            <button class="lightbox-close" id="lightboxClose">&times;</button>
+            <button class="lightbox-arrow lightbox-prev" id="lightboxPrev">&#10094;</button>
+            <div class="lightbox-content" id="lightboxContent"></div>
+            <button class="lightbox-arrow lightbox-next" id="lightboxNext">&#10095;</button>
+        </div>
+        <script src="script.js"></script>
+    </body>
+</html>
