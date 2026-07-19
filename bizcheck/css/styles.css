@@ -1,0 +1,703 @@
+/* styles.css — shared base styles for BizCheck */
+
+@font-face {
+  font-family: "Alumni Sans SC";
+  src: url("../fonts/AlumniSansSC-VariableFont_wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Alumni Sans SC";
+  src: url("../fonts/AlumniSansSC-Italic-VariableFont_wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  /* TODO: swap this hex for the exact ignitewebdev.com orange once you grab it */
+  --color-bg: #0a0b0e;
+  --color-surface: rgba(24, 27, 34, 0.55);
+  --color-surface-raised: rgba(34, 38, 47, 0.65);
+  --color-text: #edeff2;
+  --color-muted: #8b93a1;
+  --color-primary: #ff5722;
+  --color-primary-light: #ff8a50;
+  --color-primary-dark: #d84315;
+  --color-accent: #ff5722;
+  --color-error: #f0554a;
+  --color-success: #4caf72;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --radius: 6px;
+  --spacing: 1rem;
+  --glow: 0 0 24px rgba(255, 87, 34, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--color-bg);
+  /* Bumps every rem-based font-size in this file up proportionally
+     (browser default is 16px, so this is roughly a 12% increase) without
+     having to touch each individual font-size rule below. */
+  font-size: 18px;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Alumni Sans SC", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--color-text);
+  background:
+    radial-gradient(circle at 15% -10%, rgba(255, 87, 34, 0.22), transparent 45%),
+    radial-gradient(circle at 90% 10%, rgba(255, 87, 34, 0.12), transparent 40%),
+    radial-gradient(circle at 50% 110%, rgba(255, 87, 34, 0.1), transparent 50%),
+    var(--color-bg);
+  background-attachment: fixed;
+}
+
+h1, h2, h3 {
+  margin: 0 0 0.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+p {
+  margin: 0 0 var(--spacing);
+}
+
+.tagline {
+  color: var(--color-muted);
+}
+
+/* Auth / landing page */
+.auth-shell {
+  max-width: 400px;
+  margin: 3rem auto;
+  padding: 1.75rem;
+  background: var(--color-surface);
+  border-radius: 14px;
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.auth-shell h1 {
+  display: inline-block;
+  background: linear-gradient(90deg, var(--color-primary-light), var(--color-primary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  padding-bottom: 0.25rem;
+  text-shadow: none;
+}
+
+section#login-section,
+section#signup-section {
+  border-top: 1px solid var(--color-border);
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+label {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Applied to a label whenever its field must be filled in to proceed —
+   either a real HTML `required` attribute, or a field that's logically
+   required within a custom tap-flow (like the guided revenue entry,
+   which doesn't use native form validation at all). Optional fields keep
+   the default muted color above; do not apply this class to them. */
+.label-required {
+  color: var(--color-primary-light);
+}
+
+input, select {
+  padding: 0.6rem 0.65rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-family: inherit;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--color-text);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.18);
+}
+
+/* File inputs (receipt photo upload) ignore most regular input styling by
+   default — the "Choose File" button is a separate browser-native
+   element (::file-selector-button) that has to be restyled on its own,
+   otherwise it stays a plain white OS-default button no matter what the
+   surrounding input's CSS says. */
+input[type="file"] {
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+input[type="file"]::file-selector-button {
+  padding: 0.55rem 1rem;
+  margin-right: 0.75rem;
+  border: none;
+  border-radius: calc(var(--radius) - 2px);
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+input[type="file"]::file-selector-button:hover {
+  filter: brightness(1.08);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-direction: row;
+  text-transform: none;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: auto;
+  accent-color: var(--color-primary);
+}
+
+button {
+  padding: 0.65rem 1rem;
+  border: none;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.1s ease, filter 0.15s ease;
+}
+
+button:hover {
+  filter: brightness(1.08);
+  box-shadow: var(--glow);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+.error {
+  color: var(--color-error);
+  font-size: 0.875rem;
+  border-left: 3px solid var(--color-error);
+  padding-left: 0.6rem;
+}
+
+/* App shell */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 1px 0 rgba(255, 87, 34, 0.4), 0 4px 30px rgba(0, 0, 0, 0.3);
+}
+
+.app-header h1 {
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+  background: linear-gradient(90deg, var(--color-primary-light), var(--color-primary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.app-nav {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.app-nav button {
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.app-nav button:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary-light);
+  box-shadow: var(--glow);
+  filter: none;
+}
+
+#logout-btn {
+  background: transparent;
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+#logout-btn:hover {
+  background: rgba(240, 85, 74, 0.12);
+  color: var(--color-error);
+  box-shadow: 0 0 24px rgba(240, 85, 74, 0.3);
+}
+
+#app-content {
+  padding: var(--spacing);
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.placeholder {
+  color: var(--color-muted);
+  font-style: italic;
+}
+
+/* Screens (Jobs, Categories, Dashboard, ...) */
+.screen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.screen-header h2 {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 1.3rem;
+}
+
+.panel-form {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.panel-form-inline {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.panel-form-inline .inline-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.field-hint {
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  margin: -0.25rem 0 0.5rem;
+}
+
+.custom-field-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+.custom-field-row input {
+  flex: 1;
+}
+
+.custom-field-row .remove-field-btn {
+  flex-shrink: 0;
+  padding: 0.4rem 0.7rem;
+  line-height: 1;
+}
+
+.custom-fields-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.5rem 0 1.5rem;
+}
+
+.custom-field-tag {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 0.55rem 1.1rem;
+  font-size: 1.05rem;
+}
+
+.custom-field-tag strong {
+  color: var(--color-primary-light);
+  font-weight: 600;
+}
+
+/* The value half of a custom field tag (e.g. a site address) is a real
+   <button>, not just text — tapping it copies the value so a crew member
+   can paste it straight into a maps app instead of retyping an address. */
+.custom-field-value {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: var(--color-text);
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+
+.custom-field-value:hover {
+  color: var(--color-primary-light);
+}
+
+.custom-field-value.copied {
+  color: var(--color-success);
+  text-decoration: none;
+}
+
+/* A label that needs to stand out more than the usual small uppercase
+   field label — bigger and in the brand orange instead of muted gray. */
+.label-emphasis {
+  font-size: 1.15rem;
+  color: var(--color-primary-light);
+}
+
+.secondary-btn {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.secondary-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary-light);
+  box-shadow: none;
+  filter: none;
+}
+
+/* .receipt-link is an <a>, not a <button>, so it needs the base button
+   box model explicitly — the bare `button` element selector above doesn't
+   reach it. */
+.receipt-link {
+  display: inline-block;
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, filter 0.15s ease;
+}
+
+.job-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.job-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-primary);
+  border-radius: 10px;
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.job-card:hover {
+  box-shadow: 0 0 0 1px rgba(255, 87, 34, 0.25), 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+
+.job-card-main h3 {
+  margin: 0 0 0.2rem;
+  font-size: 1.1rem;
+}
+
+.job-meta {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+.job-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* Job detail screen */
+.back-btn {
+  margin-bottom: 1rem;
+}
+
+.status-badge {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  color: var(--color-muted);
+  align-self: center;
+}
+
+.status-badge.status-active {
+  border-color: var(--color-primary);
+  color: var(--color-primary-light);
+}
+
+.status-badge.status-complete {
+  border-color: #4caf50;
+  color: #7fd88f;
+}
+
+.status-badge.status-cancelled {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+.profitability-panel {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.profit-stat {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+}
+
+.profit-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+}
+
+.profit-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.profit-stat-highlight {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 20px rgba(255, 87, 34, 0.15);
+}
+
+.profit-stat-highlight .profit-value {
+  background: linear-gradient(90deg, var(--color-primary-light), var(--color-primary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Revenue entry list — green for a price increase, red for a discount/
+   reduction, so the running log is scannable at a glance. */
+.revenue-positive {
+  color: var(--color-success);
+}
+
+.revenue-negative {
+  color: var(--color-error);
+}
+
+/* Guided "Log Revenue Change" flow — large tap targets and chip-style
+   single-select buttons, built for field users on a phone, not a mouse. */
+.revenue-flow-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.revenue-flow-header .field-hint {
+  margin: 0;
+}
+
+.revenue-direction-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.revenue-direction-btn {
+  flex: 1 1 200px;
+  padding: 1.1rem 1rem;
+  font-size: 1.05rem;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.revenue-direction-btn:hover {
+  border-color: var(--color-primary);
+}
+
+.revenue-direction-btn.selected {
+  border-color: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+  color: #fff;
+  box-shadow: var(--glow);
+}
+
+.revenue-step {
+  margin-bottom: 1rem;
+}
+
+.revenue-amount-input {
+  font-size: 1.4rem;
+  padding: 0.85rem 1rem;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.chip-btn {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.chip-btn:hover {
+  border-color: var(--color-primary);
+}
+
+.chip-btn.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: none;
+}
+
+.detail-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.detail-column h3 {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 1rem;
+  color: var(--color-muted);
+  margin-bottom: 0.75rem;
+}
+
+@media (max-width: 720px) {
+  .profitability-panel {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .detail-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Dashboard screen */
+.dashboard-subhead {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.9rem;
+  color: var(--color-muted);
+  margin: 1.75rem 0 0.75rem;
+}
+
+.dashboard-subhead:first-of-type {
+  margin-top: 0;
+}
+
+.profit-tag {
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+}
+
+.profit-tag.profit-positive {
+  color: #7fd88f;
+  border-color: #4caf50;
+}
+
+.profit-tag.profit-negative {
+  color: var(--color-error);
+  border-color: var(--color-error);
+}

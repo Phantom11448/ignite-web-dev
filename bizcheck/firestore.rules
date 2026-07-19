@@ -1,0 +1,142 @@
+rules_version = '2';
+
+// Firestore security rules for BizCheck.
+// Model: every document lives under businesses/{businessId}/... .
+// A user can only touch data belonging to a business they're an active
+// member of. Beyond that, access is split by role:
+//
+//   owner       — full access to everything.
+//   supervisor  — can manage jobs and categories, log expenses/labor for
+//                 anyone, and can log revenue changes (see
+//                 revenue_entries below), but cannot see/manage the team
+//                 and cannot change business settings. The app's UI
+//                 still keeps revenue TOTALS and the profitability panel
+//                 owner-only (supervisor logs entries "blind," the same
+//                 way crew logs expenses without seeing job totals) —
+//                 that's a UI choice, not a rules restriction, since
+//                 supervisor needs read access to revenue_entries for
+//                 the shared profitability calculation to work at all.
+//   crew        — can only log their own expenses (receipts), hours, and
+//                 jobsite notes/photos against jobs. Cannot create/edit
+//                 jobs, cannot manage categories, cannot edit other
+//                 people's entries, and cannot log revenue changes at
+//                 all (not even blind).
+//
+// NOTE: Firestore rules operate on whole documents for reads — they can
+// restrict which fields get WRITTEN (e.g. block crew from setting
+// revenue), but they cannot redact a single field out of a document a
+// lesser role is otherwise allowed to read. The app's UI hides that data
+// from supervisor/crew views, and these rules block them from ever
+// writing it, but a determined user with direct Firestore access could
+// still read raw documents. revenue_entries being its OWN subcollection
+// (rather than a field on the job doc, like the old revenue_amount was)
+// means a future hardening pass CAN restrict its read access to owner
+// only without touching anything else — not done here because it would
+// break supervisor's profitability view, which currently depends on
+// reading revenue_entries to compute totals it just doesn't display.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function memberDoc(businessId) {
+      return get(/databases/$(database)/documents/businesses/$(businessId)/users/$(request.auth.uid));
+    }
+
+    function isBusinessMember(businessId) {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/businesses/$(businessId)/users/$(request.auth.uid)) &&
+        memberDoc(businessId).data.active == true;
+    }
+
+    function roleOf(businessId) {
+      return memberDoc(businessId).data.role;
+    }
+
+    function isOwner(businessId) {
+      return isBusinessMember(businessId) && roleOf(businessId) == 'owner';
+    }
+
+    function isSupervisorOrAbove(businessId) {
+      return isBusinessMember(businessId) && roleOf(businessId) in ['owner', 'supervisor'];
+    }
+
+    // Top-level (not nested under businesses/) — lets a logged-in user find
+    // which business they belong to. Written once at account creation time
+    // by signUpOwner (self) or createTeamMember (owner writing on behalf of
+    // a new hire).
+    match /user_business_map/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow create: if isSignedIn() &&
+        (request.auth.uid == userId || isOwner(request.resource.data.business_id));
+    }
+
+    match /businesses/{businessId} {
+      allow read: if isBusinessMember(businessId);
+      // Signup creates this doc with the new owner's own uid as businessId.
+      allow create: if isSignedIn() && request.auth.uid == businessId;
+      allow update, delete: if isOwner(businessId);
+
+      match /users/{userId} {
+        allow read: if isBusinessMember(businessId);
+        // A user can create their own profile doc (signup); owners can add others.
+        allow create: if isSignedIn() && (request.auth.uid == userId || isOwner(businessId));
+        allow update, delete: if isOwner(businessId) || request.auth.uid == userId;
+      }
+
+      match /categories/{categoryId} {
+        allow read: if isBusinessMember(businessId);
+        // Crew can see category names (needed to log an expense) but not
+        // create/rename/delete them.
+        allow write: if isSupervisorOrAbove(businessId);
+      }
+
+      match /jobs/{jobId} {
+        allow read: if isBusinessMember(businessId);
+        // Crew cannot create, edit, complete, or cancel jobs.
+        allow create, update: if isSupervisorOrAbove(businessId);
+        allow delete: if isOwner(businessId);
+
+        match /expenses/{expenseId} {
+          allow read: if isBusinessMember(businessId);
+          // Anyone active (including crew) can log a new expense/receipt.
+          allow create: if isBusinessMember(businessId);
+          // Only supervisor/owner can correct an existing entry.
+          allow update, delete: if isSupervisorOrAbove(businessId);
+        }
+
+        match /labor_entries/{laborEntryId} {
+          allow read: if isBusinessMember(businessId);
+          // Anyone active (including crew) can log their own hours.
+          allow create: if isBusinessMember(businessId);
+          allow update, delete: if isSupervisorOrAbove(businessId);
+        }
+
+        match /revenue_entries/{revenueEntryId} {
+          // Read follows the same pattern as categories: any active
+          // business member can read (needed so profitability
+          // calculations — used by supervisor's expense/labor totals too
+          // — don't break), but crew can never write. Unlike expenses/
+          // labor_entries, crew doesn't even get create access here —
+          // logging a price change is a supervisor/owner-only action.
+          allow read: if isBusinessMember(businessId);
+          allow write: if isSupervisorOrAbove(businessId);
+        }
+
+        match /job_notes/{noteId} {
+          // No dollar figure lives here, so unlike revenue_entries there's
+          // no reason to restrict this beyond normal business membership —
+          // same open pattern as expenses/labor_entries: anyone active
+          // (including crew) can log a note or photo, only supervisor/
+          // owner can correct/remove one that's already there.
+          allow read: if isBusinessMember(businessId);
+          allow create: if isBusinessMember(businessId);
+          allow update, delete: if isSupervisorOrAbove(businessId);
+        }
+      }
+    }
+  }
+}

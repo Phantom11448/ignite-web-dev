@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BizCheck</title>
+  <link rel="manifest" href="/bizcheck/manifest.json" />
+  <meta name="theme-color" content="#1b1f27" />
+  <link rel="stylesheet" href="/bizcheck/css/styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>BizCheck</h1>
+    <nav class="app-nav">
+      <!-- Screen links — each screen's markup/logic gets built later and
+           loaded into #app-content. Data layer for all of these already
+           exists in /js (jobs.js, expenses.js, labor.js, categories.js,
+           dashboard.js). -->
+      <button data-screen="jobs">Jobs</button>
+      <button data-screen="categories">Categories</button>
+      <button data-screen="team">Team</button>
+      <button data-screen="dashboard">Dashboard</button>
+      <button id="logout-btn">Log Out</button>
+    </nav>
+  </header>
+
+  <main id="app-content">
+    <!-- Screen content is injected here per data-screen selection.
+         No screens are implemented yet — this is scaffolding only. -->
+    <p class="placeholder">Select a screen above.</p>
+  </main>
+
+  <script type="module" src="/bizcheck/js/firebase-config.js"></script>
+  <script type="module">
+    import { observeAuthState, logOut, getUserProfile, getBusinessIdForUser } from "/bizcheck/js/auth.js";
+    import { renderJobsScreen } from "/bizcheck/js/screens/jobs-screen.js";
+    import { renderCategoriesScreen } from "/bizcheck/js/screens/categories-screen.js";
+    import { renderJobDetailScreen } from "/bizcheck/js/screens/job-detail-screen.js";
+    import { renderDashboardScreen } from "/bizcheck/js/screens/dashboard-screen.js";
+    import { renderTeamScreen } from "/bizcheck/js/screens/team-screen.js";
+
+    const contentEl = document.getElementById("app-content");
+    const categoriesNavBtn = document.querySelector('[data-screen="categories"]');
+    const dashboardNavBtn = document.querySelector('[data-screen="dashboard"]');
+    const teamNavBtn = document.querySelector('[data-screen="team"]');
+    let currentUser = null;
+    let currentRole = null;
+    let currentBusinessId = null;
+
+    // Guard: bounce unauthenticated visitors back to the login page.
+    observeAuthState(async (user) => {
+      if (!user) {
+        window.location.href = "/bizcheck/index.html";
+        return;
+      }
+      currentUser = user;
+
+      // Every account (owner, supervisor, crew) has a user_business_map
+      // entry written at creation time — this is the real way to find
+      // which business a logged-in user belongs to. Do not assume
+      // uid === businessId; that's only true for owners by coincidence.
+      currentBusinessId = await getBusinessIdForUser(currentUser.uid);
+      if (!currentBusinessId) {
+        // No business mapping found for this account — nothing to show.
+        await logOut();
+        window.location.href = "/bizcheck/index.html";
+        return;
+      }
+
+      const profile = await getUserProfile(currentBusinessId, currentUser.uid);
+      currentRole = profile?.role || "crew"; // fail closed: unknown role gets least access
+
+      applyRoleVisibility(currentRole);
+      showScreen("jobs"); // land on Jobs after login
+    });
+
+    document.getElementById("logout-btn").addEventListener("click", async () => {
+      await logOut();
+      window.location.href = "/bizcheck/index.html";
+    });
+
+    document.querySelectorAll("[data-screen]").forEach((btn) => {
+      btn.addEventListener("click", () => showScreen(btn.dataset.screen));
+    });
+
+    // Categories management is supervisor/owner only; the profit Dashboard
+    // is owner-only. Crew never sees either nav item.
+    function applyRoleVisibility(role) {
+      categoriesNavBtn.hidden = role === "crew";
+      dashboardNavBtn.hidden = role !== "owner";
+      teamNavBtn.hidden = role !== "owner";
+    }
+
+    function showScreen(screen) {
+      if (!currentUser || !currentBusinessId) return;
+      const businessId = currentBusinessId;
+
+      if (screen === "jobs") {
+        showJobsList(businessId);
+      } else if (screen === "categories" && currentRole !== "crew") {
+        renderCategoriesScreen(contentEl, { businessId, role: currentRole });
+      } else if (screen === "dashboard" && currentRole === "owner") {
+        renderDashboardScreen(contentEl, { businessId });
+      } else if (screen === "team" && currentRole === "owner") {
+        renderTeamScreen(contentEl, { businessId });
+      } else if (screen === "categories" || screen === "dashboard" || screen === "team") {
+        // Role changed since page load, or someone bypassed the hidden nav
+        // button — Firestore rules still block the underlying reads/writes,
+        // this is just the UI-side message.
+        contentEl.innerHTML = `<p class="placeholder">You don't have access to this screen.</p>`;
+      } else {
+        contentEl.innerHTML = `<p class="placeholder">"${screen}" screen not built yet.</p>`;
+      }
+    }
+
+    function showJobsList(businessId) {
+      renderJobsScreen(contentEl, {
+        businessId,
+        userId: currentUser.uid,
+        role: currentRole,
+        onSelectJob: (jobId) => showJobDetail(businessId, jobId),
+      });
+    }
+
+    function showJobDetail(businessId, jobId) {
+      renderJobDetailScreen(contentEl, {
+        businessId,
+        jobId,
+        userId: currentUser.uid,
+        role: currentRole,
+        onBack: () => showJobsList(businessId),
+      });
+    }
+  </script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/bizcheck/service-worker.js", { scope: "/bizcheck/" });
+      });
+    }
+  </script>
+</body>
+</html>

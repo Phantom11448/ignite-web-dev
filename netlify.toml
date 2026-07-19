@@ -1,0 +1,14 @@
+[build]
+  publish = "."
+
+# Static site — no build command needed (plain HTML/CSS/JS, no bundler).
+
+[[headers]]
+  for = "/bizcheck/service-worker.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/bizcheck/manifest.json"
+  [headers.values]
+    Cache-Control = "no-cache"

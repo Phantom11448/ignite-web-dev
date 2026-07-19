@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BizCheck — Sign In</title>
+  <link rel="manifest" href="/bizcheck/manifest.json" />
+  <meta name="theme-color" content="#1b1f27" />
+  <link rel="stylesheet" href="/bizcheck/css/styles.css" />
+</head>
+<body>
+  <main class="auth-shell">
+    <h1>BizCheck</h1>
+    <p class="tagline">Track job profitability in the field.</p>
+
+    <section id="login-section">
+      <h2>Log In</h2>
+      <form id="login-form">
+        <label class="label-required" for="login-email">Email</label>
+        <input type="email" id="login-email" required />
+
+        <label class="label-required" for="login-password">Password</label>
+        <input type="password" id="login-password" required />
+
+        <label class="checkbox-label" for="login-remember-me">
+          <input type="checkbox" id="login-remember-me" checked />
+          Remember me on this device
+        </label>
+
+        <button type="submit">Log In</button>
+        <p id="login-error" class="error" hidden></p>
+      </form>
+    </section>
+
+    <section id="signup-section">
+      <h2>Create a Business Account</h2>
+      <form id="signup-form">
+        <label class="label-required" for="signup-business-name">Business Name</label>
+        <input type="text" id="signup-business-name" required />
+
+        <label class="label-required" for="signup-trade-type">Trade Type</label>
+        <select id="signup-trade-type" required>
+          <option value="moving">Moving</option>
+          <option value="hvac">HVAC</option>
+          <option value="construction">Construction</option>
+          <option value="landscaping">Landscaping</option>
+          <option value="general">General</option>
+        </select>
+
+        <label class="label-required" for="signup-name">Your Name</label>
+        <input type="text" id="signup-name" required />
+
+        <label class="label-required" for="signup-email">Email</label>
+        <input type="email" id="signup-email" required />
+
+        <label class="label-required" for="signup-password">Password</label>
+        <input type="password" id="signup-password" required minlength="6" />
+
+        <button type="submit">Create Account</button>
+        <p id="signup-error" class="error" hidden></p>
+      </form>
+    </section>
+  </main>
+
+  <script type="module" src="/bizcheck/js/firebase-config.js"></script>
+  <script type="module">
+    import { signUpOwner, logIn, observeAuthState } from "/bizcheck/js/auth.js";
+
+    const loginErrorEl = document.getElementById("login-error");
+    const signupErrorEl = document.getElementById("signup-error");
+
+    // Guards the "already logged in, skip to app" auto-redirect below.
+    // createUserWithEmailAndPassword() signs the new account in immediately
+    // — before signUpOwner() has written the business/user docs to
+    // Firestore. Without this flag, the auto-redirect listener fires the
+    // instant that sign-in happens and navigates away mid-signup, aborting
+    // signUpOwner() before its Firestore writes ever run. Login has the
+    // same brief risk, so it's guarded too.
+    let isSubmittingForm = false;
+
+    function showError(el, err) {
+      el.textContent = friendlyAuthError(err);
+      el.hidden = false;
+    }
+
+    // Firebase's raw error codes ("Firebase: Error (auth/invalid-credential).")
+    // aren't something a customer should ever see. Translate the common ones.
+    // Also logged to console.error below so real errors stay debuggable —
+    // and any code we don't recognize gets shown on-screen too, since
+    // silently swallowing an unfamiliar error code just hides real bugs.
+    function friendlyAuthError(err) {
+      console.error("Auth/signup error:", err);
+      const code = err?.code || "";
+      switch (code) {
+        case "auth/invalid-credential":
+        case "auth/wrong-password":
+        case "auth/user-not-found":
+          return "That email or password isn't right. Double-check and try again.";
+        case "auth/email-already-in-use":
+          return "An account with that email already exists. Try logging in instead.";
+        case "auth/weak-password":
+          return "Password needs to be at least 6 characters.";
+        case "auth/invalid-email":
+          return "That doesn't look like a valid email address.";
+        case "auth/too-many-requests":
+          return "Too many attempts. Wait a bit and try again.";
+        case "auth/network-request-failed":
+          return "Network error — check your connection and try again.";
+        case "permission-denied":
+          return "Permission denied writing to the database (Firestore rules rejected this). Check the console for details.";
+        default:
+          return `Something went wrong (${code || "unknown error"}). Check the console for details.`;
+      }
+    }
+
+    document.getElementById("login-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      loginErrorEl.hidden = true;
+      isSubmittingForm = true;
+      try {
+        await logIn(
+          document.getElementById("login-email").value,
+          document.getElementById("login-password").value,
+          document.getElementById("login-remember-me").checked
+        );
+        window.location.href = "/bizcheck/app.html";
+      } catch (err) {
+        isSubmittingForm = false;
+        showError(loginErrorEl, err);
+      }
+    });
+
+    document.getElementById("signup-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      signupErrorEl.hidden = true;
+      isSubmittingForm = true;
+      try {
+        await signUpOwner({
+          email: document.getElementById("signup-email").value,
+          password: document.getElementById("signup-password").value,
+          businessName: document.getElementById("signup-business-name").value,
+          tradeType: document.getElementById("signup-trade-type").value,
+          name: document.getElementById("signup-name").value,
+        });
+        window.location.href = "/bizcheck/app.html";
+      } catch (err) {
+        isSubmittingForm = false;
+        showError(signupErrorEl, err);
+      }
+    });
+
+    // If already logged in, skip straight to the app shell. Skipped while
+    // a login/signup submission is in flight — see isSubmittingForm above.
+    observeAuthState((user) => {
+      if (user && !isSubmittingForm) window.location.href = "/bizcheck/app.html";
+    });
+  </script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/bizcheck/service-worker.js", { scope: "/bizcheck/" });
+      });
+    }
+  </script>
+</body>
+</html>
