@@ -907,6 +907,23 @@ button:active {
   gap: 0.6rem;
 }
 
+/* CSS specificity fix: .checkout-banner/.trial-banner set their own
+   `display` (or otherwise participate in the cascade at class-selector
+   specificity), which — being normal author-origin rules — beats the
+   browser's built-in `[hidden] { display: none }` user-agent rule even
+   though that UA rule targets the exact same element. The result without
+   this override: setting el.hidden = true still leaves the element laid
+   out as an empty bordered/backgrounded box. These two rules combine the
+   class with the [hidden] attribute selector, which raises specificity
+   above the plain class rules above, so `hidden` actually hides the
+   element again. Must stay AFTER the .checkout-banner/.trial-banner
+   blocks above — source order is what lets these win in a specificity
+   tie against the .checkout-banner-success/-cancelled modifier rules too. */
+.checkout-banner[hidden],
+.trial-banner[hidden] {
+  display: none;
+}
+
 /* Locked-out screen — shown instead of any normal screen once a
    business's trial has expired with no active subscription. */
 .locked-out-panel {
