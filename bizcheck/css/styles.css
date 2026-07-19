@@ -249,6 +249,12 @@ button:active {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  /* Lets the nav drop to its own row below the title on narrow screens
+     instead of being squeezed into a shrinking column beside it — only
+     kicks in once h1 + nav can't both fit on one line, so wide/desktop
+     layout is unaffected. */
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
   padding: var(--spacing);
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
@@ -273,6 +279,7 @@ button:active {
 
 .app-nav {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
 }
 
@@ -286,6 +293,24 @@ button:active {
   letter-spacing: 0.03em;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+}
+
+/* Narrow phones (iPhone SE/mini through standard 390-414px widths) —
+   Jobs/Bulletin Board/Categories/Team/Dashboard/Log Out never all fit on
+   one line at this width, so this tightens buttons just enough to wrap
+   into 2-3 comfortable rows instead of overflowing or feeling cramped.
+   row-gap is kept generous specifically so wrapped rows don't sit close
+   enough to cause accidental mis-taps between them. */
+@media (max-width: 480px) {
+  .app-nav {
+    row-gap: 0.6rem;
+    column-gap: 0.4rem;
+  }
+
+  .app-nav button {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.72rem;
+  }
 }
 
 .app-nav button:hover {
