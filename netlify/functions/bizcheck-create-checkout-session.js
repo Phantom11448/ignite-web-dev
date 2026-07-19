@@ -16,7 +16,7 @@ const Stripe = require("stripe");
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-const BIZCHECK_PRICE_ID = "price_1Tuuh83ho4ww4VFV0IpprkCj";
+const BIZCHECK_PRICE_ID = "price_1TuwqbQMVShkVe1Vm2014I3k";
 const SUCCESS_URL = "https://ignitewebdev.com/bizcheck/app.html?checkout=success";
 const CANCEL_URL = "https://ignitewebdev.com/bizcheck/app.html?checkout=cancelled";
 
