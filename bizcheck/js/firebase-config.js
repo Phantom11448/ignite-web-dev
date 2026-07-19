@@ -61,6 +61,18 @@ businesses/{businessId}
   - name: string
   - trade_type: string          ("moving" | "hvac" | "construction" | "landscaping" | "general")
   - created_at: timestamp
+  - subscription_status: string | null   ("active" | "past_due" | "cancelled" | ...
+                                           any other Stripe subscription status)
+  - stripe_customer_id: string | null
+  - stripe_subscription_id: string | null
+  These three are SERVER-MANAGED ONLY — written exclusively by
+  netlify/functions/bizcheck-stripe-webhook.js via the Firebase Admin SDK.
+  firestore.rules blocks every client write to them, even from the owner
+  (see subscriptionFields() in firestore.rules). Clients only ever READ
+  these — see billing.js's getBusiness() and dashboard-screen.js's billing
+  panel. Checkout itself is kicked off by billing.js's
+  createCheckoutSession(), which POSTs to
+  netlify/functions/bizcheck-create-checkout-session.js.
 
 businesses/{businessId}/users/{userId}
   - name: string
@@ -131,6 +143,20 @@ businesses/{businessId}/jobs/{jobId}/job_notes/{noteId}
   revenue, this is open to every role including crew: there's no dollar
   figure here to protect. See job-notes.js.
 
+businesses/{businessId}/bulletin_posts/{postId}
+  - text: string | null
+  - photo_url: string | null
+  - posted_by: userId
+  - posted_by_name: string        (denormalized at post time from the
+                                    poster's profile, so the feed never has
+                                    to join against users/ just to show a
+                                    name — and still shows correctly even
+                                    if that person is later deactivated)
+  - date: timestamp               (server-set, not user-editable)
+  Company-wide announcements/photos, visible to every role. NOT scoped
+  under a job — this lives directly under the business, same level as
+  categories/. See bulletin.js.
+
 user_business_map/{userId}   (top-level collection, NOT under businesses/)
   - business_id: string
   Lets the app find which business a logged-in user belongs to. The owner's
@@ -171,5 +197,7 @@ export const paths = {
     `businesses/${businessId}/jobs/${jobId}/revenue_entries/${revenueEntryId}`,
   jobNotes: (businessId, jobId) => `businesses/${businessId}/jobs/${jobId}/job_notes`,
   jobNote: (businessId, jobId, noteId) => `businesses/${businessId}/jobs/${jobId}/job_notes/${noteId}`,
+  bulletinPosts: (businessId) => `businesses/${businessId}/bulletin_posts`,
+  bulletinPost: (businessId, postId) => `businesses/${businessId}/bulletin_posts/${postId}`,
   userBusinessMap: (userId) => `user_business_map/${userId}`,
 };

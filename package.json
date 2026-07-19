@@ -1,0 +1,9 @@
+{
+  "name": "ignitewebdev-functions",
+  "private": true,
+  "description": "Server-side dependencies for this site's Netlify Functions. The site itself is a plain static HTML/CSS/JS deploy with no build step — this file exists only so Netlify installs what netlify/functions/*.js needs.",
+  "dependencies": {
+    "stripe": "^22.3.0",
+    "firebase-admin": "^14.2.0"
+  }
+}

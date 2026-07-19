@@ -74,11 +74,36 @@ service cloud.firestore {
         (request.auth.uid == userId || isOwner(request.resource.data.business_id));
     }
 
+    // Fields written ONLY by the trusted server context in
+    // netlify/functions/bizcheck-stripe-webhook.js, via the Firebase Admin
+    // SDK (which bypasses these rules entirely). No client request should
+    // ever be allowed to set these, at create OR update time — see the
+    // allow create/update conditions below, both of which block them
+    // explicitly via this shared list rather than just relying on nobody
+    // trying.
+    function subscriptionFields() {
+      return ['subscription_status', 'stripe_customer_id', 'stripe_subscription_id'];
+    }
+
     match /businesses/{businessId} {
       allow read: if isBusinessMember(businessId);
       // Signup creates this doc with the new owner's own uid as businessId.
-      allow create: if isSignedIn() && request.auth.uid == businessId;
-      allow update, delete: if isOwner(businessId);
+      // Also blocks a client from seeding subscription_status/stripe_* at
+      // signup time — those three are server-managed only (see
+      // subscriptionFields above), so nobody should be able to self-grant
+      // "active" by just including it in their own signup write.
+      allow create: if isSignedIn() && request.auth.uid == businessId &&
+        !request.resource.data.keys().hasAny(subscriptionFields());
+      // Owner can update ordinary business fields (name, trade_type, etc.)
+      // freely, but subscription_status/stripe_customer_id/
+      // stripe_subscription_id can never be part of that update — no
+      // client, not even the owner, writes those directly. diff().affectedKeys()
+      // looks at exactly which fields an update actually touches, so this
+      // only blocks updates that try to include one of the three; every
+      // other owner update keeps working normally.
+      allow update: if isOwner(businessId) &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(subscriptionFields());
+      allow delete: if isOwner(businessId);
 
       match /users/{userId} {
         allow read: if isBusinessMember(businessId);
@@ -92,6 +117,24 @@ service cloud.firestore {
         // Crew can see category names (needed to log an expense) but not
         // create/rename/delete them.
         allow write: if isSupervisorOrAbove(businessId);
+      }
+
+      // Company-wide Bulletin Board — NOT nested under jobs/, unlike
+      // expenses/labor_entries/revenue_entries/job_notes above, since a
+      // post isn't tied to any one job. Open to every role: anyone active
+      // can read, and anyone active can post (crew included, unlike
+      // revenue_entries). Deleting is the one place this differs from
+      // job_notes' pattern — here the post's own author can also delete
+      // it, not just supervisor/owner, so someone can walk back their own
+      // post. Editing is restricted to the author only (supervisor/owner
+      // don't get a blanket update here the way they do delete, since
+      // silently editing someone else's words is a different kind of
+      // action than removing them).
+      match /bulletin_posts/{postId} {
+        allow read: if isBusinessMember(businessId);
+        allow create: if isBusinessMember(businessId);
+        allow delete: if isSupervisorOrAbove(businessId) || (isBusinessMember(businessId) && resource.data.posted_by == request.auth.uid);
+        allow update: if isBusinessMember(businessId) && resource.data.posted_by == request.auth.uid;
       }
 
       match /jobs/{jobId} {

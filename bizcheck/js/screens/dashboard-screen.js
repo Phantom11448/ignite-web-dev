@@ -10,25 +10,35 @@ import {
   getBusinessSummary,
   getAllJobsProfitability,
 } from "../dashboard.js";
+import { getBusiness, createCheckoutSession } from "../billing.js";
 
-export function renderDashboardScreen(container, { businessId }) {
+/**
+ * userEmail is only used to start a Stripe Checkout session (Stripe wants
+ * an email to pre-fill on the hosted checkout page) — this screen is
+ * already owner-only (see app.html's routing), so no extra role check is
+ * needed here for the billing panel.
+ */
+export function renderDashboardScreen(container, { businessId, userEmail }) {
   container.innerHTML = `<p class="placeholder">Loading dashboard&hellip;</p>`;
   load();
 
   async function load() {
-    const [activeSummary, businessSummary, jobProfitabilities] = await Promise.all([
+    const [activeSummary, businessSummary, jobProfitabilities, business] = await Promise.all([
       getActiveJobsSummary(businessId),
       getBusinessSummary(businessId),
       getAllJobsProfitability(businessId),
+      getBusiness(businessId),
     ]);
-    render(activeSummary, businessSummary, jobProfitabilities);
+    render(activeSummary, businessSummary, jobProfitabilities, business);
   }
 
-  function render(activeSummary, businessSummary, jobProfitabilities) {
+  function render(activeSummary, businessSummary, jobProfitabilities, business) {
     container.innerHTML = `
       <div class="screen-header">
         <h2>Dashboard</h2>
       </div>
+
+      ${billingPanel(business)}
 
       <h3 class="dashboard-subhead">Active Jobs (${activeSummary.jobCount})</h3>
       ${summaryPanel(activeSummary)}
@@ -48,6 +58,69 @@ export function renderDashboardScreen(container, { businessId }) {
 
     const listEl = container.querySelector("#job-breakdown-list");
     jobProfitabilities.forEach((p) => listEl.appendChild(buildJobRow(p)));
+
+    wireBillingButton(business);
+  }
+
+  function billingPanel(business) {
+    const status = business?.subscription_status || null;
+    const statusLabel =
+      status === "active"
+        ? "Active"
+        : status === "past_due"
+        ? "Past Due"
+        : status === "cancelled"
+        ? "Cancelled"
+        : "Not subscribed";
+    const statusClass =
+      status === "active"
+        ? "billing-status-active"
+        : status === "past_due"
+        ? "billing-status-past-due"
+        : status === "cancelled"
+        ? "billing-status-cancelled"
+        : "billing-status-none";
+    // Only one server action exists right now (create a Checkout Session),
+    // so an already-subscribed owner clicking "Manage Billing" starts a
+    // brand-new subscription checkout rather than opening a Stripe Billing
+    // Portal — there's no portal-session function built yet. The label
+    // still changes contextually so it doesn't say "Subscribe" to someone
+    // who already is; a real "Manage Billing" experience would need a
+    // second Netlify Function (a Billing Portal session) wired up the same
+    // way as bizcheck-create-checkout-session.js, which wasn't part of
+    // this build.
+    const buttonLabel = status === "active" || status === "past_due" ? "Manage Billing" : "Subscribe";
+
+    return `
+      <div class="panel-form billing-panel">
+        <div class="screen-header">
+          <h3>Billing</h3>
+          <span class="status-badge ${statusClass}">${statusLabel}</span>
+        </div>
+        <button type="button" id="billing-btn">${buttonLabel}</button>
+        <p class="field-hint error" id="billing-error" hidden></p>
+      </div>
+    `;
+  }
+
+  function wireBillingButton(business) {
+    const billingBtn = container.querySelector("#billing-btn");
+    const billingErrorEl = container.querySelector("#billing-error");
+    if (!billingBtn) return;
+
+    billingBtn.addEventListener("click", async () => {
+      billingBtn.disabled = true;
+      billingErrorEl.hidden = true;
+      try {
+        const url = await createCheckoutSession(businessId, userEmail);
+        window.location.href = url;
+      } catch (err) {
+        console.error("Could not start Stripe Checkout:", err);
+        billingErrorEl.textContent = "Couldn't start checkout — try again in a moment.";
+        billingErrorEl.hidden = false;
+        billingBtn.disabled = false;
+      }
+    });
   }
 
   function summaryPanel(summary) {

@@ -43,6 +43,16 @@ export function uploadJobNotePhoto(businessId, jobId, noteId, file) {
   return uploadToCloudinary(`bizcheck/${businessId}/${jobId}/notes/${noteId}`, file);
 }
 
+/**
+ * Uploads a photo attached to a Bulletin Board post and returns its public
+ * URL. Not scoped under a job (the bulletin is company-wide), so it gets
+ * its own top-level folder instead of the jobId-scoped ones above — same
+ * compression and Cloudinary preset either way.
+ */
+export function uploadBulletinPhoto(businessId, postId, file) {
+  return uploadToCloudinary(`bizcheck/${businessId}/bulletin/${postId}`, file);
+}
+
 // --- internal helpers -----------------------------------------------------
 
 /**

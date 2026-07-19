@@ -2,6 +2,13 @@
   publish = "."
 
 # Static site — no build command needed (plain HTML/CSS/JS, no bundler).
+# package.json at the repo root exists solely so Netlify installs the
+# dependencies netlify/functions/*.js needs (stripe, firebase-admin)
+# before bundling the functions below — it does not add a build step for
+# the static site itself.
+
+[functions]
+  directory = "netlify/functions"
 
 [[headers]]
   for = "/bizcheck/service-worker.js"

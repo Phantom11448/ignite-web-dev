@@ -17,12 +17,15 @@
            exists in /js (jobs.js, expenses.js, labor.js, categories.js,
            dashboard.js). -->
       <button data-screen="jobs">Jobs</button>
+      <button data-screen="bulletin">Bulletin Board</button>
       <button data-screen="categories">Categories</button>
       <button data-screen="team">Team</button>
       <button data-screen="dashboard">Dashboard</button>
       <button id="logout-btn">Log Out</button>
     </nav>
   </header>
+
+  <div id="checkout-banner" class="checkout-banner" hidden></div>
 
   <main id="app-content">
     <!-- Screen content is injected here per data-screen selection.
@@ -34,6 +37,7 @@
   <script type="module">
     import { observeAuthState, logOut, getUserProfile, getBusinessIdForUser } from "/bizcheck/js/auth.js";
     import { renderJobsScreen } from "/bizcheck/js/screens/jobs-screen.js";
+    import { renderBulletinScreen } from "/bizcheck/js/screens/bulletin-screen.js";
     import { renderCategoriesScreen } from "/bizcheck/js/screens/categories-screen.js";
     import { renderJobDetailScreen } from "/bizcheck/js/screens/job-detail-screen.js";
     import { renderDashboardScreen } from "/bizcheck/js/screens/dashboard-screen.js";
@@ -43,9 +47,40 @@
     const categoriesNavBtn = document.querySelector('[data-screen="categories"]');
     const dashboardNavBtn = document.querySelector('[data-screen="dashboard"]');
     const teamNavBtn = document.querySelector('[data-screen="team"]');
+    // No nav-visibility variable for Bulletin Board — it's the one screen
+    // every role sees, so its button is never hidden in applyRoleVisibility.
     let currentUser = null;
     let currentRole = null;
+    let currentUserName = null;
     let currentBusinessId = null;
+
+    // Shows a one-time banner after a Stripe Checkout redirect lands back
+    // here (see billing.js's createCheckoutSession and the success_url/
+    // cancel_url in netlify/functions/bizcheck-create-checkout-session.js),
+    // then strips the query param so a page refresh doesn't show it again.
+    // Runs immediately on script load — doesn't need to wait for auth,
+    // since it's just reading the URL.
+    (function showCheckoutBanner() {
+      const params = new URLSearchParams(window.location.search);
+      const checkout = params.get("checkout");
+      if (!checkout) return;
+
+      const banner = document.getElementById("checkout-banner");
+      if (checkout === "success") {
+        banner.textContent = "Subscription active — thanks for subscribing!";
+        banner.className = "checkout-banner checkout-banner-success";
+        banner.hidden = false;
+      } else if (checkout === "cancelled") {
+        banner.textContent = "Checkout cancelled — no changes were made.";
+        banner.className = "checkout-banner checkout-banner-cancelled";
+        banner.hidden = false;
+      }
+
+      params.delete("checkout");
+      const newSearch = params.toString();
+      const newUrl = window.location.pathname + (newSearch ? `?${newSearch}` : "") + window.location.hash;
+      window.history.replaceState({}, "", newUrl);
+    })();
 
     // Guard: bounce unauthenticated visitors back to the login page.
     observeAuthState(async (user) => {
@@ -69,6 +104,9 @@
 
       const profile = await getUserProfile(currentBusinessId, currentUser.uid);
       currentRole = profile?.role || "crew"; // fail closed: unknown role gets least access
+      // Denormalized onto every bulletin post at creation time — falls back
+      // to email, then a placeholder, in case a profile has no name set.
+      currentUserName = profile?.name || currentUser.email || "Unknown";
 
       applyRoleVisibility(currentRole);
       showScreen("jobs"); // land on Jobs after login
@@ -97,10 +135,18 @@
 
       if (screen === "jobs") {
         showJobsList(businessId);
+      } else if (screen === "bulletin") {
+        // Open to every role — no gate here, unlike the branches below.
+        renderBulletinScreen(contentEl, {
+          businessId,
+          userId: currentUser.uid,
+          userName: currentUserName,
+          role: currentRole,
+        });
       } else if (screen === "categories" && currentRole !== "crew") {
         renderCategoriesScreen(contentEl, { businessId, role: currentRole });
       } else if (screen === "dashboard" && currentRole === "owner") {
-        renderDashboardScreen(contentEl, { businessId });
+        renderDashboardScreen(contentEl, { businessId, userEmail: currentUser.email });
       } else if (screen === "team" && currentRole === "owner") {
         renderTeamScreen(contentEl, { businessId });
       } else if (screen === "categories" || screen === "dashboard" || screen === "team") {
