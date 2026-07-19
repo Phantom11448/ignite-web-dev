@@ -365,6 +365,13 @@ button:active {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  /* Used everywhere a title sits beside a status badge or action button
+     (Job Detail's name+status, Billing's status badge, "Revenue" +
+     "Log Revenue Change", etc.) — without wrap, a long customer name or
+     a long button label pushes the other side off-screen on narrow
+     phones. Same overflow bug/fix pattern as .app-nav and .job-card. */
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
   margin-bottom: 1rem;
 }
 
@@ -388,6 +395,7 @@ button:active {
 
 .form-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: 0.25rem;
 }
@@ -395,6 +403,7 @@ button:active {
 .panel-form-inline {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   align-items: flex-end;
   gap: 1rem;
 }
@@ -414,6 +423,7 @@ button:active {
 
 .custom-field-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
   align-items: center;
@@ -520,6 +530,12 @@ button:active {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  /* Lets the actions (View Details/Mark Complete/Cancel Job) drop to
+     their own row below the job's name/meta on narrow screens instead of
+     being squeezed or pushed off the right edge — same overflow bug and
+     same fix pattern as .app-nav above. */
+  flex-wrap: wrap;
+  row-gap: 0.6rem;
   gap: 1rem;
   padding: 1rem 1.25rem;
   background: var(--color-surface);
@@ -535,6 +551,15 @@ button:active {
   box-shadow: 0 0 0 1px rgba(255, 87, 34, 0.25), 0 8px 30px rgba(0, 0, 0, 0.35);
 }
 
+.job-card-main {
+  /* flex-basis + min-width: 0 let this side shrink and wrap its own text
+     (long customer names) instead of forcing .job-card-actions off the
+     edge — flex items default to min-width: auto, which otherwise
+     prevents shrinking below the content's natural width. */
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
 .job-card-main h3 {
   margin: 0 0 0.2rem;
   font-size: 1.1rem;
@@ -548,8 +573,30 @@ button:active {
 
 .job-card-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   flex-shrink: 0;
+  /* flex-shrink: 0 keeps buttons full-size instead of visually squishing
+     them — but without a width cap, that same flex-shrink: 0 also stops
+     this box from ever being squeezed down to the row it wraps onto,
+     which defeats its own flex-wrap: wrap (2-3 buttons together are wider
+     than a narrow phone screen, so the whole block was still overflowing
+     even after dropping to its own line). max-width: 100% forces it to
+     respect the available row width, which is what actually makes the
+     buttons wrap onto multiple lines instead of running off the edge. */
+  max-width: 100%;
+}
+
+/* Narrow phones — three buttons (View Details/Mark Complete/Cancel Job)
+   rarely all fit on one line even after .job-card-actions drops to its
+   own row, so tighten them the same way .app-nav button gets tightened
+   above; flex-wrap on .job-card-actions is the real backstop guaranteeing
+   nothing goes off-screen even if two still don't fit together. */
+@media (max-width: 480px) {
+  .job-card-actions button {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.78rem;
+  }
 }
 
 /* Bulletin Board — reuses .job-card/.job-list, but a post's content
@@ -625,7 +672,25 @@ button:active {
   margin-bottom: 1.5rem;
 }
 
+/* Narrow phones — 4 equal columns leaves too little width per stat once
+   real dollar figures are in them (e.g. "$12,345.67"), which can force
+   the grid itself wider than the viewport since grid tracks, like flex
+   items, don't shrink below their content's intrinsic min-width by
+   default. Dropping to 2 columns gives each stat roughly double the
+   room, same overflow-prevention goal as the flex-wrap fixes elsewhere
+   on this page, just via grid-template-columns instead. */
+@media (max-width: 480px) {
+  .profitability-panel {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .profit-stat {
+  /* Grid items default to min-width: auto, the same shrink-blocking
+     default flex items have — without this, a stat whose $ value is
+     wider than its 1fr/2fr share can force the whole grid wider than the
+     viewport instead of actually using the space the grid gave it. */
+  min-width: 0;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 10px;
@@ -647,6 +712,11 @@ button:active {
 .profit-value {
   font-size: 1.4rem;
   font-weight: 700;
+  /* Backstop for narrow columns (2-up at <480px): a big currency figure
+     wraps onto a second line instead of forcing its grid column — and so
+     the whole .profitability-panel — wider than the viewport. */
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .profit-stat-highlight {
@@ -677,6 +747,8 @@ button:active {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
   gap: 1rem;
 }
 
