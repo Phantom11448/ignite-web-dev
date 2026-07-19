@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ignite Web Dev — Business Card Editor</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 30px;
+    background: #1b1a1e;
+    font-family: 'Inter', Arial, sans-serif;
+    color: #f4f2ee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+  h1 { font-size: 1rem; font-weight: 600; color: #8a8a8f; margin: 0; letter-spacing: 0.03em; }
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  button {
+    background: #ff6b35;
+    color: #0c0c0e;
+    border: none;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  button.secondary {
+    background: #2a292e;
+    color: #f4f2ee;
+  }
+  .hint {
+    font-size: 0.8rem;
+    color: #8a8a8f;
+    max-width: 1125px;
+    text-align: center;
+  }
+  #card {
+    position: relative;
+    width: 1125px;
+    height: 675px;
+    background-image: url('images/ignite-card-bg-only.png');
+    background-size: cover;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    flex-shrink: 0;
+  }
+  .safe-area {
+    position: absolute;
+    left: 37px; top: 37px; right: 37px; bottom: 37px;
+    border: 1px dashed rgba(255,255,255,0.25);
+    pointer-events: none;
+  }
+  .box {
+    position: absolute;
+    cursor: move;
+    user-select: none;
+    outline: 1px dashed transparent;
+  }
+  .box:hover, .box.active {
+    outline: 1px dashed rgba(255,255,255,0.5);
+  }
+  .box img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;
+  }
+  .box .txt {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    font-family: 'Poppins', Arial, sans-serif;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .handle {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    right: -8px;
+    bottom: -8px;
+    background: #ff6b35;
+    border: 2px solid #0c0c0e;
+    border-radius: 50%;
+    cursor: nwse-resize;
+    display: none;
+  }
+  .box.active .handle {
+    display: block;
+  }
+</style>
+</head>
+<body>
+
+<h1>DRAG TO MOVE · ORANGE DOT TO RESIZE · CLICK TEXT TO EDIT IT</h1>
+
+<div class="toolbar">
+  <button class="secondary" id="colorA">Toggle "gnite" color</button>
+  <button class="secondary" id="colorB">Toggle "webdev.com" color</button>
+  <button class="secondary" id="resetBtn">Reset layout</button>
+  <button id="downloadBtn">Download PNG (print-ready)</button>
+</div>
+
+<div id="card">
+  <div class="safe-area"></div>
+
+  <div class="box" id="logoBox" style="left:40px; top:284px; width:197px; height:351px;">
+    <img id="logoImg" src="images/Ignite-logo.png" draggable="false">
+    <div class="handle"></div>
+  </div>
+
+  <div class="box" id="textBox" style="left:237px; top:499px; width:848px; height:117px;">
+    <div class="txt" id="txtContent" contenteditable="true" spellcheck="false" style="font-size:90px;"><span style="color:#ff6b35;">gnite</span><span style="color:#f4f2ee;">webdev.com</span></div>
+    <div class="handle"></div>
+  </div>
+</div>
+
+<p class="hint">Card is 1125×675px = 3.5"×2" at 300 DPI with 0.125" bleed (dashed line = safe area, keep important stuff inside it). Drag the boxes anywhere, resize from the corner dot. Text is editable — click into it and type.</p>
+
+<script>
+  const card = document.getElementById('card');
+  let activeBox = null;
+
+  function makeInteractive(box) {
+    const handle = box.querySelector('.handle');
+    let mode = null;
+    let startX, startY, startLeft, startTop, startW, startH;
+
+    box.addEventListener('pointerdown', (e) => {
+      document.querySelectorAll('.box').forEach(b => b.classList.remove('active'));
+      box.classList.add('active');
+      activeBox = box;
+
+      if (e.target === handle) {
+        mode = 'resize';
+      } else if (e.target.isContentEditable) {
+        return; // let editing clicks through without starting a drag
+      } else {
+        mode = 'move';
+      }
+      startX = e.clientX;
+      startY = e.clientY;
+      startLeft = box.offsetLeft;
+      startTop = box.offsetTop;
+      startW = box.offsetWidth;
+      startH = box.offsetHeight;
+      box.setPointerCapture(e.pointerId);
+      e.stopPropagation();
+    });
+
+    box.addEventListener('pointermove', (e) => {
+      if (!mode) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if (mode === 'move') {
+        box.style.left = (startLeft + dx) + 'px';
+        box.style.top = (startTop + dy) + 'px';
+      } else if (mode === 'resize') {
+        const ratio = startW / startH;
+        let newH = Math.max(20, startH + dy);
+        let newW = newH * ratio;
+        box.style.width = newW + 'px';
+        box.style.height = newH + 'px';
+        const txt = box.querySelector('.txt');
+        if (txt) {
+          const currentSize = parseFloat(txt.style.fontSize) || 90;
+          txt.style.fontSize = (currentSize * (newH / startH)) + 'px';
+          startH = newH; // recalc incrementally next move to avoid runaway scaling
+          startW = newW;
+        }
+      }
+    });
+
+    box.addEventListener('pointerup', (e) => {
+      mode = null;
+    });
+
+    box.addEventListener('dblclick', () => {
+      if (box.id === 'textBox') {
+        document.getElementById('txtContent').focus();
+      }
+    });
+  }
+
+  document.querySelectorAll('.box').forEach(makeInteractive);
+
+  card.addEventListener('pointerdown', (e) => {
+    if (e.target === card) {
+      document.querySelectorAll('.box').forEach(b => b.classList.remove('active'));
+    }
+  });
+
+  const colors = ['#ff6b35', '#f4f2ee', '#0c0c0e'];
+  function cycleColor(span) {
+    const current = span.style.color;
+    const idx = colors.indexOf(current);
+    span.style.color = colors[(idx + 1) % colors.length];
+  }
+  document.getElementById('colorA').addEventListener('click', () => {
+    cycleColor(document.querySelector('#txtContent span:nth-child(1)'));
+  });
+  document.getElementById('colorB').addEventListener('click', () => {
+    cycleColor(document.querySelector('#txtContent span:nth-child(2)'));
+  });
+
+  const defaults = {
+    logo: { left: 40, top: 284, width: 197, height: 351 },
+    text: { left: 237, top: 499, width: 848, height: 117, fontSize: 90 },
+  };
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    const l = document.getElementById('logoBox');
+    l.style.left = defaults.logo.left + 'px';
+    l.style.top = defaults.logo.top + 'px';
+    l.style.width = defaults.logo.width + 'px';
+    l.style.height = defaults.logo.height + 'px';
+    const t = document.getElementById('textBox');
+    t.style.left = defaults.text.left + 'px';
+    t.style.top = defaults.text.top + 'px';
+    t.style.width = defaults.text.width + 'px';
+    t.style.height = defaults.text.height + 'px';
+    document.getElementById('txtContent').style.fontSize = defaults.text.fontSize + 'px';
+  });
+
+  document.getElementById('downloadBtn').addEventListener('click', () => {
+    document.querySelectorAll('.box').forEach(b => b.classList.remove('active'));
+    html2canvas(card, { width: 1125, height: 675, scale: 1, backgroundColor: null }).then(canvas => {
+      const link = document.createElement('a');
+      link.download = 'ignite-business-card.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</body>
+</html>

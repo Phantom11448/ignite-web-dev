@@ -36,23 +36,51 @@
   <script type="module" src="/bizcheck/js/firebase-config.js"></script>
   <script type="module">
     import { observeAuthState, logOut, getUserProfile, getBusinessIdForUser } from "/bizcheck/js/auth.js";
+    import { getBusiness } from "/bizcheck/js/billing.js";
     import { renderJobsScreen } from "/bizcheck/js/screens/jobs-screen.js";
     import { renderBulletinScreen } from "/bizcheck/js/screens/bulletin-screen.js";
     import { renderCategoriesScreen } from "/bizcheck/js/screens/categories-screen.js";
     import { renderJobDetailScreen } from "/bizcheck/js/screens/job-detail-screen.js";
     import { renderDashboardScreen } from "/bizcheck/js/screens/dashboard-screen.js";
     import { renderTeamScreen } from "/bizcheck/js/screens/team-screen.js";
+    import { renderLockedOutScreen } from "/bizcheck/js/screens/locked-out-screen.js";
 
     const contentEl = document.getElementById("app-content");
+    const navScreenButtons = document.querySelectorAll("[data-screen]");
     const categoriesNavBtn = document.querySelector('[data-screen="categories"]');
     const dashboardNavBtn = document.querySelector('[data-screen="dashboard"]');
     const teamNavBtn = document.querySelector('[data-screen="team"]');
-    // No nav-visibility variable for Bulletin Board — it's the one screen
-    // every role sees, so its button is never hidden in applyRoleVisibility.
     let currentUser = null;
     let currentRole = null;
     let currentUserName = null;
     let currentBusinessId = null;
+    let currentBusiness = null;
+    let currentHasAccess = true;
+
+    const TRIAL_DAYS = 30;
+    const TRIAL_MS = TRIAL_DAYS * 24 * 60 * 60 * 1000;
+
+    // Mirrors firestore.rules' hasActiveAccess()/isInTrial() exactly — a
+    // business has access if its subscription is active, OR it's still
+    // within 30 days of created_at. This is a UX convenience only: the
+    // rules are the real enforcement, this just keeps the UI from showing
+    // screens whose reads would fail anyway. Keep this in sync by hand if
+    // the rules version ever changes — there's no shared source between
+    // the two languages.
+    //
+    // Note: this compares against the CLIENT's clock, while the rules
+    // compare against request.time (the server's clock) — a small clock
+    // skew between the two is expected and harmless here, since the rules
+    // are what actually decides whether a read/write succeeds either way.
+    function hasActiveAccess(business) {
+      if (!business) return false;
+      if (business.subscription_status === "active") return true;
+      const createdAt = business.created_at;
+      if (!createdAt) return false; // fail closed if somehow missing
+      const createdAtMs =
+        typeof createdAt.toDate === "function" ? createdAt.toDate().getTime() : new Date(createdAt).getTime();
+      return Date.now() < createdAtMs + TRIAL_MS;
+    }
 
     // Shows a one-time banner after a Stripe Checkout redirect lands back
     // here (see billing.js's createCheckoutSession and the success_url/
@@ -108,8 +136,15 @@
       // to email, then a placeholder, in case a profile has no name set.
       currentUserName = profile?.name || currentUser.email || "Unknown";
 
-      applyRoleVisibility(currentRole);
-      showScreen("jobs"); // land on Jobs after login
+      // businesses/{businessId} itself is never access-gated (see
+      // firestore.rules) specifically so this read always works, even for
+      // a locked-out business — it's what makes the locked-out screen
+      // possible to show at all.
+      currentBusiness = await getBusiness(currentBusinessId);
+      currentHasAccess = hasActiveAccess(currentBusiness);
+
+      applyNavVisibility(currentRole, currentHasAccess);
+      showScreen("jobs"); // land on Jobs after login (or the locked-out screen, if access is denied)
     });
 
     document.getElementById("logout-btn").addEventListener("click", async () => {
@@ -122,8 +157,18 @@
     });
 
     // Categories management is supervisor/owner only; the profit Dashboard
-    // is owner-only. Crew never sees either nav item.
-    function applyRoleVisibility(role) {
+    // is owner-only. Crew never sees either nav item. When the business
+    // has no active access (trial expired, not subscribed), EVERY nav
+    // button gets hidden except Log Out — there's nothing behind any of
+    // them to show, and showScreen() below renders the locked-out screen
+    // no matter which one gets clicked anyway, but hiding them is clearer
+    // than leaving dead buttons around.
+    function applyNavVisibility(role, hasAccess) {
+      if (!hasAccess) {
+        navScreenButtons.forEach((btn) => (btn.hidden = true));
+        return;
+      }
+      navScreenButtons.forEach((btn) => (btn.hidden = false));
       categoriesNavBtn.hidden = role === "crew";
       dashboardNavBtn.hidden = role !== "owner";
       teamNavBtn.hidden = role !== "owner";
@@ -132,6 +177,21 @@
     function showScreen(screen) {
       if (!currentUser || !currentBusinessId) return;
       const businessId = currentBusinessId;
+
+      if (!currentHasAccess) {
+        // Overrides normal routing entirely — no matter which nav item
+        // was clicked (or none, on initial load), a locked-out business
+        // only ever sees this. firestore.rules blocks the underlying
+        // reads/writes regardless; this just avoids showing a screen
+        // that would immediately fail anyway.
+        renderLockedOutScreen(contentEl, {
+          businessId,
+          role: currentRole,
+          userEmail: currentUser.email,
+          subscriptionStatus: currentBusiness?.subscription_status || null,
+        });
+        return;
+      }
 
       if (screen === "jobs") {
         showJobsList(businessId);

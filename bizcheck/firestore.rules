@@ -34,6 +34,19 @@ rules_version = '2';
 // only without touching anything else — not done here because it would
 // break supervisor's profitability view, which currently depends on
 // reading revenue_entries to compute totals it just doesn't display.
+//
+// SUBSCRIPTION/TRIAL GATING: a business has access to its operational
+// data (jobs and everything nested under a job, categories, and the
+// bulletin board) only while hasActiveAccess(businessId) is true — either
+// subscription_status == 'active' (set by bizcheck-stripe-webhook.js) or
+// still within the 30-day trial window measured from the business doc's
+// created_at. This is layered ON TOP of the existing role checks above,
+// not a replacement for them — every allow condition below keeps its
+// original role requirement AND now also requires hasActiveAccess.
+// Deliberately NOT gated: the businesses/{businessId} doc itself, users/,
+// and user_business_map/ — the app has to keep reading those even while
+// locked out, so it can show who's locked out, why, and (for the owner)
+// a working Subscribe button.
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -62,6 +75,31 @@ service cloud.firestore {
 
     function isSupervisorOrAbove(businessId) {
       return isBusinessMember(businessId) && roleOf(businessId) in ['owner', 'supervisor'];
+    }
+
+    // --- Subscription/trial access gating ---------------------------------
+    // businessDoc/isInTrial/hasActiveAccess mirror the exact logic in
+    // app.html's client-side hasAccess() computation — keep both in sync if
+    // this ever changes. get() calls that hit the same document path
+    // within one rule evaluation are cached by Firestore, so calling
+    // businessDoc(businessId) from multiple places below (isInTrial,
+    // hasActiveAccess) only costs one actual document read, not several.
+    function businessDoc(businessId) {
+      return get(/databases/$(database)/documents/businesses/$(businessId));
+    }
+
+    // True strictly before the 30-day trial window closes. created_at is a
+    // Firestore serverTimestamp() (see signUpOwner in auth.js), so it's
+    // already a `timestamp` value here — duration.value(30, 'd') builds a
+    // 30-day `duration`, and timestamp + duration is itself a `timestamp`,
+    // so this compares two timestamps directly (request.time is also a
+    // timestamp — the time the request hit the server).
+    function isInTrial(businessId) {
+      return request.time < businessDoc(businessId).data.created_at + duration.value(30, 'd');
+    }
+
+    function hasActiveAccess(businessId) {
+      return businessDoc(businessId).data.subscription_status == 'active' || isInTrial(businessId);
     }
 
     // Top-level (not nested under businesses/) — lets a logged-in user find
@@ -113,10 +151,10 @@ service cloud.firestore {
       }
 
       match /categories/{categoryId} {
-        allow read: if isBusinessMember(businessId);
+        allow read: if isBusinessMember(businessId) && hasActiveAccess(businessId);
         // Crew can see category names (needed to log an expense) but not
         // create/rename/delete them.
-        allow write: if isSupervisorOrAbove(businessId);
+        allow write: if isSupervisorOrAbove(businessId) && hasActiveAccess(businessId);
       }
 
       // Company-wide Bulletin Board — NOT nested under jobs/, unlike
@@ -131,31 +169,31 @@ service cloud.firestore {
       // silently editing someone else's words is a different kind of
       // action than removing them).
       match /bulletin_posts/{postId} {
-        allow read: if isBusinessMember(businessId);
-        allow create: if isBusinessMember(businessId);
-        allow delete: if isSupervisorOrAbove(businessId) || (isBusinessMember(businessId) && resource.data.posted_by == request.auth.uid);
-        allow update: if isBusinessMember(businessId) && resource.data.posted_by == request.auth.uid;
+        allow read: if isBusinessMember(businessId) && hasActiveAccess(businessId);
+        allow create: if isBusinessMember(businessId) && hasActiveAccess(businessId);
+        allow delete: if (isSupervisorOrAbove(businessId) || (isBusinessMember(businessId) && resource.data.posted_by == request.auth.uid)) && hasActiveAccess(businessId);
+        allow update: if isBusinessMember(businessId) && resource.data.posted_by == request.auth.uid && hasActiveAccess(businessId);
       }
 
       match /jobs/{jobId} {
-        allow read: if isBusinessMember(businessId);
+        allow read: if isBusinessMember(businessId) && hasActiveAccess(businessId);
         // Crew cannot create, edit, complete, or cancel jobs.
-        allow create, update: if isSupervisorOrAbove(businessId);
-        allow delete: if isOwner(businessId);
+        allow create, update: if isSupervisorOrAbove(businessId) && hasActiveAccess(businessId);
+        allow delete: if isOwner(businessId) && hasActiveAccess(businessId);
 
         match /expenses/{expenseId} {
-          allow read: if isBusinessMember(businessId);
+          allow read: if isBusinessMember(businessId) && hasActiveAccess(businessId);
           // Anyone active (including crew) can log a new expense/receipt.
-          allow create: if isBusinessMember(businessId);
+          allow create: if isBusinessMember(businessId) && hasActiveAccess(businessId);
           // Only supervisor/owner can correct an existing entry.
-          allow update, delete: if isSupervisorOrAbove(businessId);
+          allow update, delete: if isSupervisorOrAbove(businessId) && hasActiveAccess(businessId);
         }
 
         match /labor_entries/{laborEntryId} {
-          allow read: if isBusinessMember(businessId);
+          allow read: if isBusinessMember(businessId) && hasActiveAccess(businessId);
           // Anyone active (including crew) can log their own hours.
-          allow create: if isBusinessMember(businessId);
-          allow update, delete: if isSupervisorOrAbove(businessId);
+          allow create: if isBusinessMember(businessId) && hasActiveAccess(businessId);
+          allow update, delete: if isSupervisorOrAbove(businessId) && hasActiveAccess(businessId);
         }
 
         match /revenue_entries/{revenueEntryId} {
@@ -165,8 +203,8 @@ service cloud.firestore {
           // — don't break), but crew can never write. Unlike expenses/
           // labor_entries, crew doesn't even get create access here —
           // logging a price change is a supervisor/owner-only action.
-          allow read: if isBusinessMember(businessId);
-          allow write: if isSupervisorOrAbove(businessId);
+          allow read: if isBusinessMember(businessId) && hasActiveAccess(businessId);
+          allow write: if isSupervisorOrAbove(businessId) && hasActiveAccess(businessId);
         }
 
         match /job_notes/{noteId} {
@@ -175,9 +213,9 @@ service cloud.firestore {
           // same open pattern as expenses/labor_entries: anyone active
           // (including crew) can log a note or photo, only supervisor/
           // owner can correct/remove one that's already there.
-          allow read: if isBusinessMember(businessId);
-          allow create: if isBusinessMember(businessId);
-          allow update, delete: if isSupervisorOrAbove(businessId);
+          allow read: if isBusinessMember(businessId) && hasActiveAccess(businessId);
+          allow create: if isBusinessMember(businessId) && hasActiveAccess(businessId);
+          allow update, delete: if isSupervisorOrAbove(businessId) && hasActiveAccess(businessId);
         }
       }
     }

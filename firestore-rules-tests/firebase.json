@@ -1,0 +1,10 @@
+{
+  "firestore": {
+    "rules": "../bizcheck/firestore.rules"
+  },
+  "emulators": {
+    "firestore": {
+      "port": 8080
+    }
+  }
+}

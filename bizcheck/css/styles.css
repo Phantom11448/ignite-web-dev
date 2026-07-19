@@ -99,6 +99,29 @@ p {
   text-shadow: none;
 }
 
+/* Public-facing description on the login page — sits between the tagline
+   and the login/signup forms. Kept compact (smaller font, tight margins)
+   since it's competing with two always-visible forms below it for space
+   above the fold. */
+.public-description {
+  margin: 0.75rem 0 1.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.public-description p {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.public-description .pricing-line {
+  color: var(--color-primary-light);
+  font-weight: 600;
+  margin-bottom: 0;
+}
+
 section#login-section,
 section#signup-section {
   border-top: 1px solid var(--color-border);
@@ -794,4 +817,117 @@ button:active {
   border-color: var(--color-border);
   color: var(--color-muted);
   background: var(--color-surface);
+}
+
+/* Locked-out screen — shown instead of any normal screen once a
+   business's trial has expired with no active subscription. */
+.locked-out-panel {
+  max-width: 480px;
+  margin: 3rem auto;
+  padding: 2rem;
+  text-align: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.locked-out-panel h2 {
+  background: linear-gradient(90deg, var(--color-primary-light), var(--color-primary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.locked-out-panel p {
+  color: var(--color-muted);
+}
+
+.locked-out-panel button {
+  margin-top: 0.5rem;
+}
+
+/* Legal pages (terms.html, privacy.html) — wider than .auth-shell since
+   it's actual reading material, not a form, but keeps the same glassy
+   card treatment used everywhere else. */
+.legal-shell {
+  max-width: 720px;
+  margin: 2.5rem auto 4rem;
+  padding: 2rem 2.25rem;
+  background: var(--color-surface);
+  border-radius: 14px;
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.legal-shell h1 {
+  display: inline-block;
+  background: linear-gradient(90deg, var(--color-primary-light), var(--color-primary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+  margin-top: 1rem;
+}
+
+.legal-shell h2 {
+  font-size: 1.1rem;
+  margin-top: 1.75rem;
+}
+
+.legal-shell p {
+  color: var(--color-text);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.legal-updated {
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.legal-list {
+  margin: 0 0 var(--spacing);
+  padding-left: 1.25rem;
+  color: var(--color-text);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.legal-list li {
+  margin-bottom: 0.5rem;
+}
+
+/* Small link row at the bottom of the login page and both legal pages. */
+.legal-footer {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.legal-footer a {
+  color: var(--color-muted);
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
+.legal-footer a:hover {
+  color: var(--color-primary-light);
 }

@@ -1,0 +1,14 @@
+{
+  "name": "bizcheck-firestore-rules-tests",
+  "private": true,
+  "type": "module",
+  "description": "Local-only test suite for bizcheck/firestore.rules' subscription/trial access gating. NOT part of the deployed site — see .netlifyignore at the repo root, which excludes this whole folder from the Netlify deploy.",
+  "scripts": {
+    "test": "firebase emulators:exec --only firestore \"node --test test.mjs\" --project bizcheck-rules-test"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.1",
+    "firebase": "^12.0.0",
+    "firebase-tools": "^15.0.0"
+  }
+}

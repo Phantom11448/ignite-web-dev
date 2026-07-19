@@ -1,0 +1,4 @@
+# Local-only dev tooling — never publish this with the static site.
+# (Netlify Functions still deploy fine; this only affects publish = "."
+# static asset upload, not netlify/functions/.)
+firestore-rules-tests/
