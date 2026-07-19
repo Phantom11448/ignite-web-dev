@@ -125,6 +125,7 @@ exports.handler = async (event) => {
       customer_email: email,
       success_url: SUCCESS_URL,
       cancel_url: CANCEL_URL,
+      allow_promotion_codes: true,
     });
 
     return {

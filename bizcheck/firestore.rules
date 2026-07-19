@@ -139,6 +139,18 @@ service cloud.firestore {
       return ['subscription_status', 'stripe_customer_id', 'stripe_subscription_id'];
     }
 
+    // Fields that must never be reassigned once a business doc exists, but
+    // — unlike subscriptionFields() above — ARE legitimately written by the
+    // client itself at create time, so they can't be blocked from create
+    // the way subscriptionFields() is. terms_accepted_at is stamped by
+    // signUpOwner() (auth.js) via serverTimestamp() as the real legal
+    // record of Terms of Service/Privacy Policy acceptance at signup; once
+    // set, it must stay a fixed record of that moment, not something an
+    // owner (or anyone) can later edit.
+    function updateOnlyProtectedFields() {
+      return subscriptionFields().concat(['terms_accepted_at']);
+    }
+
     match /businesses/{businessId} {
       allow read: if isBusinessMember(businessId);
       // Signup creates this doc with the new owner's own uid as businessId.
@@ -146,17 +158,20 @@ service cloud.firestore {
       // signup time — those three are server-managed only (see
       // subscriptionFields above), so nobody should be able to self-grant
       // "active" by just including it in their own signup write.
+      // terms_accepted_at is deliberately NOT blocked here — signUpOwner()
+      // legitimately sets it as part of this same create write.
       allow create: if isSignedIn() && request.auth.uid == businessId &&
         !request.resource.data.keys().hasAny(subscriptionFields());
       // Owner can update ordinary business fields (name, trade_type, etc.)
       // freely, but subscription_status/stripe_customer_id/
-      // stripe_subscription_id can never be part of that update — no
-      // client, not even the owner, writes those directly. diff().affectedKeys()
-      // looks at exactly which fields an update actually touches, so this
-      // only blocks updates that try to include one of the three; every
-      // other owner update keeps working normally.
+      // stripe_subscription_id/terms_accepted_at can never be part of that
+      // update — no client, not even the owner, writes those directly
+      // after creation. diff().affectedKeys() looks at exactly which
+      // fields an update actually touches, so this only blocks updates
+      // that try to include one of these; every other owner update keeps
+      // working normally.
       allow update: if isOwner(businessId) &&
-        !request.resource.data.diff(resource.data).affectedKeys().hasAny(subscriptionFields());
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(updateOnlyProtectedFields());
       allow delete: if isOwner(businessId);
 
       match /users/{userId} {

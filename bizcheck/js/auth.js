@@ -43,6 +43,13 @@ export async function signUpOwner({ email, password, businessName, tradeType, na
     name: businessName,
     trade_type: tradeType, // "moving" | "hvac" | "construction" | "landscaping" | "general"
     created_at: serverTimestamp(),
+    // Server-stamped record that this account agreed to the Terms of
+    // Service/Privacy Policy at signup (see the required checkbox on
+    // index.html's signup form) — this is the actual legal record, not
+    // just the checkbox itself. Protected from reassignment after
+    // creation in firestore.rules, the same way subscription_status/
+    // stripe_* are.
+    terms_accepted_at: serverTimestamp(),
   });
 
   await setDoc(doc(db, paths.user(businessId, userId)), {

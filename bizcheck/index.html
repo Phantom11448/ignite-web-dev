@@ -77,6 +77,11 @@
         <label class="label-required" for="signup-password">Password</label>
         <input type="password" id="signup-password" required minlength="6" />
 
+        <label class="checkbox-label" for="signup-agree-terms">
+          <input type="checkbox" id="signup-agree-terms" required />
+          I agree to the <a href="/bizcheck/terms.html" target="_blank">Terms of Service</a> and <a href="/bizcheck/privacy.html" target="_blank">Privacy Policy</a>
+        </label>
+
         <button type="submit">Create Account</button>
         <p id="signup-error" class="error" hidden></p>
       </form>
