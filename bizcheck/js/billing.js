@@ -62,3 +62,36 @@ export async function createCheckoutSession(businessId, email) {
   const data = await response.json();
   return data.url;
 }
+
+/**
+ * Opens a Stripe Billing Portal session for an already-subscribed
+ * business and returns the portal URL to redirect the browser to. Lets
+ * the owner update their payment method, view invoices, or cancel — all
+ * inside Stripe's own hosted UI.
+ *
+ * Sends the current user's Firebase ID token as a Bearer token, same as
+ * createCheckoutSession() — bizcheck-create-portal-session.js verifies it
+ * server-side, confirms the token's uid matches businessId, and looks up
+ * the Stripe customer id itself off the business's Firestore doc (never
+ * trusting a client-supplied customer id).
+ */
+export async function createPortalSession(businessId) {
+  if (!auth.currentUser) {
+    throw new Error("You must be signed in to manage billing.");
+  }
+  const idToken = await getIdToken(auth.currentUser);
+  const response = await fetch("/.netlify/functions/bizcheck-create-portal-session", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${idToken}`,
+    },
+    body: JSON.stringify({ businessId }),
+  });
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`Portal session creation failed (${response.status}): ${errorBody}`);
+  }
+  const data = await response.json();
+  return data.url;
+}

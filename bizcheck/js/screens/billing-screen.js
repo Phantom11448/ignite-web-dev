@@ -7,7 +7,7 @@
 // banner in app.html has a dedicated screen to link to.
 // -----------------------------------------------------------------------
 
-import { getBusiness, createCheckoutSession } from "../billing.js";
+import { getBusiness, createCheckoutSession, createPortalSession } from "../billing.js";
 import { exportAllBusinessData } from "../export.js";
 
 /**
@@ -43,15 +43,6 @@ export function renderBillingScreen(container, { businessId, userEmail }) {
         : status === "cancelled"
         ? "billing-status-cancelled"
         : "billing-status-none";
-    // Only one server action exists right now (create a Checkout Session),
-    // so an already-subscribed owner clicking "Manage Billing" starts a
-    // brand-new subscription checkout rather than opening a Stripe Billing
-    // Portal — there's no portal-session function built yet. The label
-    // still changes contextually so it doesn't say "Subscribe" to someone
-    // who already is; a real "Manage Billing" experience would need a
-    // second Netlify Function (a Billing Portal session) wired up the same
-    // way as bizcheck-create-checkout-session.js, which wasn't part of
-    // this build.
     const buttonLabel = status === "active" || status === "past_due" ? "Manage Billing" : "Subscribe";
 
     container.innerHTML = `
@@ -74,11 +65,11 @@ export function renderBillingScreen(container, { businessId, userEmail }) {
       </div>
     `;
 
-    wireBillingButton();
+    wireBillingButton(status);
     wireExportButton();
   }
 
-  function wireBillingButton() {
+  function wireBillingButton(status) {
     const billingBtn = container.querySelector("#billing-btn");
     const billingErrorEl = container.querySelector("#billing-error");
     if (!billingBtn) return;
@@ -87,7 +78,10 @@ export function renderBillingScreen(container, { businessId, userEmail }) {
       billingBtn.disabled = true;
       billingErrorEl.hidden = true;
       try {
-        const url = await createCheckoutSession(businessId, userEmail);
+        const url =
+          status === "active" || status === "past_due"
+            ? await createPortalSession(businessId)
+            : await createCheckoutSession(businessId, userEmail);
         window.location.href = url;
       } catch (err) {
         console.error("Could not start Stripe Checkout:", err);
