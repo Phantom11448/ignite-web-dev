@@ -1,4 +1,5 @@
 // billing-screen.js
+// 2026-07-19: forcing fresh deploy — see bizcheck-create-checkout-session.js's DEPLOY NOTE comment for why this is needed.
 // -----------------------------------------------------------------------
 // Owner-only screen for viewing/managing the business's Stripe
 // subscription. Previously a panel embedded at the top of the Dashboard;

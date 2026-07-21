@@ -1,4 +1,5 @@
 // bizcheck-create-portal-session.js
+// 2026-07-19: forcing fresh deploy — see bizcheck-create-checkout-session.js's DEPLOY NOTE comment for why this is needed.
 // -----------------------------------------------------------------------
 // Netlify Function — creates a Stripe Billing Portal session for an
 // already-subscribed BizCheck business and hands the client back the URL
