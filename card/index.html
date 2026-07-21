@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ignite Web Dev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{
+    --bg: #08070c;
+    --bg-2: #0f0c16;
+    --glass: rgba(255,255,255,0.05);
+    --glass-border: rgba(255,255,255,0.12);
+    --ember: #ff5024;
+    --magenta: #ff1f8f;
+    --violet: #8b2ff0;
+    --text: #f5f3f7;
+    --text-dim: #9a94a8;
+  }
+
+  *{ box-sizing: border-box; margin:0; padding:0; }
+
+  html,body{
+    height:100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+  }
+
+  body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    min-height:100vh;
+  }
+
+  .field{
+    position:absolute;
+    inset:0;
+    background:
+      radial-gradient(600px circle at 20% 15%, rgba(255,80,36,0.20), transparent 60%),
+      radial-gradient(700px circle at 85% 80%, rgba(139,47,240,0.22), transparent 60%),
+      radial-gradient(500px circle at 90% 10%, rgba(255,31,143,0.14), transparent 55%),
+      var(--bg);
+    animation: drift 14s ease-in-out infinite alternate;
+  }
+
+  @keyframes drift{
+    0%{ filter: hue-rotate(0deg) brightness(1); }
+    100%{ filter: hue-rotate(12deg) brightness(1.08); }
+  }
+
+  .grain{
+    position:absolute; inset:0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/></svg>");
+    pointer-events:none;
+  }
+
+  .card{
+    position:relative;
+    width: min(380px, 88vw);
+    padding: 40px 32px 32px;
+    border-radius: 28px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(22px) saturate(140%);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+    box-shadow:
+      0 30px 60px -20px rgba(0,0,0,0.6),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    opacity:0;
+    transform: translateY(14px) scale(0.985);
+    animation: rise 0.7s cubic-bezier(.2,.8,.2,1) 0.1s forwards;
+  }
+
+  @keyframes rise{
+    to{ opacity:1; transform: translateY(0) scale(1); }
+  }
+
+  .mark{
+    width:34px; height:34px;
+    margin-bottom:14px;
+    filter: drop-shadow(0 0 10px rgba(255,80,36,0.55));
+  }
+
+  .eyebrow{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .brand{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size: 22px;
+    letter-spacing: 0.01em;
+    margin-bottom: 8px;
+    background: linear-gradient(100deg, #ffffff 0%, #ffffff 55%, #ffb199 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .tagline{
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--text-dim);
+    margin-bottom: 26px;
+  }
+
+  a.site{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size: clamp(24px, 6vw, 30px);
+    letter-spacing: -0.01em;
+    text-decoration:none;
+    padding: 14px 22px;
+    border-radius: 16px;
+    color: var(--text);
+    background: linear-gradient(135deg, rgba(255,80,36,0.16), rgba(139,47,240,0.16));
+    border: 1px solid rgba(255,255,255,0.14);
+    display:inline-block;
+    position:relative;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  }
+
+  a.site:hover, a.site:focus-visible{
+    transform: translateY(-2px);
+    box-shadow: 0 14px 34px -10px rgba(255,49,90,0.45);
+    background: linear-gradient(135deg, rgba(255,80,36,0.26), rgba(139,47,240,0.26));
+    outline: none;
+  }
+
+  a.site:focus-visible{
+    outline: 2px solid var(--magenta);
+    outline-offset: 3px;
+  }
+
+  .tap-hint{
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 10px;
+    letter-spacing: 0.04em;
+  }
+
+  .divider{
+    width: 100%;
+    height: 1px;
+    margin: 28px 0 24px;
+    background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+  }
+
+  .qr-wrap{
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.9);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.14), 0 10px 30px -12px rgba(255,31,143,0.35);
+  }
+
+  #qrcode{
+    line-height:0;
+  }
+
+  #qrcode img{
+    display:block;
+    border-radius: 6px;
+  }
+
+  .identity{
+    margin-top: 26px;
+  }
+
+  .name{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 15px;
+    color: var(--text);
+  }
+
+  .phone{
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 3px;
+    letter-spacing: 0.02em;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .field{ animation:none; }
+    .card{ animation:none; opacity:1; transform:none; }
+    a.site{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="field"></div>
+  <div class="grain"></div>
+
+  <div class="card">
+    <svg class="mark" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2C12 2 6 8.5 6 13.5C6 17.09 8.69 20 12 20C15.31 20 18 17.09 18 13.5C18 12.3 17.6 11.1 17 10C17 12 15.5 13 14.5 13C15.5 10 14 6 12 2Z"
+        fill="url(#g)"/>
+      <defs>
+        <linearGradient id="g" x1="6" y1="2" x2="18" y2="20" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#ff5024"/>
+          <stop offset="1" stop-color="#8b2ff0"/>
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <div class="eyebrow">Digital Business Card</div>
+    <div class="brand">IGNITE WEB DEV</div>
+    <div class="tagline">Web &middot; Mobile &middot; Data Recovery &middot; Repairs</div>
+
+    <a class="site" href="https://ignitewebdev.com" target="_blank" rel="noopener">ignitewebdev.com</a>
+    <div class="tap-hint">Tap to visit &middot; or scan below</div>
+
+    <div class="divider"></div>
+
+    <div class="qr-wrap">
+      <div id="qrcode"></div>
+    </div>
+
+    <div class="identity">
+      <div class="name">Grey Burns</div>
+      <div class="phone">832&nbsp;797&nbsp;8806</div>
+      <div class="phone">burnsgrey3@gmail.com</div>
+    </div>
+  </div>
+
+<script>
+  new QRCode(document.getElementById("qrcode"), {
+    text: "https://ignitewebdev.com/card",
+    width: 148,
+    height: 148,
+    colorDark: "#0f0c16",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.M
+  });
+</script>
+
+</body>
+</html>
