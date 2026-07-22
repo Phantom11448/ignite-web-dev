@@ -197,9 +197,10 @@
       row.className = 'party-row' + (p.status === 'seated' ? ' seated' : '');
       const badgeClass = p.status === 'waiting' ? 'status-waiting' : p.status === 'notified' ? 'status-notified' : 'status-seated';
       const badgeText = p.status === 'waiting' ? 'WAITING' : p.status === 'notified' ? 'TEXTED' : 'SEATED';
+      const tableNum = i + 1;
 
       row.innerHTML = `
-        <div class="pos-num">#${i + 1}</div>
+        <div class="pos-num">#${tableNum}</div>
         <div>
           <div class="party-name">${p.name}</div>
           <div class="party-meta meta">Party of ${p.size} · ${p.phone} · quoted ${p.wait}</div>
@@ -211,6 +212,23 @@
         </div>
       `;
       list.appendChild(row);
+      
+      // Generate QR code for this table
+      const qrContainer = document.createElement('div');
+      qrContainer.style.display = 'none';
+      qrContainer.style.position = 'fixed';
+      qrContainer.style.bottom = '20px';
+      qrContainer.style.right = '20px';
+      qrContainer.style.zIndex = '100';
+      qrContainer.style.background = 'white';
+      qrContainer.style.padding = '10px';
+      qrContainer.style.borderRadius = '8px';
+      qrContainer.id = 'qr-table-' + tableNum;
+      list.appendChild(qrContainer);
+      
+      // Store reference for QR generation
+      p.qrContainerId = 'qr-table-' + tableNum;
+      p.qrUrl = 'https://ignitewebdev.com/saltline/order?table=' + tableNum;
     });
 
     document.getElementById('queueCount').textContent = parties.filter(p => p.status !== 'seated').length + ' parties';
@@ -233,6 +251,25 @@
         render();
       });
     });
+    
+    // Generate QR codes for all parties
+    setTimeout(() => {
+      parties.forEach((p, idx) => {
+        if (p.qrContainerId && p.qrUrl) {
+          const container = document.getElementById(p.qrContainerId);
+          if (container && !container.querySelector('canvas')) {
+            new QRCode(container, {
+              text: p.qrUrl,
+              width: 120,
+              height: 120,
+              colorDark: '#000',
+              colorLight: '#fff',
+              correctLevel: QRCode.CorrectLevel.H
+            });
+          }
+        }
+      });
+    }, 100);
   }
 
   function showToast(msg){
