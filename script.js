@@ -90,6 +90,11 @@ const lightboxNext = document.getElementById('lightboxNext');
 let lightboxSlides = [];
 let lightboxIndex = 0;
 
+// Full showcase page (/projects.html) has #all-projects; the homepage
+// preview grid does not. Exhibit videos play with sound on the full
+// showcase, but stay muted in the homepage preview.
+const isFullShowcasePage = !!document.getElementById('all-projects');
+
 function renderLightboxSlide() {
     lightboxContent.innerHTML = '';
     const slideData = lightboxSlides[lightboxIndex];
@@ -99,7 +104,7 @@ function renderLightboxSlide() {
         video.src = slideData.src;
         video.controls = true;
         video.autoplay = true;
-        video.muted = true;
+        video.muted = !isFullShowcasePage;
         lightboxContent.appendChild(video);
     } else {
         const img = document.createElement('img');
