@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salt Line Kitchen — Host Stand</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="/saltline/qrcode.min.js"></script>
+<style>
+  :root{
+    --bg-deep:#070C14;
+    --panel:rgba(255,255,255,0.055);
+    --panel-strong:rgba(255,255,255,0.09);
+    --border-glass:rgba(255,255,255,0.11);
+    --border-glass-soft:rgba(255,255,255,0.07);
+    --cyan:#38BDF8;
+    --emerald:#34D399;
+    --emerald-soft:rgba(52,211,153,0.18);
+    --amber:#FBBF24;
+    --amber-soft:rgba(251,191,36,0.16);
+    --text-primary:#EAF3F2;
+    --text-muted:#93A6AE;
+    --text-faint:#5E717A;
+  }
+  *{box-sizing:border-box;}
+  html,body{ overflow-x:hidden; width:100%; }
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(56,189,248,0.10), transparent 45%),
+      radial-gradient(circle at 85% 15%, rgba(52,211,153,0.09), transparent 40%),
+      var(--bg-deep);
+    color:var(--text-primary);
+    font-family:'Manrope', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  h1,h2,h3{ font-family:'Space Grotesk', sans-serif; margin:0; letter-spacing:-0.01em; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  button{ font-family:'Manrope'; }
+
+  /* ---------- BAR ---------- */
+  .staffbar{
+    position:sticky; top:0; z-index:20;
+    backdrop-filter:blur(18px); background:rgba(7,12,20,0.72);
+    border-bottom:1px solid var(--border-glass-soft);
+    padding:16px 24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+  }
+  .staffbar .who{ display:flex; align-items:center; gap:10px; }
+  .brand-mark{
+    width:28px; height:28px; border-radius:8px;
+    background:linear-gradient(135deg, var(--cyan), var(--emerald));
+    display:flex; align-items:center; justify-content:center; font-size:13px; color:#04140F; font-weight:700;
+  }
+  .staffbar h1{ font-size:17px; }
+  .staff-tag{
+    font-family:'IBM Plex Mono'; font-size:11px; color:var(--text-faint);
+    border:1px solid var(--border-glass); padding:4px 10px; border-radius:99px;
+  }
+  .live-pill{
+    display:flex; align-items:center; gap:7px; font-family:'IBM Plex Mono'; font-size:12px; color:var(--emerald);
+  }
+  .live-dot{ width:7px; height:7px; border-radius:50%; background:var(--emerald); box-shadow:0 0 8px var(--emerald); animation:pulse 1.6s infinite; }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+  .wrap{ max-width:1100px; margin:0 auto; padding:26px 24px 60px; }
+
+  /* ---------- SUMMARY STRIP ---------- */
+  .summary{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:28px; }
+  @media (max-width:700px){ .summary{ grid-template-columns:repeat(2,1fr); } }
+  .sum-card{ background:var(--panel); border:1px solid var(--border-glass-soft); border-radius:14px; padding:16px 18px; }
+  .sum-card .num{ font-family:'Space Grotesk'; font-size:26px; font-weight:700; }
+  .sum-card .lbl{ font-size:12px; color:var(--text-muted); margin-top:2px; }
+
+  /* ---------- QUICK ADD ---------- */
+  .quick-add{
+    background:var(--panel); border:1px solid var(--border-glass); border-radius:16px;
+    padding:18px 20px; margin-bottom:26px; display:flex; gap:12px; flex-wrap:wrap; align-items:end;
+  }
+  .qa-field{ flex:1; min-width:120px; }
+  .qa-field label{ display:block; font-family:'IBM Plex Mono'; font-size:11px; color:var(--text-faint); margin-bottom:6px; }
+  .qa-field input{
+    width:100%; padding:12px 13px; border-radius:10px; border:1px solid var(--border-glass);
+    background:rgba(255,255,255,0.03); color:var(--text-primary); font-size:15px;
+  }
+  .qa-field input:focus{ outline:none; border-color:var(--cyan); }
+  .qa-btn{
+    padding:13px 22px; border-radius:10px; border:none; cursor:pointer; font-weight:700; font-size:14.5px;
+    background:linear-gradient(135deg, var(--cyan), var(--emerald)); color:#04140F;
+  }
+
+  /* ---------- QUEUE ---------- */
+  .queue-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px; }
+  .queue-head h2{ font-size:19px; }
+  .queue-head .count{ font-family:'IBM Plex Mono'; font-size:12.5px; color:var(--text-faint); }
+
+  .party-row{
+    display:grid; grid-template-columns:auto 1fr auto auto auto; gap:16px; align-items:center;
+    background:var(--panel); border:1px solid var(--border-glass-soft); border-radius:14px;
+    padding:16px 18px; margin-bottom:10px; transition:border-color .2s ease, opacity .3s ease;
+  }
+  @media (max-width:760px){
+    .party-row{ grid-template-columns:1fr auto; grid-template-areas:"name status" "meta meta" "actions actions"; row-gap:10px; }
+    .party-row .pos-num{ display:none; }
+    .party-row .meta{ grid-area:meta; }
+    .party-row .actions{ grid-area:actions; width:100%; }
+  }
+  .pos-num{
+    width:30px; height:30px; border-radius:9px; background:var(--panel-strong);
+    display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono'; font-size:13px; color:var(--text-muted);
+  }
+  .party-name{ font-size:16px; font-weight:600; }
+  .party-meta{ font-size:12.5px; color:var(--text-muted); margin-top:2px; }
+  .status-badge{
+    font-family:'IBM Plex Mono'; font-size:11px; padding:5px 11px; border-radius:99px; white-space:nowrap;
+  }
+  .status-waiting{ background:var(--amber-soft); color:var(--amber); }
+  .status-notified{ background:var(--emerald-soft); color:var(--emerald); }
+  .status-seated{ background:rgba(255,255,255,0.06); color:var(--text-faint); }
+
+  .actions{ display:flex; gap:8px; }
+  .act-btn{
+    padding:10px 16px; border-radius:9px; border:1px solid var(--border-glass); background:var(--panel-strong);
+    color:var(--text-primary); font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;
+  }
+  .act-btn.ready{ background:linear-gradient(135deg, var(--cyan), var(--emerald)); color:#04140F; border:none; }
+  .act-btn.seat{ background:rgba(255,255,255,0.04); color:var(--text-faint); }
+  .act-btn:disabled{ opacity:0.4; cursor:default; }
+
+  .party-row.seated{ opacity:0.45; }
+
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--panel-strong); border:1px solid rgba(52,211,153,0.4); backdrop-filter:blur(16px);
+    padding:13px 20px; border-radius:12px; font-size:13.5px; opacity:0; pointer-events:none; transition:all .3s ease;
+    display:flex; align-items:center; gap:10px; z-index:40;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  .toast .dot{ width:7px; height:7px; border-radius:50%; background:var(--emerald); box-shadow:0 0 8px var(--emerald); }
+
+  .back-link{ display:inline-block; margin-top:30px; font-size:13px; color:var(--text-faint); }
+</style>
+</head>
+<body>
+
+<div class="staffbar">
+  <div class="who">
+    <span class="brand-mark">S</span>
+    <h1>Salt Line Kitchen</h1>
+    <span class="staff-tag">HOST STAND</span>
+  </div>
+  <div class="live-pill"><span class="live-dot"></span>LIVE QUEUE</div>
+</div>
+
+<div class="wrap">
+  <div class="summary">
+    <div class="sum-card"><div class="num" id="waitingCount">3</div><div class="lbl">Waiting</div></div>
+    <div class="sum-card"><div class="num" id="notifiedCount">0</div><div class="lbl">Notified</div></div>
+    <div class="sum-card"><div class="num">14 min</div><div class="lbl">Avg wait tonight</div></div>
+    <div class="sum-card"><div class="num">6</div><div class="lbl">Open tables</div></div>
+  </div>
+
+  <div class="quick-add">
+    <div class="qa-field"><label>NAME</label><input type="text" id="addName" placeholder="Walk-in name"></div>
+    <div class="qa-field" style="flex:0 0 90px;"><label>PARTY</label><input type="number" id="addParty" value="2" min="1" max="12"></div>
+    <div class="qa-field" style="flex:0 0 100px;"><label>MOBILE</label><input type="tel" id="addPhone" placeholder="(555)…"></div>
+    <button class="qa-btn" id="addBtn">+ Add to Queue</button>
+  </div>
+
+  <div class="queue-head">
+    <h2>Waitlist</h2>
+    <span class="count" id="queueCount">3 parties</span>
+  </div>
+
+  <div id="queueList"></div>
+
+  <a href="/saltline/demo" class="back-link">← Back to guest site</a>
+</div>
+
+<div class="toast" id="toast"><span class="dot"></span><span id="toastText"></span></div>
+
+<script>
+  let parties = [
+    { id: 1, name: "Marcus Reyes", size: 4, phone: "(555) 013-4477", wait: "12 min", status: "waiting" },
+    { id: 2, name: "Priya Nair", size: 2, phone: "(555) 088-2210", wait: "8 min", status: "waiting" },
+    { id: 3, name: "The Dalton Party", size: 6, phone: "(555) 402-9931", wait: "22 min", status: "waiting" },
+  ];
+  let nextId = 4;
+
+  function render(){
+    const list = document.getElementById('queueList');
+    list.innerHTML = '';
+    parties.forEach((p, i) => {
+      const row = document.createElement('div');
+      row.className = 'party-row' + (p.status === 'seated' ? ' seated' : '');
+      const badgeClass = p.status === 'waiting' ? 'status-waiting' : p.status === 'notified' ? 'status-notified' : 'status-seated';
+      const badgeText = p.status === 'waiting' ? 'WAITING' : p.status === 'notified' ? 'TEXTED' : 'SEATED';
+
+      row.innerHTML = `
+        <div class="pos-num">#${i + 1}</div>
+        <div>
+          <div class="party-name">${p.name}</div>
+          <div class="party-meta meta">Party of ${p.size} · ${p.phone} · quoted ${p.wait}</div>
+        </div>
+        <div class="status-badge ${badgeClass}">${badgeText}</div>
+        <div class="actions">
+          <button class="act-btn ready" data-id="${p.id}" data-action="notify" ${p.status !== 'waiting' ? 'disabled' : ''}>Table Ready</button>
+          <button class="act-btn seat" data-id="${p.id}" data-action="seat" ${p.status === 'seated' ? 'disabled' : ''}>Seat</button>
+        </div>
+      `;
+      list.appendChild(row);
+    });
+
+    document.getElementById('queueCount').textContent = parties.filter(p => p.status !== 'seated').length + ' parties';
+    document.getElementById('waitingCount').textContent = parties.filter(p => p.status === 'waiting').length;
+    document.getElementById('notifiedCount').textContent = parties.filter(p => p.status === 'notified').length;
+
+    list.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = parseInt(btn.dataset.id);
+        const action = btn.dataset.action;
+        const party = parties.find(p => p.id === id);
+        if (!party) return;
+        if (action === 'notify') {
+          party.status = 'notified';
+          showToast(`Text sent to ${party.name.split(' ')[0]} — "Your table is ready"`);
+        } else if (action === 'seat') {
+          party.status = 'seated';
+          showToast(`${party.name} seated`);
+        }
+        render();
+      });
+    });
+  }
+
+  function showToast(msg){
+    const toast = document.getElementById('toast');
+    document.getElementById('toastText').textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+
+  document.getElementById('addBtn').addEventListener('click', () => {
+    const name = document.getElementById('addName').value.trim() || 'Walk-in';
+    const size = document.getElementById('addParty').value || 2;
+    const phone = document.getElementById('addPhone').value.trim() || '—';
+    parties.push({ id: nextId++, name, size, phone, wait: 'TBD', status: 'waiting' });
+    document.getElementById('addName').value = '';
+    document.getElementById('addPhone').value = '';
+    showToast(`${name} added to the queue`);
+    render();
+  });
+
+  render();
+</script>
+
+</body>
+</html>

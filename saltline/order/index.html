@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salt Line Kitchen — Order</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#070C14;
+    --panel:rgba(255,255,255,0.055);
+    --panel-strong:rgba(255,255,255,0.09);
+    --border-glass:rgba(255,255,255,0.11);
+    --border-glass-soft:rgba(255,255,255,0.07);
+    --cyan:#38BDF8;
+    --emerald:#34D399;
+    --emerald-soft:rgba(52,211,153,0.18);
+    --text-primary:#EAF3F2;
+    --text-muted:#93A6AE;
+    --text-faint:#5E717A;
+  }
+  *{box-sizing:border-box;}
+  html,body{ overflow-x:hidden; width:100%; }
+  body{
+    margin:0; min-height:100vh; padding-bottom:100px;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(56,189,248,0.10), transparent 45%),
+      radial-gradient(circle at 85% 15%, rgba(52,211,153,0.09), transparent 40%),
+      var(--bg-deep);
+    color:var(--text-primary);
+    font-family:'Manrope', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{ font-family:'Space Grotesk', sans-serif; margin:0; letter-spacing:-0.01em; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+
+  .topbar{
+    position:sticky; top:0; z-index:30; backdrop-filter:blur(18px);
+    background:rgba(7,12,20,0.72); border-bottom:1px solid var(--border-glass-soft);
+    padding:14px 20px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .topbar .who{ display:flex; align-items:center; gap:9px; }
+  .brand-mark{
+    width:26px; height:26px; border-radius:8px;
+    background:linear-gradient(135deg, var(--cyan), var(--emerald));
+    display:flex; align-items:center; justify-content:center; font-size:12px; color:#04140F; font-weight:700;
+  }
+  .topbar h1{ font-size:15.5px; }
+  .table-chip{
+    font-family:'IBM Plex Mono'; font-size:11.5px; color:var(--cyan);
+    background:rgba(56,189,248,0.14); border:1px solid rgba(56,189,248,0.35);
+    padding:5px 11px; border-radius:99px;
+  }
+
+  .wrap{ max-width:640px; margin:0 auto; padding:22px 18px; }
+
+  /* reassurance banner */
+  .human-note{
+    display:flex; gap:12px; align-items:flex-start;
+    background:var(--panel); border:1px solid var(--border-glass-soft); border-radius:14px;
+    padding:14px 16px; margin-bottom:22px;
+  }
+  .human-note .ico{ font-size:17px; line-height:1; }
+  .human-note p{ margin:0; font-size:13px; color:var(--text-muted); line-height:1.55; }
+  .human-note b{ color:var(--text-primary); }
+
+  .cat-label{
+    font-family:'IBM Plex Mono'; font-size:11px; color:var(--cyan); text-transform:uppercase;
+    letter-spacing:0.08em; margin:26px 0 12px;
+  }
+  .cat-label:first-of-type{ margin-top:4px; }
+
+  .item-row{
+    display:flex; justify-content:space-between; align-items:center; gap:14px;
+    background:var(--panel); border:1px solid var(--border-glass-soft); border-radius:14px;
+    padding:14px 16px; margin-bottom:10px;
+  }
+  .item-row h3{ font-size:15px; font-weight:600; }
+  .item-row p{ font-size:12.5px; color:var(--text-muted); margin:4px 0 0; line-height:1.4; }
+  .item-row .price{ font-family:'IBM Plex Mono'; font-size:13px; color:var(--text-faint); margin-top:6px; display:block; }
+
+  .stepper{ display:flex; align-items:center; gap:10px; flex:none; }
+  .step-btn{
+    width:30px; height:30px; border-radius:9px; border:1px solid var(--border-glass);
+    background:var(--panel-strong); color:var(--text-primary); font-size:16px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .step-btn.add{ color:var(--emerald); }
+  .step-count{ font-family:'IBM Plex Mono'; font-size:14px; min-width:14px; text-align:center; }
+
+  /* cart bar */
+  .cart-bar{
+    position:fixed; left:0; right:0; bottom:0; z-index:40;
+    background:rgba(7,12,20,0.85); backdrop-filter:blur(20px);
+    border-top:1px solid var(--border-glass);
+    padding:14px 18px; display:flex; align-items:center; justify-content:space-between;
+    transform:translateY(100%); transition:transform .3s ease;
+  }
+  .cart-bar.show{ transform:translateY(0); }
+  .cart-bar .info{ font-size:13.5px; color:var(--text-muted); }
+  .cart-bar .info b{ color:var(--text-primary); font-family:'IBM Plex Mono'; }
+  .cart-btn{
+    padding:12px 22px; border-radius:11px; border:none; cursor:pointer; font-weight:700; font-size:14px;
+    background:linear-gradient(135deg, var(--cyan), var(--emerald)); color:#04140F;
+  }
+
+  /* confirmation */
+  .confirm-overlay{
+    position:fixed; inset:0; background:rgba(4,7,12,0.88); backdrop-filter:blur(6px);
+    display:none; align-items:center; justify-content:center; z-index:60; padding:24px;
+  }
+  .confirm-overlay.show{ display:flex; }
+  .confirm-card{
+    background:var(--panel-strong); border:1px solid var(--border-glass); border-radius:18px;
+    padding:30px 26px; max-width:340px; text-align:center;
+  }
+  .confirm-card .check{
+    width:52px; height:52px; border-radius:50%; margin:0 auto 16px;
+    background:var(--emerald-soft); display:flex; align-items:center; justify-content:center; font-size:24px;
+  }
+  .confirm-card h2{ font-size:19px; margin-bottom:8px; }
+  .confirm-card p{ font-size:13.5px; color:var(--text-muted); line-height:1.6; margin:0 0 20px; }
+  .confirm-card button{
+    width:100%; padding:12px; border-radius:10px; border:1px solid var(--border-glass);
+    background:var(--panel); color:var(--text-primary); font-size:14px; cursor:pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="who">
+    <span class="brand-mark">S</span>
+    <h1>Salt Line Kitchen</h1>
+  </div>
+  <div class="table-chip" id="tableChip">TABLE —</div>
+</div>
+
+<div class="wrap">
+  <div class="human-note">
+    <span class="ico">🙂</span>
+    <p><b>Ordering by phone is optional.</b> Prefer to order with your server? Just wave — we're happy to help, no scanning required.</p>
+  </div>
+
+  <div class="cat-label">Starters</div>
+  <div class="item-row" data-id="1" data-price="12">
+    <div>
+      <h3>Charred Corn Elote</h3>
+      <p>Cotija, lime crema, chili thread</p>
+      <span class="price">$12</span>
+    </div>
+    <div class="stepper">
+      <button class="step-btn" data-action="sub">−</button>
+      <span class="step-count">0</span>
+      <button class="step-btn add" data-action="add">+</button>
+    </div>
+  </div>
+
+  <div class="cat-label">Mains</div>
+  <div class="item-row" data-id="2" data-price="29">
+    <div>
+      <h3>Grilled Branzino</h3>
+      <p>Charred broccolini, preserved lemon aioli</p>
+      <span class="price">$29</span>
+    </div>
+    <div class="stepper">
+      <button class="step-btn" data-action="sub">−</button>
+      <span class="step-count">0</span>
+      <button class="step-btn add" data-action="add">+</button>
+    </div>
+  </div>
+  <div class="item-row" data-id="3" data-price="32">
+    <div>
+      <h3>Smoked Short Rib</h3>
+      <p>Blue cheese polenta, red wine jus</p>
+      <span class="price">$32</span>
+    </div>
+    <div class="stepper">
+      <button class="step-btn" data-action="sub">−</button>
+      <span class="step-count">0</span>
+      <button class="step-btn add" data-action="add">+</button>
+    </div>
+  </div>
+  <div class="item-row" data-id="4" data-price="17">
+    <div>
+      <h3>Blackened Fish Sando</h3>
+      <p>Slaw, pickle, calabrian aioli</p>
+      <span class="price">$17</span>
+    </div>
+    <div class="stepper">
+      <button class="step-btn" data-action="sub">−</button>
+      <span class="step-count">0</span>
+      <button class="step-btn add" data-action="add">+</button>
+    </div>
+  </div>
+
+  <div class="cat-label">Sides &amp; Dessert</div>
+  <div class="item-row" data-id="5" data-price="9">
+    <div>
+      <h3>Truffle Fingerlings</h3>
+      <p>Parmesan, herb, black pepper</p>
+      <span class="price">$9</span>
+    </div>
+    <div class="stepper">
+      <button class="step-btn" data-action="sub">−</button>
+      <span class="step-count">0</span>
+      <button class="step-btn add" data-action="add">+</button>
+    </div>
+  </div>
+  <div class="item-row" data-id="6" data-price="11">
+    <div>
+      <h3>Basque Cheesecake</h3>
+      <p>Burnt honey, sea salt, seasonal berry</p>
+      <span class="price">$11</span>
+    </div>
+    <div class="stepper">
+      <button class="step-btn" data-action="sub">−</button>
+      <span class="step-count">0</span>
+      <button class="step-btn add" data-action="add">+</button>
+    </div>
+  </div>
+</div>
+
+<div class="cart-bar" id="cartBar">
+  <div class="info"><b id="cartCount">0</b> items · <b id="cartTotal">$0</b></div>
+  <button class="cart-btn" id="checkoutBtn">Send to Kitchen →</button>
+</div>
+
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-card">
+    <div class="check">✓</div>
+    <h2>Order sent</h2>
+    <p>Your order for <span id="confirmTable">Table —</span> is on its way to the kitchen. We'll bring it right out.</p>
+    <button id="confirmClose">Order more</button>
+  </div>
+</div>
+
+<script>
+  // Read table number from ?table= in the URL
+  const params = new URLSearchParams(window.location.search);
+  const table = params.get('table') || '—';
+  document.getElementById('tableChip').textContent = 'TABLE ' + table;
+  document.getElementById('confirmTable').textContent = 'Table ' + table;
+
+  const cart = {};
+
+  function updateCartBar(){
+    let count = 0, total = 0;
+    document.querySelectorAll('.item-row').forEach(row => {
+      const id = row.dataset.id;
+      const qty = cart[id] || 0;
+      const price = parseFloat(row.dataset.price);
+      count += qty;
+      total += qty * price;
+    });
+    const bar = document.getElementById('cartBar');
+    document.getElementById('cartCount').textContent = count;
+    document.getElementById('cartTotal').textContent = '$' + total.toFixed(2).replace(/\.00$/, '');
+    if (count > 0) bar.classList.add('show'); else bar.classList.remove('show');
+  }
+
+  document.querySelectorAll('.item-row').forEach(row => {
+    const id = row.dataset.id;
+    const countEl = row.querySelector('.step-count');
+    row.querySelector('[data-action="add"]').addEventListener('click', () => {
+      cart[id] = (cart[id] || 0) + 1;
+      countEl.textContent = cart[id];
+      updateCartBar();
+    });
+    row.querySelector('[data-action="sub"]').addEventListener('click', () => {
+      cart[id] = Math.max(0, (cart[id] || 0) - 1);
+      countEl.textContent = cart[id];
+      updateCartBar();
+    });
+  });
+
+  document.getElementById('checkoutBtn').addEventListener('click', () => {
+    document.getElementById('confirmOverlay').classList.add('show');
+  });
+  document.getElementById('confirmClose').addEventListener('click', () => {
+    document.getElementById('confirmOverlay').classList.remove('show');
+    document.querySelectorAll('.item-row').forEach(row => {
+      cart[row.dataset.id] = 0;
+      row.querySelector('.step-count').textContent = '0';
+    });
+    updateCartBar();
+  });
+</script>
+
+</body>
+</html>
