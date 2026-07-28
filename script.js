@@ -116,6 +116,12 @@ function renderLightboxSlide() {
 
 document.querySelectorAll('.media-cycle').forEach((cycle) => {
     cycle.addEventListener('click', () => {
+        const linkedAncestor = cycle.closest('[data-project-url]');
+        if (linkedAncestor) {
+            window.open(linkedAncestor.dataset.projectUrl, '_blank', 'noopener');
+            return;
+        }
+
         const slideEls = cycle.querySelectorAll('.slide');
         lightboxSlides = Array.from(slideEls).map((el) => ({
             type: el.tagName === 'VIDEO' ? 'video' : 'image',
@@ -153,3 +159,86 @@ lightboxNext.addEventListener('click', showNext);
 lightbox.addEventListener('click', (e) => {
     if (e.target === lightbox) closeLightbox();
 });
+
+const showcaseFull = document.querySelector('.showcase-full');
+if (showcaseFull) {
+    const track = showcaseFull.querySelector('.showcase-full-track');
+    const slides = Array.from(showcaseFull.querySelectorAll('.showcase-full-slide'));
+    const dots = Array.from(showcaseFull.querySelectorAll('.showcase-full-dot'));
+    const prevBtn = showcaseFull.querySelector('.showcase-full-prev');
+    const nextBtn = showcaseFull.querySelector('.showcase-full-next');
+    let activeIndex = 0;
+
+    function goToFullSlide(index) {
+        const nextIndex = (index + slides.length) % slides.length;
+        if (nextIndex === activeIndex) return;
+
+        const current = slides[activeIndex];
+        const next = slides[nextIndex];
+        const direction = nextIndex > activeIndex ? 1 : -1;
+
+        current.classList.remove('is-active');
+        current.classList.add(direction > 0 ? 'is-leaving-left' : 'is-leaving-right');
+        current.querySelectorAll('video').forEach((v) => v.pause());
+
+        next.classList.add('is-active');
+
+        setTimeout(() => {
+            current.classList.remove('is-leaving-left', 'is-leaving-right');
+        }, 600);
+
+        dots[activeIndex].classList.remove('is-active');
+        dots[nextIndex].classList.add('is-active');
+        activeIndex = nextIndex;
+    }
+
+    prevBtn.addEventListener('click', () => goToFullSlide(activeIndex - 1));
+    nextBtn.addEventListener('click', () => goToFullSlide(activeIndex + 1));
+    dots.forEach((dot, i) => dot.addEventListener('click', () => goToFullSlide(i)));
+
+    let startX = 0;
+    let isDragging = false;
+    let dragMoved = false;
+
+    track.addEventListener('pointerdown', (e) => {
+        startX = e.clientX;
+        isDragging = true;
+        dragMoved = false;
+    });
+    track.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+        if (Math.abs(e.clientX - startX) > 10) dragMoved = true;
+    });
+    track.addEventListener('pointerup', (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        const deltaX = e.clientX - startX;
+        if (Math.abs(deltaX) > 50) {
+            goToFullSlide(activeIndex + (deltaX < 0 ? 1 : -1));
+        }
+    });
+    track.addEventListener('pointerleave', () => { isDragging = false; });
+
+    track.addEventListener('click', (e) => {
+        if (dragMoved) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
+    }, true);
+
+    let wheelLocked = false;
+    track.addEventListener('wheel', (e) => {
+        if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) return;
+        if (wheelLocked) return;
+        e.preventDefault();
+        wheelLocked = true;
+        goToFullSlide(activeIndex + (e.deltaX > 0 ? 1 : -1));
+        setTimeout(() => { wheelLocked = false; }, 500);
+    }, { passive: false });
+
+    showcaseFull.setAttribute('tabindex', '0');
+    showcaseFull.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') goToFullSlide(activeIndex - 1);
+        if (e.key === 'ArrowRight') goToFullSlide(activeIndex + 1);
+    });
+}
