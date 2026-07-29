@@ -311,10 +311,32 @@ function layout() {
   glow.style.background = `radial-gradient(circle, rgba(${c[0]},${c[1]},${c[2]},0.55), transparent 65%)`;
 }
 
+// Smoothly animates dragOffset toward a target value using requestAnimationFrame,
+// instead of a CSS transition on transform (which this environment silently refuses
+// to apply). This gives full control over the easing without touching CSS at all.
+let targetOffset = 0;
+let animating = false;
+
+function animateStep() {
+  const diff = targetOffset - dragOffset;
+  if (Math.abs(diff) < 0.002) {
+    dragOffset = targetOffset;
+    layout();
+    animating = false;
+    return;
+  }
+  dragOffset += diff * 0.18;
+  layout();
+  requestAnimationFrame(animateStep);
+}
+
 function goTo(i) {
   activeIndex = (i + PROJECTS.length) % PROJECTS.length;
-  dragOffset = activeIndex;
-  layout();
+  targetOffset = activeIndex;
+  if (!animating) {
+    animating = true;
+    requestAnimationFrame(animateStep);
+  }
 }
 
 buildCards();
