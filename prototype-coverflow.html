@@ -72,6 +72,8 @@
     perspective-origin: 50% 50%;
     transform-style: preserve-3d;
     cursor: grab;
+    touch-action: pan-y;
+    user-select: none;
   }
   #track.dragging { cursor: grabbing; }
 
@@ -332,6 +334,7 @@ const SWIPE_THRESHOLD = 50; // minimum px of movement to count as a swipe
 track.addEventListener('pointerdown', (e) => {
   dragging = true; dragged = false; startX = e.clientX;
   track.classList.add('dragging');
+  try { track.setPointerCapture(e.pointerId); } catch (err) {}
 });
 track.addEventListener('pointermove', (e) => {
   if (!dragging) return;
@@ -349,7 +352,7 @@ window.addEventListener('pointerup', (e) => {
 
 let wheelLock = false;
 track.addEventListener('wheel', (e) => {
-  if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) return;
+  if (Math.abs(e.deltaX) < 5) return;
   e.preventDefault();
   if (wheelLock) return;
   wheelLock = true;
