@@ -1,141 +1,391 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Ignite Web Dev — Custom Websites for Small Businesses</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-        <link rel="shortcut icon" href="images/favicon.ico">
-        <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
-        <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
-        <link rel="stylesheet" href="styles.css">
-    </head>
-    <body>
-        <div class="cursor-dot"></div>
-        <div class="cursor-ring"></div>
-        <nav>
-            <a href="#hero" aria-label="Ignite Web Dev, back to top">
-                <img src="images/ignite-logo.png" class="logo" alt="Ignite Web Dev logo">
-            </a>
-            <ul>
-                <li><a href="#contact">Contact</a></li>
-                <li><a href="#work">Work</a></li>
-                <li><a href="#about">About</a></li>
-            </ul>
-            <a href="#contact">Inquire</a>
-        </nav>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ignite Web Dev — Custom Websites for Small Businesses</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    background: #000;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+  }
+  #scroller {
+    height: 100vh;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+  section {
+    min-height: 100vh;
+    width: 100%;
+    scroll-snap-align: start;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 140px 80px 80px;
+  }
+
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 40px;
+  }
+  nav .logo-link { display: flex; align-items: center; }
+  nav .logo { height: 34px; }
+  nav ul { list-style: none; display: flex; gap: 36px; }
+  nav ul a {
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.95rem;
+    transition: color 0.25s ease;
+  }
+  nav ul a:hover { color: #fff; }
+  nav > a {
+    color: #fff;
+    text-decoration: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.95rem;
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+    padding-bottom: 4px;
+    transition: border-color 0.25s ease;
+  }
+  nav > a:hover { border-color: #ff6b35; }
+
+  .eyebrow {
+    color: #ff6b35;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  /* Hero */
+  #hero {
+    background: radial-gradient(circle at 75% 30%, rgba(255,107,53,0.14), transparent 55%), #000;
+  }
+  #hero h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: clamp(2.6rem, 6.5vw, 5.6rem);
+    line-height: 1.05;
+    max-width: 900px;
+  }
+  #hero h1 span { color: #ff6b35; }
+  #hero p.sub {
+    margin-top: 28px;
+    max-width: 520px;
+    color: rgba(255,255,255,0.6);
+    font-size: 1.1rem;
+    line-height: 1.5;
+  }
+  .discover-link {
+    margin-top: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    text-decoration: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.95rem;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+    width: fit-content;
+    transition: border-color 0.3s ease, gap 0.3s ease;
+  }
+  .discover-link:hover { border-color: #ff6b35; gap: 16px; }
+  .discover-link .arrow { color: #ff6b35; }
+  .scroll-hint {
+    position: absolute;
+    bottom: 48px;
+    left: 80px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: rgba(255,255,255,0.4);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+  }
+  .scroll-line { width: 1px; height: 28px; background: rgba(255,255,255,0.3); }
+
+  /* Work preview */
+  #work h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    margin-bottom: 44px;
+    max-width: 700px;
+  }
+  .work-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+  .work-tile {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #111;
+    cursor: pointer;
+    display: block;
+  }
+  .work-tile img, .work-tile video {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.5s ease, filter 0.5s ease;
+    filter: grayscale(0.5) brightness(0.75);
+  }
+  .work-tile:hover img, .work-tile:hover video { transform: scale(1.06); filter: grayscale(0) brightness(0.9); }
+  .work-tile .label {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 16px;
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  /* About */
+  #about h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    margin-bottom: 36px;
+    max-width: 700px;
+  }
+  #about p {
+    color: rgba(255,255,255,0.65);
+    font-size: 1rem;
+    line-height: 1.65;
+    max-width: 680px;
+    margin-bottom: 20px;
+  }
+  #about ul {
+    list-style: none;
+    margin-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    padding-top: 24px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px 40px;
+    max-width: 760px;
+  }
+  #about li {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.9rem;
+    padding-left: 20px;
+    position: relative;
+  }
+  #about li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 6px;
+    height: 6px;
+    background: #ff6b35;
+    border-radius: 50%;
+  }
+
+  /* Contact */
+  #contact h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: clamp(2.2rem, 5vw, 4rem);
+    max-width: 700px;
+    margin-bottom: 16px;
+  }
+  #contact p.sub {
+    color: rgba(255,255,255,0.55);
+    max-width: 520px;
+    margin-bottom: 40px;
+  }
+  #contact form {
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  #contact label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  #contact input, #contact textarea {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px;
+    padding: 12px 14px;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+  }
+  #contact input:focus, #contact textarea:focus {
+    outline: none;
+    border-color: #ff6b35;
+  }
+  #contact textarea { min-height: 100px; resize: vertical; }
+  #contact button {
+    margin-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #ff6b35;
+    color: #000;
+    border: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 16px 28px;
+    border-radius: 999px;
+    cursor: pointer;
+    width: fit-content;
+    transition: transform 0.25s ease, background 0.25s ease;
+  }
+  #contact button:hover { transform: translateY(-2px); background: #ff8259; }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  footer {
+    padding: 28px 40px;
+    display: flex;
+    justify-content: space-between;
+    color: rgba(255,255,255,0.35);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 900px) {
+    section { padding: 120px 28px 60px; }
+    nav { padding: 20px 24px; }
+    nav ul { display: none; }
+    .work-row { grid-template-columns: repeat(2, 1fr); }
+    #about ul { grid-template-columns: 1fr; }
+    .scroll-hint { left: 28px; }
+  }
+</style>
+</head>
+<body>
+    <div class="cursor-dot"></div>
+    <div class="cursor-ring"></div>
+
+    <nav>
+        <a href="#hero" class="logo-link" aria-label="Ignite Web Dev, back to top">
+            <img src="images/ignite-logo.png" class="logo" alt="Ignite Web Dev logo">
+        </a>
+        <ul>
+            <li><a href="#work">Work</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <a href="#contact">Inquire</a>
+    </nav>
+
+    <div id="scroller">
+
         <section id="hero">
-            <div class="hero-main">
-                <span>01 — freelance web developer</span>
-                <h1>Real code. No templates. <span>No Shortcuts.</span></h1>
-
-                <div class="glass-backdrop">
-                    <div class="glass-panel">
-                        <p>The spark that makes your fire roar.</p>
-                    </div>
-                </div>
-
-                
-                <a href="/projects.html">View showcase</a>
-
-                <div class="scroll-hint">
-                    <span>Scroll</span>
-                    <div class="scroll-line"></div>
-                </div>
-            </div>
-
-            <div class="glass-backdrop" id="contact">
-                <a href="contact-heading">Get a Quote</a>
-                <form class="glass-panel" name="contact" method="POST" data-netlify="true">
-                    <label for="name">Name</label>
-                    <input type="text" id="name" name="name" required>
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required>
-                    <label for="message">Message</label>
-                    <textarea id="message" name="message" required></textarea>
-                    <p hidden>
-                        <label>Don't fill this out: <input name="bot-field"></label>
-                    </p>
-                    <button type="submit">Send</button>
-                </form>
+            <div class="eyebrow">Houston, TX — Freelance Web Developer</div>
+            <h1>Real code. No templates.<br><span>No shortcuts.</span></h1>
+            <p class="sub">Custom websites and web apps for small businesses — built fast, built right, and made to actually bring in customers.</p>
+            <a href="#work" class="discover-link">See the work <span class="arrow">&rarr;</span></a>
+            <div class="scroll-hint">
+                <span>Scroll</span>
+                <div class="scroll-line"></div>
             </div>
         </section>
+
         <section id="work">
-            <span>02 &mdash; Selected work</span>
-            <h2>Showcase</h2>
-            <div class="work-grid">
-                <div class="work-card reveal">
-                    <div class="media-cycle">
-                        <img src="images/coldside-screenshot-1.png" data-full="images/coldside-full-1.jpg" class="slide active" alt="ColdSide Study screenshot 1">
-                        <img src="images/coldside-screenshot-2.png" data-full="images/coldside-full-2.jpg" class="slide" alt="ColdSide Study screenshot 2">
-                        <img src="images/coldside-screenshot-3.png" data-full="images/coldside-full-3.jpg" class="slide" alt="ColdSide Study screenshot 3">
-                        <img src="images/coldside-screenshot-4.png" data-full="images/coldside-full-4.jpg" class="slide" alt="ColdSide Study screenshot 4">
-                        <img src="images/coldside-screenshot-5.png" data-full="images/coldside-full-5.jpg" class="slide" alt="ColdSide Study screenshot 5">
-                        <img src="images/coldside-screenshot-6.png" data-full="images/coldside-full-6.jpg" class="slide" alt="ColdSide Study screenshot 6">
-                    </div>
-                    <h3>ColdSide Study</h3>
-                    <p>A study app to help pass the EPA 608 Exam</p>
-                    <span>Stack: HTML, CSS, Javascript</span>
-                </div>
-                <div class="work-card reveal">
-                    <div class="media-cycle">
-                        <video src="images/signal-demo.mp4" muted playsinline class="slide active"></video>
-                        <img src="images/signal-screenshot-1.png" data-full="images/signal-full-1.jpg" class="slide" alt="Signal Lost screenshot 1">
-                        <img src="images/signal-screenshot-2.png" data-full="images/signal-full-2.jpg" class="slide" alt="Signal Lost screenshot 2">
-                        <img src="images/signal-screenshot-3.png" data-full="images/signal-full-3.jpg" class="slide" alt="Signal Lost screenshot 3">
-                        <img src="images/signal-screenshot-4.png" data-full="images/signal-full-4.jpg" class="slide" alt="Signal Lost screenshot 4">
-                        <img src="images/signal-screenshot-5.png" data-full="images/signal-full-5.jpg" class="slide" alt="Signal Lost screenshot 5">
-                    </div>
-                    <h3>Signal Lost</h3>
-                    <p>HTML lessons</p>
-                    <span>Stack: React, Vite</span>
-                </div>
-                <div class="work-card reveal">
-                    <div class="media-cycle">
-                        <img src="images/customer-mockup-1.png" class="slide active" alt="Example booking calendar mockup">
-                        <img src="images/customer-mockup-2.png" class="slide" alt="Example booking form mockup">
-                        <img src="images/customer-mockup-3.png" class="slide" alt="Example booking confirmation mockup">
-                    </div>
-                    <h3>Your project</h3>
-                    <p>coming soon!</p>
-                </div>
+            <div class="eyebrow">02 &mdash; Selected Work</div>
+            <h2 class="reveal">A few things we've shipped.</h2>
+            <div class="work-row">
+                <a class="work-tile reveal" href="projects.html">
+                    <img src="images/coldside-screenshot-1.png" alt="ColdSide Study">
+                    <div class="label">ColdSide Study</div>
+                </a>
+                <a class="work-tile reveal" href="projects.html">
+                    <img src="images/bizcheck-display-1.jpg" alt="BizCheck">
+                    <div class="label">BizCheck</div>
+                </a>
+                <a class="work-tile reveal" href="projects.html">
+                    <img src="saltline/saltline-screenshot-1.jpg" alt="Salt Line Kitchen">
+                    <div class="label">Salt Line Kitchen</div>
+                </a>
+                <a class="work-tile reveal" href="projects.html">
+                    <img src="3fs/bar-scene-wide.png" alt="3FS">
+                    <div class="label">3FS</div>
+                </a>
             </div>
-            <div class="view-all-wrap">
-                <a href="/projects.html" class="view-all-link">View all projects &rarr;</a>
-            </div>
+            <a href="projects.html" class="discover-link">View full showcase <span class="arrow">&rarr;</span></a>
         </section>
+
         <section id="about">
-            <span>03 &mdash; About</span>
-            <h2>About Ignite Web Dev</h2>
-            <div class="glass-backdrop">
-                <div class="glass-panel">
-                    <p class="reveal">There's a litany of I.T. certifications, web development projects, and lifetimes worth of computer experience backing this workhorse. We're the type of nuts that check things five times before clicking save — We genuinely can't leave a problem half-solved. That obsessive streak means fewer bugs, fewer "wait, can you fix this" emails, and a site that actually works the way it's supposed to the first time.</p>
-                    <p class="reveal">Working freelance means you're talking straight to the person building your site — no account managers, no corporate approval chains, no handoffs between five different people. Some of us work in small businesses by day, so we understand exactly what you need your website to do: bring in customers, load fast, and not waste your time with problems.</p>
-                    <ul>
-                        <li class="reveal">Custom-built websites, no templates or shortcuts</li>
-                        <li class="reveal">Custom-built apps tailored to your business needs</li>
-                        <li class="reveal">Locked out of your old device? We can get that data off for you</li>
-                        <li class="reveal">Custom animations tailored to your business</li>
-                        <li class="reveal">Free visual mockups with consultation BEFORE spending any money</li>
-                        <li class="reveal">Logo and graphic design available</li>
-                        <li class="reveal">Got other computer problems? We can help!</li>
-                    </ul>
-                </div>
-            </div>
+            <div class="eyebrow">03 &mdash; About</div>
+            <h2 class="reveal">About Ignite Web Dev</h2>
+            <p class="reveal">There's a litany of I.T. certifications, web development projects, and lifetimes worth of computer experience backing this workhorse. We're the type of nuts that check things five times before clicking save — We genuinely can't leave a problem half-solved. That obsessive streak means fewer bugs, fewer "wait, can you fix this" emails, and a site that actually works the way it's supposed to the first time.</p>
+            <p class="reveal">Working freelance means you're talking straight to the person building your site — no account managers, no corporate approval chains, no handoffs between five different people. Some of us work in small businesses by day, so we understand exactly what you need your website to do: bring in customers, load fast, and not waste your time with problems.</p>
+            <ul>
+                <li class="reveal">Custom-built websites, no templates or shortcuts</li>
+                <li class="reveal">Custom-built apps tailored to your business needs</li>
+                <li class="reveal">Locked out of your old device? We can get that data off for you</li>
+                <li class="reveal">Custom animations tailored to your business</li>
+                <li class="reveal">Free visual mockups with consultation BEFORE spending any money</li>
+                <li class="reveal">Logo and graphic design available</li>
+                <li class="reveal">Got other computer problems? We can help!</li>
+            </ul>
         </section>
-        <footer>
-            <span>ignite.webdev</span>
-            <span>&copy; 2026. All rights reserved.</span>
-        </footer>
-        <div class="lightbox" id="lightbox">
-            <button class="lightbox-close" id="lightboxClose">&times;</button>
-            <button class="lightbox-arrow lightbox-prev" id="lightboxPrev">&#10094;</button>
-            <div class="lightbox-content" id="lightboxContent"></div>
-            <button class="lightbox-arrow lightbox-next" id="lightboxNext">&#10095;</button>
-        </div>
-        <script src="script.js"></script>
-    </body>
+
+        <section id="contact">
+            <div class="eyebrow">04 &mdash; Get In Touch</div>
+            <h2 class="reveal">Let's build something that actually gets you customers.</h2>
+            <p class="sub reveal">Tell us a bit about your project and we'll get back to you with a free quote.</p>
+            <form name="contact" method="POST" data-netlify="true" class="reveal">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+                <label for="message">Message</label>
+                <textarea id="message" name="message" required></textarea>
+                <p hidden>
+                    <label>Don't fill this out: <input name="bot-field"></label>
+                </p>
+                <button type="submit">Send <span>&rarr;</span></button>
+            </form>
+        </section>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
 </html>
