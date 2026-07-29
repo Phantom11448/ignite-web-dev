@@ -152,13 +152,15 @@ function showNext() {
     renderLightboxSlide();
 }
 
-lightboxClose.addEventListener('click', closeLightbox);
-lightboxPrev.addEventListener('click', showPrev);
-lightboxNext.addEventListener('click', showNext);
+if (lightboxClose && lightboxPrev && lightboxNext && lightbox) {
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightboxPrev.addEventListener('click', showPrev);
+    lightboxNext.addEventListener('click', showNext);
 
-lightbox.addEventListener('click', (e) => {
-    if (e.target === lightbox) closeLightbox();
-});
+    lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox) closeLightbox();
+    });
+}
 
 const marqueeTrack = document.querySelector('.project-marquee-track');
 if (marqueeTrack) {
