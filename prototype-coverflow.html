@@ -323,28 +323,28 @@ window.addEventListener('resize', () => { measureRadius(); layout(); });
 document.getElementById('prevBtn').addEventListener('click', () => goTo(activeIndex - 1));
 document.getElementById('nextBtn').addEventListener('click', () => goTo(activeIndex + 1));
 
-let dragging = false, dragged = false, startX = 0, startOffset = 0;
-const PX_PER_CARD = 90;
+// Swipe support — a swipe is a single discrete step, exactly like pressing an
+// arrow key. It does NOT rotate the ring live or let it land on a fractional
+// position; it only detects direction and distance, then calls goTo() once.
+let dragging = false, dragged = false, startX = 0;
+const SWIPE_THRESHOLD = 50; // minimum px of movement to count as a swipe
 
 track.addEventListener('pointerdown', (e) => {
-  dragging = true; dragged = false; startX = e.clientX; startOffset = dragOffset;
+  dragging = true; dragged = false; startX = e.clientX;
   track.classList.add('dragging');
-  track.style.transition = 'none';
-  cards.forEach(c => c.style.transition = 'opacity 0.5s ease');
 });
 track.addEventListener('pointermove', (e) => {
   if (!dragging) return;
-  const delta = e.clientX - startX;
-  if (Math.abs(delta) > 8) dragged = true;
-  dragOffset = startOffset - delta / PX_PER_CARD;
-  layout();
+  if (Math.abs(e.clientX - startX) > 8) dragged = true;
 });
-window.addEventListener('pointerup', () => {
+window.addEventListener('pointerup', (e) => {
   if (!dragging) return;
   dragging = false;
   track.classList.remove('dragging');
-  cards.forEach(c => c.style.transition = 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), filter 0.5s ease, opacity 0.5s ease');
-  goTo(Math.round(dragOffset));
+  const delta = e.clientX - startX;
+  if (Math.abs(delta) > SWIPE_THRESHOLD) {
+    goTo(activeIndex + (delta < 0 ? 1 : -1));
+  }
 });
 
 let wheelLock = false;
