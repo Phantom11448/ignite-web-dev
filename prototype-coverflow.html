@@ -81,6 +81,8 @@
     left: 50%;
     width: min(30vw, 460px);
     height: min(42vw, 620px);
+    margin-top: calc(min(42vw, 620px) / -2);
+    margin-left: calc(min(30vw, 460px) / -2);
     border-radius: 10px;
     overflow: hidden;
     background: #111;
@@ -295,7 +297,7 @@ function layout() {
     const depthFactor = (z + RADIUS) / RADIUS;
     const opacity = 0.25 + 0.75 * Math.max(0, depthFactor);
 
-    card.style.transform = `translate(-50%, -50%) translateX(${x}px) translateZ(${z}px) rotateY(${rotateY}deg)`;
+    card.style.transform = `translateX(${x}px) translateZ(${z}px) rotateY(${rotateY}deg)`;
     card.style.opacity = opacity;
     card.style.zIndex = Math.round(1000 * depthFactor);
     card.classList.toggle('is-active', front);
