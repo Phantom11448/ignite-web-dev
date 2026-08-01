@@ -80,7 +80,20 @@
 
   /* Hero */
   #hero {
-    background: radial-gradient(circle at 75% 30%, rgba(255,107,53,0.14), transparent 55%), #000;
+    background: #000;
+    position: relative;
+    overflow: hidden;
+  }
+  #hero-shader {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+  }
+  #hero > *:not(#hero-shader) {
+    position: relative;
+    z-index: 1;
   }
   #hero h1 {
     font-family: 'Space Grotesk', sans-serif;
@@ -316,8 +329,9 @@
     <div id="scroller">
 
         <section id="hero">
+            <canvas id="hero-shader" aria-hidden="true"></canvas>
             <div class="eyebrow">Houston, TX — Freelance Web Developer</div>
-            <h1>Real code. No templates.<br><span>No shortcuts.</span></h1>
+            <h1 id="hero-heading">Real code. No templates.<br><span>No shortcuts.</span></h1>
             <p class="sub">Custom websites and web apps for small businesses — built fast, built right, and made to actually bring in customers.</p>
             <a href="#work" class="discover-link">See the work <span class="arrow">&rarr;</span></a>
             <div class="scroll-hint">

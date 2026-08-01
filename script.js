@@ -204,3 +204,142 @@ if (marqueeTrack) {
         }
     }, true);
 }
+
+// Hero shader background — smoky, reactive gradient using the site's own ember/black palette
+(function() {
+    const canvas = document.getElementById('hero-shader');
+    if (!canvas) return;
+    const gl = canvas.getContext('webgl');
+    if (!gl) return;
+
+    function resize() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width * Math.min(window.devicePixelRatio || 1, 2);
+        canvas.height = rect.height * Math.min(window.devicePixelRatio || 1, 2);
+        gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const vertSrc = `
+        attribute vec2 position;
+        void main() { gl_Position = vec4(position, 0.0, 1.0); }
+    `;
+
+    const fragSrc = `
+        precision highp float;
+        uniform vec2 u_resolution;
+        uniform float u_time;
+        uniform vec2 u_mouse;
+
+        vec3 hash3(vec2 p) {
+            vec3 q = vec3(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)), dot(p, vec2(419.2, 371.9)));
+            return fract(sin(q) * 43758.5453);
+        }
+        float noise(vec2 p) {
+            vec2 i = floor(p); vec2 f = fract(p);
+            vec2 u = f * f * (3.0 - 2.0 * f);
+            return mix(mix(hash3(i).x, hash3(i + vec2(1,0)).x, u.x),
+                       mix(hash3(i + vec2(0,1)).x, hash3(i + vec2(1,1)).x, u.x), u.y);
+        }
+        float fbm(vec2 p) {
+            float v = 0.0; float a = 0.5;
+            for (int i = 0; i < 5; i++) { v += a * noise(p); p *= 2.0; a *= 0.5; }
+            return v;
+        }
+
+        void main() {
+            vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+            vec2 p = uv * 3.0;
+            p.x *= u_resolution.x / u_resolution.y;
+
+            vec2 mouseInfluence = (u_mouse - 0.5) * 1.2;
+            float t = u_time * 0.05;
+
+            float n1 = fbm(p + vec2(t, -t * 0.6) + mouseInfluence * 0.3);
+            float n2 = fbm(p * 1.4 - vec2(t * 0.7, t * 0.3));
+            float pattern = fbm(p + vec2(n1, n2) * 1.1);
+
+            vec3 colorA = vec3(0.047, 0.047, 0.055);
+            vec3 colorB = vec3(0.16, 0.07, 0.03);
+            vec3 colorC = vec3(1.0, 0.42, 0.21);
+
+            vec3 col = mix(colorA, colorB, smoothstep(0.2, 0.7, pattern));
+            col = mix(col, colorC, smoothstep(0.72, 0.95, n2) * 0.35);
+
+            float vignette = smoothstep(1.3, 0.2, length(uv - 0.5));
+            col *= vignette * 0.85 + 0.15;
+
+            gl_FragColor = vec4(col, 1.0);
+        }
+    `;
+
+    function compile(type, src) {
+        const s = gl.createShader(type);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        return s;
+    }
+
+    const prog = gl.createProgram();
+    gl.attachShader(prog, compile(gl.VERTEX_SHADER, vertSrc));
+    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, fragSrc));
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
+
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+    const posLoc = gl.getAttribLocation(prog, 'position');
+    gl.enableVertexAttribArray(posLoc);
+    gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+    const uRes = gl.getUniformLocation(prog, 'u_resolution');
+    const uTime = gl.getUniformLocation(prog, 'u_time');
+    const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+
+    let mouse = { x: 0.5, y: 0.5 };
+    canvas.parentElement.addEventListener('pointermove', (e) => {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        mouse.x = (e.clientX - rect.left) / rect.width;
+        mouse.y = 1.0 - (e.clientY - rect.top) / rect.height;
+    });
+
+    function render(t) {
+        gl.uniform2f(uRes, canvas.width, canvas.height);
+        gl.uniform1f(uTime, t * 0.001);
+        gl.uniform2f(uMouse, mouse.x, mouse.y);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+        requestAnimationFrame(render);
+    }
+    requestAnimationFrame(render);
+})();
+
+// Text scramble on the hero heading only, on page load
+(function() {
+    const el = document.getElementById('hero-heading');
+    if (!el) return;
+    const finalHTML = el.innerHTML;
+    const finalText = el.textContent;
+    const chars = '!<>-_\\/[]{}—=+*^?#0123456789';
+    let frame = 0;
+    const totalFrames = 40;
+
+    function scrambleFrame() {
+        let output = '';
+        const revealCount = Math.floor((frame / totalFrames) * finalText.length);
+        for (let i = 0; i < finalText.length; i++) {
+            const ch = finalText[i];
+            if (ch === '\n' || ch === ' ') { output += ch; continue; }
+            output += i < revealCount ? ch : chars[Math.floor(Math.random() * chars.length)];
+        }
+        el.textContent = output;
+        frame++;
+        if (frame <= totalFrames) {
+            requestAnimationFrame(scrambleFrame);
+        } else {
+            el.innerHTML = finalHTML;
+        }
+    }
+    requestAnimationFrame(scrambleFrame);
+})();
