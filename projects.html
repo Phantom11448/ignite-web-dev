@@ -80,10 +80,10 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    width: min(30vw, 460px);
-    height: min(42vw, 620px);
-    margin-top: calc(min(42vw, 620px) / -2);
-    margin-left: calc(min(30vw, 460px) / -2);
+    width: min(36vw, 560px);
+    height: min(50vw, 756px);
+    margin-top: calc(min(50vw, 756px) / -2);
+    margin-left: calc(min(36vw, 560px) / -2);
     border-radius: 10px;
     overflow: hidden;
     background: #111;
@@ -181,6 +181,7 @@
 <script>
 const PROJECTS = [
   {
+    slug: 'coldside',
     title: 'ColdSide Study',
     desc: 'EPA 608 exam prep',
     type: 'img',
@@ -189,6 +190,7 @@ const PROJECTS = [
     accent: [56, 189, 248],
   },
   {
+    slug: 'signal-lost',
     title: 'Signal Lost',
     desc: 'HTML lessons',
     type: 'video',
@@ -197,6 +199,7 @@ const PROJECTS = [
     accent: [167, 139, 250],
   },
   {
+    slug: '3fs',
     title: '3FS',
     desc: 'Card game PWA',
     type: 'video',
@@ -205,6 +208,7 @@ const PROJECTS = [
     accent: [251, 113, 133],
   },
   {
+    slug: 'bizcheck',
     title: 'BizCheck',
     desc: 'Job-costing software',
     type: 'img',
@@ -213,6 +217,7 @@ const PROJECTS = [
     accent: [52, 211, 153],
   },
   {
+    slug: 'saltline',
     title: 'Salt Line Kitchen',
     desc: 'Table-side QR ordering',
     type: 'img',
@@ -221,6 +226,7 @@ const PROJECTS = [
     accent: [251, 191, 36],
   },
   {
+    slug: 'neon-province',
     title: 'Neon Province',
     desc: 'Learn CSS through story',
     type: 'video',
@@ -341,6 +347,17 @@ function goTo(i) {
 
 buildCards();
 measureRadius();
+
+const requestedSlug = window.location.hash.replace('#', '');
+const requestedIndex = PROJECTS.findIndex((p) => p.slug === requestedSlug);
+if (requestedIndex !== -1) {
+    activeIndex = requestedIndex;
+    dragOffset = requestedIndex;
+    targetOffset = requestedIndex;
+    cards.forEach((c, i) => c.classList.toggle('is-active', i === requestedIndex));
+    dots.forEach((d, i) => d.classList.toggle('active', i === requestedIndex));
+}
+
 layout();
 window.addEventListener('resize', () => { measureRadius(); layout(); });
 
