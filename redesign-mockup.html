@@ -135,11 +135,22 @@
     color: rgba(255,255,255,0.8);
     margin-bottom: 12px;
   }
-  .hero-visual .overlay-text .ignite-wordmark {
-    width: min(90%, 780px);
-    height: auto;
-    display: block;
-    margin: 0 auto;
+  .hero-visual .overlay-text h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 800;
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    line-height: 0.9;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 8px;
+    padding-bottom: 0.06em;
+  }
+  .hero-visual .overlay-text h2 .logo-letter {
+    height: 1.3em;
+    width: auto;
+    margin: 0 -0.12em 0 0;
+    transform: translateY(0.2em);
   }
 
   /* ===== WORK SECTION ===== */
@@ -310,10 +321,7 @@
   <div class="hero-visual">
     <div class="overlay-text">
       <div class="kicker">Since 2024, building real results</div>
-      <svg class="ignite-wordmark" viewBox="0 0 900 220" xmlns="http://www.w3.org/2000/svg">
-        <image href="images/Ignite-logo.png" x="10" y="0" width="120" height="213" />
-        <text x="160" y="200" font-family="'Space Grotesk', sans-serif" font-weight="800" font-size="180" fill="#ffffff">GNITE</text>
-      </svg>
+      <h2><img src="images/Ignite-logo.png" class="logo-letter" alt="">GNITE</h2>
     </div>
   </div>
 </section>
