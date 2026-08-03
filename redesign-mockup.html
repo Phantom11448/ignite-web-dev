@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ignite Web Dev — Full Homepage Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    background: #0c0c0e;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+  }
+  img, video { max-width: 100%; display: block; }
+  a { color: inherit; }
+
+  /* ===== NAV ===== */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 40px;
+  }
+  nav .logo { height: 34px; }
+  nav ul { list-style: none; display: flex; gap: 36px; }
+  nav ul a { text-decoration: none; color: rgba(255,255,255,0.65); font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem; transition: color 0.25s ease; }
+  nav ul a:hover { color: #fff; }
+  nav .talk-btn {
+    background: #ff6b35;
+    color: #0c0c0e;
+    text-decoration: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 12px 26px;
+    border-radius: 999px;
+  }
+
+  /* ===== SPLIT HERO ===== */
+  #hero {
+    display: grid;
+    grid-template-columns: 1fr 1.35fr;
+    min-height: 640px;
+  }
+  .hero-panel {
+    background: #ff6b35;
+    color: #0c0c0e;
+    padding: 60px 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .hero-panel .eyebrow {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    opacity: 0.75;
+  }
+  .hero-panel h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2rem, 3.4vw, 2.9rem);
+    line-height: 1.08;
+    margin-bottom: 22px;
+  }
+  .hero-panel p {
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 400px;
+    margin-bottom: 32px;
+    opacity: 0.9;
+  }
+  .hero-panel .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #0c0c0e;
+    color: #fff;
+    text-decoration: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 16px 30px;
+    border-radius: 999px;
+    width: fit-content;
+    transition: transform 0.25s ease;
+  }
+  .hero-panel .cta-btn:hover { transform: translateY(-2px); }
+
+  .hero-visual {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hero-visual video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.5) saturate(0.9);
+  }
+  .hero-visual::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(12,12,14,0.2), rgba(12,12,14,0.75));
+  }
+  .hero-visual .overlay-text {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+  }
+  .hero-visual .overlay-text .kicker {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 12px;
+  }
+  .hero-visual .overlay-text h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 800;
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    line-height: 0.9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .hero-visual .overlay-text h2 .badge {
+    width: 0.85em;
+    height: 0.85em;
+    border-radius: 50%;
+    background: #ff6b35;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.28em;
+    color: #0c0c0e;
+    font-weight: 700;
+  }
+
+  /* ===== WORK SECTION ===== */
+  #work {
+    padding: 110px 56px;
+  }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 56px;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .section-head .eyebrow {
+    color: #ff6b35;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .section-head h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+    max-width: 600px;
+  }
+  .section-head .view-all {
+    text-decoration: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.9rem;
+    color: #fff;
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+    padding-bottom: 4px;
+    white-space: nowrap;
+  }
+
+  .work-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+  .work-card {
+    background: #16161a;
+    border-radius: 12px;
+    overflow: hidden;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+  }
+  .work-card:hover { transform: translateY(-4px); border-color: rgba(255,107,53,0.4); }
+  .work-card .thumb {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+  }
+  .work-card .thumb img, .work-card .thumb video {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  .work-card .body { padding: 24px; flex: 1; display: flex; flex-direction: column; }
+  .work-card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; margin-bottom: 8px; }
+  .work-card p { font-size: 0.88rem; color: rgba(255,255,255,0.6); line-height: 1.5; flex: 1; margin-bottom: 18px; }
+  .work-card .link {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #ff6b35;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ===== APPROACH STRIP ===== */
+  #approach {
+    padding: 90px 56px;
+    background: #111114;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .approach-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .approach-item .num { font-family: 'Space Grotesk', sans-serif; color: #ff6b35; font-size: 0.85rem; margin-bottom: 14px; }
+  .approach-item h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; margin-bottom: 8px; }
+  .approach-item p { font-size: 0.85rem; color: rgba(255,255,255,0.55); line-height: 1.5; }
+
+  /* ===== CONTACT CTA ===== */
+  #contact {
+    padding: 130px 56px;
+    text-align: center;
+  }
+  #contact .eyebrow { color: #ff6b35; font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px; }
+  #contact h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: clamp(2rem, 5vw, 3.6rem);
+    max-width: 780px;
+    margin: 0 auto 40px;
+    line-height: 1.15;
+  }
+  #contact .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: #ff6b35;
+    color: #0c0c0e;
+    text-decoration: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 18px 36px;
+    border-radius: 999px;
+    transition: transform 0.25s ease;
+  }
+  #contact .cta-btn:hover { transform: translateY(-2px); }
+
+  footer {
+    padding: 32px 56px;
+    display: flex;
+    justify-content: space-between;
+    color: rgba(255,255,255,0.35);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.8rem;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  @media (max-width: 950px) {
+    #hero { grid-template-columns: 1fr; }
+    .hero-visual { min-height: 380px; }
+    .work-grid { grid-template-columns: 1fr; }
+    .approach-grid { grid-template-columns: repeat(2, 1fr); }
+    nav ul { display: none; }
+    #work, #approach, #contact { padding-left: 24px; padding-right: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <img src="https://ignitewebdev.com/images/ignite-logo.png" class="logo" alt="Ignite Web Dev">
+  <ul>
+    <li><a href="#work">Work</a></li>
+    <li><a href="#approach">Approach</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#contact" class="talk-btn">Let's Talk</a>
+</nav>
+
+<section id="hero">
+  <div class="hero-panel">
+    <div class="eyebrow">Houston, TX &middot; Freelance Web Developer</div>
+    <h1>Custom websites that actually bring in customers.</h1>
+    <p>Real code, no templates, no shortcuts. Built fast, built right, for small businesses that need a site that works as hard as they do.</p>
+    <a href="#contact" class="cta-btn">Request a Quote &rarr;</a>
+  </div>
+  <div class="hero-visual">
+    <video src="https://ignitewebdev.com/images/houston-skyline.mp4" autoplay muted loop playsinline></video>
+    <div class="overlay-text">
+      <div class="kicker">Since 2024, building real results</div>
+      <h2>GR<span class="badge">IWD</span>WTH.</h2>
+    </div>
+  </div>
+</section>
+
+<section id="work">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">01 &mdash; Selected Work</div>
+      <h2>A few things we've shipped for real businesses.</h2>
+    </div>
+    <a href="projects.html" class="view-all">View full showcase &rarr;</a>
+  </div>
+  <div class="work-grid" id="workGrid"></div>
+</section>
+
+<section id="approach">
+  <div class="approach-grid">
+    <div class="approach-item">
+      <div class="num">01</div>
+      <h3>Discovery</h3>
+      <p>A free quote call — what you need, who it's for, what "done" looks like.</p>
+    </div>
+    <div class="approach-item">
+      <div class="num">02</div>
+      <h3>Design</h3>
+      <p>A real layout built around your brand, not a recycled template.</p>
+    </div>
+    <div class="approach-item">
+      <div class="num">03</div>
+      <h3>Build</h3>
+      <p>Fast, clean, hand-coded — fully responsive, no bloat.</p>
+    </div>
+    <div class="approach-item">
+      <div class="num">04</div>
+      <h3>Launch</h3>
+      <p>Deployed, tested, and handed off with support after go-live.</p>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="eyebrow">02 &mdash; Get In Touch</div>
+  <h2>Let's build something that actually gets you customers.</h2>
+  <a href="#contact" class="cta-btn">Get a Free Quote &rarr;</a>
+</section>
+
+<footer>
+  <span>Ignite Web Dev &copy; 2026</span>
+  <span>Houston, TX</span>
+</footer>
+
+<script>
+const PROJECTS = [
+  {
+    slug: 'coldside',
+    title: 'ColdSide Study',
+    desc: 'An EPA 608 exam-prep app built with working HVAC technicians, covering all four certification types.',
+    thumb: 'https://ignitewebdev.com/images/coldside-screenshot-1.png',
+    type: 'img',
+  },
+  {
+    slug: 'bizcheck',
+    title: 'BizCheck',
+    desc: 'Job-costing software for trade and service businesses — track expenses, labor, and profit per job in real time.',
+    thumb: 'https://ignitewebdev.com/images/bizcheck-display-1.jpg',
+    type: 'img',
+  },
+  {
+    slug: 'saltline',
+    title: 'Salt Line Kitchen',
+    desc: 'Table-side QR ordering for restaurants — guests order and pay without a delivery-app commission taken.',
+    thumb: 'https://ignitewebdev.com/saltline/saltline-screenshot-1.jpg',
+    type: 'img',
+  },
+  {
+    slug: '3fs',
+    title: '3FS',
+    desc: 'A fast-paced card game PWA with custom animations and character art, built from scratch in vanilla JS.',
+    thumb: 'https://ignitewebdev.com/3fs/intro.mp4',
+    type: 'video',
+  },
+  {
+    slug: 'signal-lost',
+    title: 'Signal Lost',
+    desc: 'An interactive HTML lessons app that teaches web development through a mystery-driven story.',
+    thumb: 'https://ignitewebdev.com/images/signal-demo.mp4',
+    type: 'video',
+  },
+  {
+    slug: 'neon-province',
+    title: 'Neon Province',
+    desc: 'A story-driven game teaching CSS and layout — the box model, flexbox, and grid through a neon-lit world.',
+    thumb: 'https://ignitewebdev.com/images/neon-demo.mp4',
+    type: 'video',
+  },
+];
+
+const grid = document.getElementById('workGrid');
+PROJECTS.forEach((p) => {
+  const card = document.createElement('a');
+  card.className = 'work-card';
+  card.href = `projects.html#${p.slug}`;
+
+  const thumb = document.createElement('div');
+  thumb.className = 'thumb';
+  if (p.type === 'video') {
+    const v = document.createElement('video');
+    v.src = p.thumb; v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
+    thumb.appendChild(v);
+  } else {
+    const img = document.createElement('img');
+    img.src = p.thumb;
+    thumb.appendChild(img);
+  }
+
+  const body = document.createElement('div');
+  body.className = 'body';
+  body.innerHTML = `<h3>${p.title}</h3><p>${p.desc}</p><span class="link">View project &rarr;</span>`;
+
+  card.appendChild(thumb);
+  card.appendChild(body);
+  grid.appendChild(card);
+});
+</script>
+
+</body>
+</html>
