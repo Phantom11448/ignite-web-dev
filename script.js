@@ -205,17 +205,16 @@ if (marqueeTrack) {
     }, true);
 }
 
-// Hero shader background — smoky, reactive gradient using the site's own ember/black palette
+// Site-wide shader background — smoky white/ember gradient behind every section
 (function() {
-    const canvas = document.getElementById('hero-shader');
+    const canvas = document.getElementById('site-shader');
     if (!canvas) return;
     const gl = canvas.getContext('webgl');
     if (!gl) return;
 
     function resize() {
-        const rect = canvas.parentElement.getBoundingClientRect();
-        canvas.width = rect.width * Math.min(window.devicePixelRatio || 1, 2);
-        canvas.height = rect.height * Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = window.innerWidth * Math.min(window.devicePixelRatio || 1, 2);
+        canvas.height = window.innerHeight * Math.min(window.devicePixelRatio || 1, 2);
         gl.viewport(0, 0, canvas.width, canvas.height);
     }
     window.addEventListener('resize', resize);
@@ -260,12 +259,12 @@ if (marqueeTrack) {
             float n2 = fbm(p * 1.4 - vec2(t * 0.7, t * 0.3));
             float pattern = fbm(p + vec2(n1, n2) * 1.1);
 
-            vec3 colorA = vec3(0.047, 0.047, 0.055);
-            vec3 colorB = vec3(0.16, 0.07, 0.03);
+            vec3 colorA = vec3(0.043, 0.043, 0.05);
+            vec3 colorB = vec3(0.6, 0.58, 0.56);
             vec3 colorC = vec3(1.0, 0.42, 0.21);
 
-            vec3 col = mix(colorA, colorB, smoothstep(0.2, 0.7, pattern));
-            col = mix(col, colorC, smoothstep(0.72, 0.95, n2) * 0.35);
+            vec3 col = mix(colorA, colorB, smoothstep(0.25, 0.75, pattern) * 0.8);
+            col = mix(col, colorC, smoothstep(0.72, 0.95, n2) * 0.4);
 
             float vignette = smoothstep(1.3, 0.2, length(uv - 0.5));
             col *= vignette * 0.85 + 0.15;
@@ -299,10 +298,9 @@ if (marqueeTrack) {
     const uMouse = gl.getUniformLocation(prog, 'u_mouse');
 
     let mouse = { x: 0.5, y: 0.5 };
-    canvas.parentElement.addEventListener('pointermove', (e) => {
-        const rect = canvas.parentElement.getBoundingClientRect();
-        mouse.x = (e.clientX - rect.left) / rect.width;
-        mouse.y = 1.0 - (e.clientY - rect.top) / rect.height;
+    window.addEventListener('pointermove', (e) => {
+        mouse.x = e.clientX / window.innerWidth;
+        mouse.y = 1.0 - e.clientY / window.innerHeight;
     });
 
     function render(t) {
