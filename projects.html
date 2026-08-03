@@ -357,17 +357,31 @@ function goTo(i) {
 buildCards();
 measureRadius();
 
-const requestedSlug = window.location.hash.replace('#', '');
-const requestedIndex = PROJECTS.findIndex((p) => p.slug === requestedSlug);
-if (requestedIndex !== -1) {
-    activeIndex = requestedIndex;
-    dragOffset = requestedIndex;
-    targetOffset = requestedIndex;
-    cards.forEach((c, i) => c.classList.toggle('is-active', i === requestedIndex));
-    dots.forEach((d, i) => d.classList.toggle('active', i === requestedIndex));
+function applyRequestedSlug() {
+    const requestedSlug = window.location.hash.replace('#', '');
+    const requestedIndex = PROJECTS.findIndex((p) => p.slug === requestedSlug);
+    if (requestedIndex !== -1) {
+        activeIndex = requestedIndex;
+        dragOffset = requestedIndex;
+        targetOffset = requestedIndex;
+        cards.forEach((c, i) => c.classList.toggle('is-active', i === requestedIndex));
+        dots.forEach((d, i) => d.classList.toggle('active', i === requestedIndex));
+    }
+    layout();
 }
 
-layout();
+applyRequestedSlug();
+
+// Mobile browsers can restore this page from the back-forward cache instead of
+// running a fresh page load, which was silently showing whatever exhibit was
+// active during the previous visit instead of the one just linked to. Re-run
+// the slug resolution whenever the page is shown, including bfcache restores.
+window.addEventListener('pageshow', (e) => {
+    if (e.persisted) {
+        applyRequestedSlug();
+    }
+});
+
 window.addEventListener('resize', () => { measureRadius(); layout(); });
 
 document.getElementById('prevBtn').addEventListener('click', () => goTo(activeIndex - 1));
