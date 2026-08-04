@@ -164,7 +164,9 @@
   #faq-heading span { display: inline-block; transition: transform 0.15s ease; }
   .faq-list { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
   .faq-item {
-    background: rgba(255,255,255,0.04);
+    background: rgba(12,12,14,0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 12px;
     overflow: hidden;
@@ -627,7 +629,7 @@ PROJECTS.forEach((p) => {
   img.addEventListener('click', function() {
     if (falling) return;
     falling = true;
-    vy = -18;
+    vy = 0;
     vr = (Math.random() - 0.5) * 30;
     setTimeout(function() {
       falling = false;
