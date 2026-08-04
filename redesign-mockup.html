@@ -386,7 +386,9 @@
   <div class="hero-visual">
     <div class="overlay-text">
       <div class="kicker">Since 2024, building real results</div>
-      <img src="images/ignitefullword.png" class="wordmark" id="wordmark-img" alt="Ignite">
+      <div class="wordmark-wrap" id="wordmark-wrap">
+        <img src="images/ignitefullword.png" class="wordmark" id="wordmark-img" alt="Ignite">
+      </div>
     </div>
   </div>
 </section>
@@ -612,41 +614,85 @@ PROJECTS.forEach((p) => {
 })();
 
 (function() {
+  var wrap = document.getElementById('wordmark-wrap');
   var img = document.getElementById('wordmark-img');
-  if (!img) return;
-  var vy = 0, vr = 0, y = 0, rot = 0, falling = false, bounces = 0;
-  var floor = 90;
+  if (!wrap || !img) return;
+
+  var SLICE_COUNT = 6;
+  var pieces = [];
+  var floor = 0;
+  var active = false;
+
+  function build() {
+    wrap.querySelectorAll('.wordmark-piece').forEach(function(p) { p.remove(); });
+    pieces = [];
+    var rect = img.getBoundingClientRect();
+    var wrapRect = wrap.getBoundingClientRect();
+    var w = rect.width, h = rect.height;
+    var pieceW = w / SLICE_COUNT;
+    floor = h * 0.35;
+    for (var i = 0; i < SLICE_COUNT; i++) {
+      var piece = document.createElement('div');
+      piece.className = 'wordmark-piece';
+      piece.style.position = 'absolute';
+      piece.style.left = (rect.left - wrapRect.left + i * pieceW) + 'px';
+      piece.style.top = (rect.top - wrapRect.top) + 'px';
+      piece.style.width = pieceW + 'px';
+      piece.style.height = h + 'px';
+      piece.style.backgroundImage = 'url(images/ignitefullword.png)';
+      piece.style.backgroundSize = (w) + 'px ' + h + 'px';
+      piece.style.backgroundPosition = (-i * pieceW) + 'px 0px';
+      piece.style.backgroundRepeat = 'no-repeat';
+      wrap.appendChild(piece);
+      pieces.push({ el: piece, baseLeft: parseFloat(piece.style.left), y: 0, vy: 0, x: 0, vx: 0, rot: 0, vr: 0 });
+    }
+    img.style.visibility = 'hidden';
+  }
+  build();
+  window.addEventListener('resize', build);
+
   function tick() {
-    if (falling) {
-      vy += 1.6;
-      y += vy;
-      rot += vr;
-      if (y > floor) {
-        y = floor;
-        vy *= -0.45;
-        vr *= 0.6;
-        bounces++;
-        if (bounces > 4 || Math.abs(vy) < 2) {
-          falling = false;
-          setTimeout(function() {
-            img.style.transition = 'transform 0.6s ease';
-            y = 0; rot = 0; vy = 0;
-            img.style.transform = 'translateY(0) rotate(0deg)';
-            setTimeout(function() { img.style.transition = 'none'; }, 650);
-          }, 500);
+    if (active) {
+      var stillMoving = false;
+      pieces.forEach(function(p) {
+        p.vy += 1.1;
+        p.y += p.vy;
+        p.x += p.vx;
+        p.vr *= 0.96;
+        p.rot += p.vr;
+        if (p.y > floor) {
+          p.y = floor;
+          p.vy *= -0.4;
         }
+        if (Math.abs(p.vy) > 0.3 || p.y < floor - 1) stillMoving = true;
+        p.el.style.transform = 'translate(' + p.x + 'px,' + p.y + 'px) rotate(' + p.rot + 'deg)';
+      });
+      if (!stillMoving) {
+        active = false;
+        setTimeout(function() {
+          pieces.forEach(function(p) {
+            p.el.style.transition = 'transform 0.6s ease';
+            p.y = 0; p.x = 0; p.rot = 0; p.vy = 0; p.vx = 0; p.vr = 0;
+            p.el.style.transform = 'translate(0,0) rotate(0deg)';
+          });
+          setTimeout(function() {
+            pieces.forEach(function(p) { p.el.style.transition = 'none'; });
+          }, 650);
+        }, 600);
       }
-      img.style.transform = 'translateY(' + y + 'px) rotate(' + rot + 'deg)';
     }
     requestAnimationFrame(tick);
   }
   tick();
-  img.addEventListener('mouseenter', function() {
-    if (falling) return;
-    falling = true;
-    bounces = 0;
-    vy = 0;
-    vr = (Math.random() - 0.5) * 30;
+
+  wrap.addEventListener('mouseenter', function() {
+    if (active) return;
+    active = true;
+    pieces.forEach(function(p) {
+      p.vy = -2 - Math.random() * 4;
+      p.vx = (Math.random() - 0.5) * 3;
+      p.vr = (Math.random() - 0.5) * 6;
+    });
   });
 })();
 
