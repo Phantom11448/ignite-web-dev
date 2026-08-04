@@ -140,7 +140,25 @@
     height: auto;
     display: block;
     margin: 0 auto;
+    cursor: pointer;
+    transition: none;
   }
+  #hero-heading {
+    transform-style: preserve-3d;
+    transition: transform 0.1s ease-out;
+    text-shadow:
+      1px 1px 0 #1a3a6b, 2px 2px 0 #1a3a6b, 3px 3px 0 #163260,
+      4px 4px 0 #142c55, 5px 5px 0 #12264a, 6px 6px 0 #10203f,
+      7px 7px 0 #0e1a34, 8px 8px 8px rgba(0,0,0,0.5);
+  }
+  #hero-eyebrow span { display: inline-block; }
+  #hero-para span { display: inline-block; filter: blur(4px); opacity: 0; transition: filter 0.6s ease, opacity 0.6s ease; }
+  #hero-cta span { display: inline-block; transition: transform 0.15s ease; }
+  .trace-heading { opacity: 0; }
+  .trace-heading svg { overflow: visible; }
+  #work-heading.particle-active { visibility: hidden; }
+  #work-canvas { display: block; width: 100%; max-width: 640px; height: 60px; }
+  .gravity-letter { display: inline-block; cursor: pointer; }
   #faq { padding: 100px 56px; }
   #faq .section-head { margin-bottom: 48px; }
   #faq-heading span { display: inline-block; transition: transform 0.15s ease; }
@@ -358,15 +376,15 @@
 
 <section id="hero">
   <div class="hero-panel">
-    <div class="eyebrow">Houston, TX &middot; Freelance Web Developer</div>
-    <h1>Custom websites that actually bring in customers.</h1>
-    <p>Real code, no templates, no shortcuts. Built fast, built right, for small businesses that need a site that works as hard as they do.</p>
-    <a href="#contact" class="cta-btn">Request a Quote &rarr;</a>
+    <div class="eyebrow" id="hero-eyebrow">Houston, TX &middot; Freelance Web Developer</div>
+    <h1 id="hero-heading">Custom websites that actually bring in customers.</h1>
+    <p id="hero-para">Real code, no templates, no shortcuts. Built fast, built right, for small businesses that need a site that works as hard as they do.</p>
+    <a href="#contact" class="cta-btn" id="hero-cta">Request a Quote &rarr;</a>
   </div>
   <div class="hero-visual">
     <div class="overlay-text">
       <div class="kicker">Since 2024, building real results</div>
-      <img src="images/ignitefullword.png" class="wordmark" alt="Ignite">
+      <img src="images/ignitefullword.png" class="wordmark" id="wordmark-img" alt="Ignite">
     </div>
   </div>
 </section>
@@ -375,7 +393,7 @@
   <div class="section-head">
     <div>
       <div class="eyebrow">01 &mdash; Selected Work</div>
-      <h2>A few things we've shipped for real businesses.</h2>
+      <h2 id="work-heading">A few things we've shipped for real businesses.</h2>
     </div>
     <a href="projects.html" class="view-all">View full showcase &rarr;</a>
   </div>
@@ -386,22 +404,22 @@
   <div class="approach-grid">
     <div class="approach-item">
       <div class="num">01</div>
-      <h3>Discovery</h3>
+      <h3 class="trace-heading">Discovery</h3>
       <p>A free quote call — what you need, who it's for, what "done" looks like.</p>
     </div>
     <div class="approach-item">
       <div class="num">02</div>
-      <h3>Design</h3>
+      <h3 class="trace-heading">Design</h3>
       <p>A real layout built around your brand, not a recycled template.</p>
     </div>
     <div class="approach-item">
       <div class="num">03</div>
-      <h3>Build</h3>
+      <h3 class="trace-heading">Build</h3>
       <p>Fast, clean, hand-coded — fully responsive, no bloat.</p>
     </div>
     <div class="approach-item">
       <div class="num">04</div>
-      <h3>Launch</h3>
+      <h3 class="trace-heading">Launch</h3>
       <p>Deployed, tested, and handed off with support after go-live.</p>
     </div>
   </div>
@@ -442,7 +460,7 @@
 
 <section id="contact">
   <div class="eyebrow">02 &mdash; Get In Touch</div>
-  <h2>Let's build something that actually gets you customers.</h2>
+  <h2 id="gravity-heading">Let's build something that actually gets you customers.</h2>
   <a href="#contact" class="cta-btn">Get a Free Quote &rarr;</a>
 </section>
 
@@ -573,6 +591,237 @@ PROJECTS.forEach((p) => {
   });
   heading.addEventListener('mouseleave', function() {
     Array.from(heading.children).forEach(function(span) { span.style.transform = 'translate(0,0)'; });
+  });
+})();
+
+(function() {
+  var heading = document.getElementById('hero-heading');
+  var hero = document.getElementById('hero');
+  if (!heading || !hero) return;
+  hero.addEventListener('mousemove', function(e) {
+    var rect = hero.getBoundingClientRect();
+    var px = (e.clientX - rect.left) / rect.width - 0.5;
+    var py = (e.clientY - rect.top) / rect.height - 0.5;
+    heading.style.transform = 'perspective(600px) rotateY(' + (px * 24) + 'deg) rotateX(' + (py * -24) + 'deg)';
+  });
+  hero.addEventListener('mouseleave', function() {
+    heading.style.transform = 'perspective(600px) rotateY(0deg) rotateX(0deg)';
+  });
+})();
+
+(function() {
+  var img = document.getElementById('wordmark-img');
+  if (!img) return;
+  var vy = 0, vr = 0, y = 0, rot = 0, falling = false;
+  function tick() {
+    if (falling) {
+      vy += 1.6;
+      y += vy;
+      rot += vr;
+      img.style.transform = 'translateY(' + y + 'px) rotate(' + rot + 'deg)';
+      if (y > 300) falling = false;
+    }
+    requestAnimationFrame(tick);
+  }
+  tick();
+  img.addEventListener('click', function() {
+    if (falling) return;
+    falling = true;
+    vy = -18;
+    vr = (Math.random() - 0.5) * 30;
+    setTimeout(function() {
+      falling = false;
+      y = 0; rot = 0; vy = 0;
+      img.style.transition = 'transform 0.6s ease';
+      img.style.transform = 'translateY(0) rotate(0deg)';
+      setTimeout(function() { img.style.transition = 'none'; }, 650);
+    }, 1600);
+  });
+})();
+
+(function() {
+  var el = document.getElementById('hero-eyebrow');
+  if (!el) return;
+  var text = el.textContent;
+  el.textContent = '';
+  var i = 0;
+  function type() {
+    if (i <= text.length) {
+      el.textContent = text.slice(0, i);
+      i++;
+      setTimeout(type, 40);
+    }
+  }
+  type();
+})();
+
+(function() {
+  var el = document.getElementById('hero-para');
+  if (!el) return;
+  var words = el.textContent.split(' ');
+  el.innerHTML = '';
+  words.forEach(function(w, i) {
+    var span = document.createElement('span');
+    span.textContent = w;
+    el.appendChild(span);
+    el.appendChild(document.createTextNode(' '));
+    setTimeout(function() {
+      span.style.filter = 'blur(0)';
+      span.style.opacity = '1';
+    }, 600 + i * 70);
+  });
+})();
+
+(function() {
+  var btn = document.getElementById('hero-cta');
+  if (!btn) return;
+  var text = btn.textContent;
+  btn.innerHTML = '';
+  text.split('').forEach(function(ch) {
+    var span = document.createElement('span');
+    span.textContent = ch === ' ' ? '\u00A0' : ch;
+    btn.appendChild(span);
+  });
+  btn.addEventListener('mousemove', function(e) {
+    Array.from(btn.children).forEach(function(span) {
+      var sr = span.getBoundingClientRect();
+      var dx = (sr.left + sr.width / 2) - e.clientX;
+      var dy = (sr.top + sr.height / 2) - e.clientY;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+      var force = Math.max(0, 1 - dist / 50);
+      span.style.transform = 'translate(' + (-dx * force * 0.3) + 'px,' + (-dy * force * 0.3) + 'px)';
+    });
+  });
+  btn.addEventListener('mouseleave', function() {
+    Array.from(btn.children).forEach(function(span) { span.style.transform = 'translate(0,0)'; });
+  });
+})();
+
+(function() {
+  var heading = document.getElementById('work-heading');
+  if (!heading) return;
+  var canvas = document.createElement('canvas');
+  canvas.id = 'work-canvas';
+  canvas.width = 640;
+  canvas.height = 60;
+  heading.parentNode.insertBefore(canvas, heading);
+  var ctx = canvas.getContext('2d');
+  var text = heading.textContent;
+  var pts = [];
+  var off = document.createElement('canvas');
+  off.width = 640; off.height = 60;
+  var octx = off.getContext('2d');
+  octx.font = "700 32px 'Space Grotesk', sans-serif";
+  octx.fillStyle = '#fff';
+  octx.textBaseline = 'middle';
+  octx.fillText(text, 4, 30);
+  var data = octx.getImageData(0, 0, 640, 60).data;
+  for (var y = 0; y < 60; y += 2) {
+    for (var x = 0; x < 640; x += 2) {
+      if (data[(y * 640 + x) * 4 + 3] > 128) {
+        pts.push({ tx: x, ty: y, x: Math.random() * 640, y: Math.random() * 60 });
+      }
+    }
+  }
+  var played = false;
+  var start = null;
+  function draw(t) {
+    if (start === null) start = t;
+    var elapsed = t - start;
+    var prog = Math.min(1, elapsed / 1400);
+    ctx.clearRect(0, 0, 640, 60);
+    ctx.fillStyle = '#fff';
+    pts.forEach(function(p) {
+      var cx = p.x + (p.tx - p.x) * prog;
+      var cy = p.y + (p.ty - p.y) * prog;
+      ctx.fillRect(cx, cy, 2, 2);
+    });
+    if (prog < 1) requestAnimationFrame(draw);
+  }
+  var obs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting && !played) {
+        played = true;
+        heading.classList.add('particle-active');
+        start = null;
+        requestAnimationFrame(draw);
+        obs.unobserve(heading);
+      }
+    });
+  }, { threshold: 0.4 });
+  obs.observe(heading);
+})();
+
+(function() {
+  document.querySelectorAll('.trace-heading').forEach(function(h3) {
+    var text = h3.textContent;
+    var svgWidth = text.length * 20 + 10;
+    h3.innerHTML = '<svg viewBox="0 0 ' + svgWidth + ' 40" width="' + svgWidth + '" height="40">' +
+      '<text x="2" y="28" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="22" fill="none" stroke="#2f7fff" stroke-width="1" stroke-dasharray="300" stroke-dashoffset="300">' + text + '</text></svg>';
+    var traceEl = h3.querySelector('text');
+    var obs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          h3.style.opacity = '1';
+          traceEl.style.transition = 'stroke-dashoffset 1s ease';
+          traceEl.style.strokeDashoffset = '0';
+          setTimeout(function() {
+            traceEl.style.transition = 'fill 0.5s ease';
+            traceEl.style.fill = '#fff';
+          }, 900);
+          obs.unobserve(h3);
+        }
+      });
+    }, { threshold: 0.3 });
+    obs.observe(h3);
+  });
+})();
+
+(function() {
+  var heading = document.getElementById('gravity-heading');
+  if (!heading) return;
+  var text = heading.textContent;
+  heading.innerHTML = '';
+  var letters = [];
+  text.split('').forEach(function(ch) {
+    var span = document.createElement('span');
+    span.className = 'gravity-letter';
+    span.textContent = ch === ' ' ? '\u00A0' : ch;
+    heading.appendChild(span);
+    letters.push({ el: span, vy: 0, vx: 0, y: 0, x: 0, rot: 0, vr: 0, falling: false });
+  });
+  var active = false;
+  function tick() {
+    if (active) {
+      letters.forEach(function(l) {
+        if (!l.falling) return;
+        l.vy += 1.4;
+        l.y += l.vy;
+        l.x += l.vx;
+        l.rot += l.vr;
+        l.el.style.transform = 'translate(' + l.x + 'px,' + l.y + 'px) rotate(' + l.rot + 'deg)';
+      });
+    }
+    requestAnimationFrame(tick);
+  }
+  tick();
+  heading.addEventListener('click', function() {
+    if (active) return;
+    active = true;
+    letters.forEach(function(l) {
+      l.falling = true;
+      l.vy = -6 - Math.random() * 4;
+      l.vx = (Math.random() - 0.5) * 6;
+      l.vr = (Math.random() - 0.5) * 20;
+    });
+    setTimeout(function() {
+      letters.forEach(function(l) {
+        l.falling = false;
+        l.y = 0; l.x = 0; l.rot = 0; l.vy = 0; l.vx = 0;
+        l.el.style.transform = 'translate(0,0) rotate(0deg)';
+      });
+      active = false;
+    }, 2400);
   });
 })();
 </script>
