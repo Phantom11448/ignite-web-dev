@@ -232,10 +232,10 @@
   }
   .showcase-fade {
     position: relative;
-    margin: 0 -56px;
-    height: 640px;
-    overflow: hidden;
-    background: #050506;
+    height: 560px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .showcase-fade-track {
     position: relative;
@@ -244,17 +244,24 @@
   }
   .showcase-fade-slide {
     position: absolute;
-    inset: 0;
+    top: 50%;
+    left: 50%;
+    width: min(70%, 780px);
+    height: 480px;
+    transform: translate(-50%, -50%) scale(0.9);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-    transform: scale(0.92);
     cursor: grab;
+    touch-action: pan-y;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.55);
   }
   .showcase-fade-slide.is-active {
     opacity: 1;
     pointer-events: auto;
-    transform: scale(1.06);
+    transform: translate(-50%, -50%) scale(1);
     z-index: 2;
   }
   .showcase-fade-slide img,
@@ -290,15 +297,14 @@
     font-size: 0.9rem;
     border-bottom: 1px solid rgba(47,127,255,0.5);
   }
-  .showcase-fade-controls {
+  #fadePrevBtn, #fadeNextBtn {
     position: absolute;
-    bottom: 40px;
-    right: 64px;
-    z-index: 4;
-    display: flex;
-    align-items: center;
-    gap: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
   }
+  #fadePrevBtn { left: 20px; }
+  #fadeNextBtn { right: 20px; }
   .showcase-fade-controls button {
     width: 44px;
     height: 44px;
@@ -318,6 +324,11 @@
     background: rgba(47,127,255,0.15);
   }
   .showcase-fade-dots {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 4;
     display: flex;
     gap: 8px;
   }
@@ -336,9 +347,11 @@
     transform: scale(1.4);
   }
   @media (max-width: 700px) {
-    .showcase-fade { margin: 0 -20px; height: 460px; }
+    .showcase-fade { height: 420px; }
+    .showcase-fade-slide { width: 88%; height: 340px; }
     .showcase-fade-overlay { padding: 24px; }
-    .showcase-fade-controls { right: 24px; bottom: 24px; }
+    #fadePrevBtn { left: 8px; }
+    #fadeNextBtn { right: 8px; }
   }
   .section-head {
     display: flex;
@@ -989,12 +1002,12 @@
 
 (function() {
   var PROJECTS = [
-    { slug: 'coldside', title: 'ColdSide Study', desc: 'EPA 608 exam prep', src: 'https://ignitewebdev.com/images/coldside-screenshot-1.png', type: 'img', url: 'https://coldsidestudy.netlify.app' },
-    { slug: 'bizcheck', title: 'BizCheck', desc: 'Job-costing software for trade and service businesses', src: 'https://ignitewebdev.com/images/bizcheck-display-1.jpg', type: 'img', url: 'https://ignitewebdev.com/bizcheck/' },
-    { slug: 'saltline', title: 'Salt Line Kitchen', desc: 'Table-side QR ordering, no delivery-app commission taken', src: 'https://ignitewebdev.com/saltline/saltline-screenshot-1.jpg', type: 'img', url: 'https://ignitewebdev.com/saltline/demo/' },
     { slug: '3fs', title: '3FS', desc: 'Fast-paced card game PWA built from scratch', src: 'https://ignitewebdev.com/3fs/intro.mp4', type: 'video', url: 'https://ignitewebdev.com/3fs/' },
     { slug: 'signal-lost', title: 'Signal Lost', desc: 'HTML lessons through an interactive story', src: 'https://ignitewebdev.com/images/signal-demo.mp4', type: 'video', url: null },
-    { slug: 'neon-province', title: 'Neon Province', desc: 'Learn CSS through story', src: 'https://ignitewebdev.com/images/neon-demo.mp4', type: 'video', url: null }
+    { slug: 'neon-province', title: 'Neon Province', desc: 'Learn CSS through story', src: 'https://ignitewebdev.com/images/neon-demo.mp4', type: 'video', url: null },
+    { slug: 'bizcheck', title: 'BizCheck', desc: 'Job-costing software for trade and service businesses', src: 'https://ignitewebdev.com/images/bizcheck-display-1.jpg', type: 'img', url: 'https://ignitewebdev.com/bizcheck/' },
+    { slug: 'saltline', title: 'Salt Line Kitchen', desc: 'Table-side QR ordering, no delivery-app commission taken', src: 'https://ignitewebdev.com/saltline/saltline-screenshot-1.jpg', type: 'img', url: 'https://ignitewebdev.com/saltline/demo/' },
+    { slug: 'coldside', title: 'ColdSide Study', desc: 'EPA 608 exam prep', src: 'https://ignitewebdev.com/images/coldside-screenshot-1.png', type: 'img', url: 'https://coldsidestudy.netlify.app' }
   ];
 
   var track = document.getElementById('showcaseFadeTrack');
@@ -1052,6 +1065,7 @@
   var dragging = false, dragged = false, startX = 0;
   track.addEventListener('pointerdown', function(e) {
     dragging = true; dragged = false; startX = e.clientX;
+    try { track.setPointerCapture(e.pointerId); } catch (err) {}
   });
   track.addEventListener('pointermove', function(e) {
     if (!dragging) return;
