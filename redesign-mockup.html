@@ -740,52 +740,66 @@ PROJECTS.forEach((p) => {
 (function() {
   var heading = document.getElementById('work-heading');
   if (!heading) return;
+  var text = heading.textContent;
+
+  var measureCanvas = document.createElement('canvas');
+  var mctx = measureCanvas.getContext('2d');
+  mctx.font = "700 32px 'Space Grotesk', sans-serif";
+  var textWidth = Math.ceil(mctx.measureText(text).width) + 20;
+  var CW = textWidth, CH = 60;
+
   var canvas = document.createElement('canvas');
   canvas.id = 'work-canvas';
-  canvas.width = 640;
-  canvas.height = 60;
+  canvas.width = CW;
+  canvas.height = CH;
+  canvas.style.maxWidth = CW + 'px';
   heading.parentNode.insertBefore(canvas, heading);
   var ctx = canvas.getContext('2d');
-  var text = heading.textContent;
-  var pts = [];
+
   var off = document.createElement('canvas');
-  off.width = 640; off.height = 60;
+  off.width = CW; off.height = CH;
   var octx = off.getContext('2d');
   octx.font = "700 32px 'Space Grotesk', sans-serif";
   octx.fillStyle = '#fff';
   octx.textBaseline = 'middle';
-  octx.fillText(text, 4, 30);
-  var data = octx.getImageData(0, 0, 640, 60).data;
-  for (var y = 0; y < 60; y += 2) {
-    for (var x = 0; x < 640; x += 2) {
-      if (data[(y * 640 + x) * 4 + 3] > 128) {
-        pts.push({ tx: x, ty: y, x: Math.random() * 640, y: Math.random() * 60 });
+  octx.fillText(text, 4, CH / 2);
+  var data = octx.getImageData(0, 0, CW, CH).data;
+  var pts = [];
+  for (var y = 0; y < CH; y += 2) {
+    for (var x = 0; x < CW; x += 2) {
+      if (data[(y * CW + x) * 4 + 3] > 128) {
+        pts.push({ tx: x, ty: y, x: 0, y: 0 });
       }
     }
   }
-  var played = false;
+
   var start = null;
+  var running = false;
   function draw(t) {
     if (start === null) start = t;
     var elapsed = t - start;
     var prog = Math.min(1, elapsed / 1400);
-    ctx.clearRect(0, 0, 640, 60);
+    ctx.clearRect(0, 0, CW, CH);
     ctx.fillStyle = '#fff';
     pts.forEach(function(p) {
       var cx = p.x + (p.tx - p.x) * prog;
       var cy = p.y + (p.ty - p.y) * prog;
       ctx.fillRect(cx, cy, 2, 2);
     });
-    if (prog < 1) requestAnimationFrame(draw);
+    if (prog < 1) { requestAnimationFrame(draw); } else { running = false; }
+  }
+  function play() {
+    if (running) return;
+    running = true;
+    pts.forEach(function(p) { p.x = Math.random() * CW; p.y = Math.random() * CH; });
+    start = null;
+    requestAnimationFrame(draw);
   }
   var obs = new IntersectionObserver(function(entries) {
     entries.forEach(function(entry) {
-      if (entry.isIntersecting && !played) {
-        played = true;
+      if (entry.isIntersecting) {
         heading.classList.add('particle-active');
-        start = null;
-        requestAnimationFrame(draw);
-        obs.unobserve(heading);
+        play();
       }
     });
   }, { threshold: 0.4 });
@@ -799,17 +813,20 @@ PROJECTS.forEach((p) => {
     h3.innerHTML = '<svg viewBox="0 0 ' + svgWidth + ' 40" width="' + svgWidth + '" height="40">' +
       '<text x="2" y="28" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="22" fill="none" stroke="#2f7fff" stroke-width="1" stroke-dasharray="300" stroke-dashoffset="300">' + text + '</text></svg>';
     var traceEl = h3.querySelector('text');
+    h3.style.opacity = '1';
     var obs = new IntersectionObserver(function(entries) {
       entries.forEach(function(entry) {
         if (entry.isIntersecting) {
-          h3.style.opacity = '1';
+          traceEl.style.transition = 'none';
+          traceEl.style.fill = 'none';
+          traceEl.style.strokeDashoffset = '300';
+          void traceEl.getBoundingClientRect();
           traceEl.style.transition = 'stroke-dashoffset 1s ease';
           traceEl.style.strokeDashoffset = '0';
           setTimeout(function() {
             traceEl.style.transition = 'fill 0.5s ease';
             traceEl.style.fill = '#fff';
           }, 900);
-          obs.unobserve(h3);
         }
       });
     }, { threshold: 0.3 });
@@ -883,13 +900,16 @@ PROJECTS.forEach((p) => {
     var obs = new IntersectionObserver(function(entries) {
       entries.forEach(function(entry) {
         if (entry.isIntersecting) {
+          traceEl.style.transition = 'none';
+          traceEl.style.fill = 'none';
+          traceEl.style.strokeDashoffset = '260';
+          void traceEl.getBoundingClientRect();
           traceEl.style.transition = 'stroke-dashoffset 0.9s ease';
           traceEl.style.strokeDashoffset = '0';
           setTimeout(function() {
             traceEl.style.transition = 'fill 0.4s ease';
             traceEl.style.fill = '#fff';
           }, 800);
-          obs.unobserve(btn);
         }
       });
     }, { threshold: 0.5 });
