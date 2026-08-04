@@ -146,7 +146,10 @@
     display: block;
     cursor: pointer;
   }
-  .wordmark-piece { cursor: pointer; }
+  .wordmark-piece {
+    cursor: pointer;
+    transition: transform 0.35s ease-out;
+  }
   #hero-heading {
     transform-style: preserve-3d;
     transition: transform 0.1s ease-out;
@@ -624,8 +627,14 @@ PROJECTS.forEach((p) => {
 
   var SLICE_COUNT = 6;
   var pieces = [];
-  var floor = 0;
-  var active = false;
+  var OFFSETS = [
+    { x: -30, y: -14, rot: -10 },
+    { x: -18, y:  10, rot:   6 },
+    { x:  -6, y: -18, rot:  -8 },
+    { x:   6, y:  16, rot:   9 },
+    { x:  18, y: -12, rot:  -6 },
+    { x:  30, y:  14, rot:  11 }
+  ];
 
   function build() {
     wrap.querySelectorAll('.wordmark-piece').forEach(function(p) { p.remove(); });
@@ -634,7 +643,6 @@ PROJECTS.forEach((p) => {
     var wrapRect = wrap.getBoundingClientRect();
     var w = rect.width, h = rect.height;
     var pieceW = w / SLICE_COUNT;
-    floor = h * 0.35;
     for (var i = 0; i < SLICE_COUNT; i++) {
       var piece = document.createElement('div');
       piece.className = 'wordmark-piece';
@@ -644,58 +652,27 @@ PROJECTS.forEach((p) => {
       piece.style.width = pieceW + 'px';
       piece.style.height = h + 'px';
       piece.style.backgroundImage = 'url(images/ignitefullword.png)';
-      piece.style.backgroundSize = (w) + 'px ' + h + 'px';
+      piece.style.backgroundSize = w + 'px ' + h + 'px';
       piece.style.backgroundPosition = (-i * pieceW) + 'px 0px';
       piece.style.backgroundRepeat = 'no-repeat';
+      piece.style.transform = 'translate(0,0) rotate(0deg)';
       wrap.appendChild(piece);
-      pieces.push({ el: piece, baseLeft: parseFloat(piece.style.left), y: 0, vy: 0, x: 0, vx: 0, rot: 0, vr: 0 });
+      pieces.push(piece);
     }
     img.style.visibility = 'hidden';
   }
   build();
   window.addEventListener('resize', build);
 
-  function tick() {
-    if (active) {
-      var stillMoving = false;
-      pieces.forEach(function(p) {
-        p.vy += 1.1;
-        p.y += p.vy;
-        p.x += p.vx;
-        p.vr *= 0.96;
-        p.rot += p.vr;
-        if (p.y > floor) {
-          p.y = floor;
-          p.vy *= -0.4;
-        }
-        if (Math.abs(p.vy) > 0.3 || p.y < floor - 1) stillMoving = true;
-        p.el.style.transform = 'translate(' + p.x + 'px,' + p.y + 'px) rotate(' + p.rot + 'deg)';
-      });
-      if (!stillMoving) {
-        active = false;
-        setTimeout(function() {
-          pieces.forEach(function(p) {
-            p.el.style.transition = 'transform 0.6s ease';
-            p.y = 0; p.x = 0; p.rot = 0; p.vy = 0; p.vx = 0; p.vr = 0;
-            p.el.style.transform = 'translate(0,0) rotate(0deg)';
-          });
-          setTimeout(function() {
-            pieces.forEach(function(p) { p.el.style.transition = 'none'; });
-          }, 650);
-        }, 600);
-      }
-    }
-    requestAnimationFrame(tick);
-  }
-  tick();
-
   wrap.addEventListener('mouseenter', function() {
-    if (active) return;
-    active = true;
+    pieces.forEach(function(p, i) {
+      var o = OFFSETS[i];
+      p.style.transform = 'translate(' + o.x + 'px,' + o.y + 'px) rotate(' + o.rot + 'deg)';
+    });
+  });
+  wrap.addEventListener('mouseleave', function() {
     pieces.forEach(function(p) {
-      p.vy = -2 - Math.random() * 4;
-      p.vx = (Math.random() - 0.5) * 3;
-      p.vr = (Math.random() - 0.5) * 6;
+      p.style.transform = 'translate(0,0) rotate(0deg)';
     });
   });
 })();
