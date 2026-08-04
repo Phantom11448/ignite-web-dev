@@ -135,14 +135,18 @@
     color: rgba(255,255,255,0.8);
     margin-bottom: 12px;
   }
-  .hero-visual .overlay-text .wordmark {
+  .hero-visual .overlay-text .wordmark-wrap {
+    position: relative;
     width: min(90%, 780px);
+    margin: 0 auto;
+  }
+  .hero-visual .overlay-text .wordmark {
+    width: 100%;
     height: auto;
     display: block;
-    margin: 0 auto;
     cursor: pointer;
-    transition: none;
   }
+  .wordmark-piece { cursor: pointer; }
   #hero-heading {
     transform-style: preserve-3d;
     transition: transform 0.1s ease-out;
