@@ -141,6 +141,61 @@
     display: block;
     margin: 0 auto;
   }
+  #faq { padding: 100px 56px; }
+  #faq .section-head { margin-bottom: 48px; }
+  #faq-heading span { display: inline-block; transition: transform 0.15s ease; }
+  .faq-list { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+  .faq-item {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .faq-question {
+    width: 100%;
+    background: none;
+    border: none;
+    color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    text-align: left;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    cursor: pointer;
+  }
+  .faq-question .chevron {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #2f7fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2f7fff;
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+  }
+  .faq-item.open .faq-question .chevron { transform: rotate(45deg); }
+  .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+  .faq-answer p {
+    padding: 0 24px 20px;
+    color: rgba(255,255,255,0.65);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    filter: blur(6px);
+    opacity: 0.3;
+    transition: filter 0.5s ease, opacity 0.5s ease;
+  }
+  .faq-item.open .faq-answer p { filter: blur(0); opacity: 1; }
 
   /* ===== WORK SECTION ===== */
   #work {
@@ -295,6 +350,7 @@
   <ul>
     <li><a href="#work">Work</a></li>
     <li><a href="#approach">Approach</a></li>
+    <li><a href="#faq">FAQ</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
   <a href="#contact" class="talk-btn">Let's Talk</a>
@@ -347,6 +403,39 @@
       <div class="num">04</div>
       <h3>Launch</h3>
       <p>Deployed, tested, and handed off with support after go-live.</p>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="section-head">
+    <div class="eyebrow">03 &mdash; Common Questions</div>
+    <h2 id="faq-heading">Frequently asked questions</h2>
+  </div>
+  <div class="faq-list">
+    <div class="faq-item open">
+      <button class="faq-question">How much does a website cost?<span class="chevron">+</span></button>
+      <div class="faq-answer"><p>It depends on what you need, but every project starts with a free quote call so you know the real number upfront — no templates, no surprise fees, no agency markup.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question">How long does it take to build a website?<span class="chevron">+</span></button>
+      <div class="faq-answer"><p>Most small business sites take a few weeks from kickoff to launch, depending on scope. You'll get a real timeline during the free quote call, not a vague estimate.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question">What's the difference between a website and a web app?<span class="chevron">+</span></button>
+      <div class="faq-answer"><p>A website mainly shows information. A web app lets people actually do something — book a table, place an order, log in and track a job. Most businesses need both, and I build either one custom to your needs.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question">Can you recover data from a broken phone or computer?<span class="chevron">+</span></button>
+      <div class="faq-answer"><p>In most cases, yes. If a device won't boot or a drive's failing, I can usually pull your files off before you write it off as a loss.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question">Do you offer logo and branding design?<span class="chevron">+</span></button>
+      <div class="faq-answer"><p>Yes — logo and graphic design is available alongside web work, so your site and your brand actually match instead of looking like they came from two different places.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question">How often should a website be updated?<span class="chevron">+</span></button>
+      <div class="faq-answer"><p>Content and security updates are worth checking a few times a year at minimum. A full redesign is usually more like every 3-5 years, or whenever your business outgrows the old site.</p></div>
     </div>
   </div>
 </section>
@@ -434,6 +523,58 @@ PROJECTS.forEach((p) => {
   card.appendChild(body);
   grid.appendChild(card);
 });
+
+(function() {
+  document.querySelectorAll('.faq-question').forEach(function(btn) {
+    var item = btn.closest('.faq-item');
+    var answer = item.querySelector('.faq-answer');
+    function setHeight() {
+      if (item.classList.contains('open')) {
+        answer.style.maxHeight = answer.scrollHeight + 'px';
+      } else {
+        answer.style.maxHeight = '0px';
+      }
+    }
+    setHeight();
+    btn.addEventListener('click', function() {
+      var wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(function(openItem) {
+        openItem.classList.remove('open');
+        openItem.querySelector('.faq-answer').style.maxHeight = '0px';
+      });
+      if (!wasOpen) {
+        item.classList.add('open');
+        setHeight();
+      }
+    });
+  });
+})();
+
+(function() {
+  var heading = document.getElementById('faq-heading');
+  if (!heading) return;
+  var text = heading.textContent;
+  heading.innerHTML = '';
+  text.split('').forEach(function(ch) {
+    var span = document.createElement('span');
+    span.textContent = ch === ' ' ? '\u00A0' : ch;
+    heading.appendChild(span);
+  });
+  heading.addEventListener('mousemove', function(e) {
+    var rect = heading.getBoundingClientRect();
+    Array.from(heading.children).forEach(function(span) {
+      var sr = span.getBoundingClientRect();
+      var dx = (sr.left + sr.width / 2) - e.clientX;
+      var dy = (sr.top + sr.height / 2) - e.clientY;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+      var force = Math.max(0, 1 - dist / 70);
+      span.style.transform = 'translate(' + (-dx * force * 0.35) + 'px,' + (-dy * force * 0.35) + 'px)';
+    });
+  });
+  heading.addEventListener('mouseleave', function() {
+    Array.from(heading.children).forEach(function(span) { span.style.transform = 'translate(0,0)'; });
+  });
+})();
 </script>
 
 </body>
