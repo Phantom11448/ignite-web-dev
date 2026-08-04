@@ -223,6 +223,8 @@
     transition: filter 0.5s ease, opacity 0.5s ease;
   }
   .faq-item.open .faq-answer p { filter: blur(0); opacity: 1; }
+  .faq-q-text svg { overflow: visible; vertical-align: middle; }
+  .faq-answer p span { display: inline-block; transition: transform 0.15s ease; }
 
   /* ===== WORK SECTION ===== */
   #work {
@@ -860,6 +862,63 @@ PROJECTS.forEach((p) => {
       });
       active = false;
     }, 2400);
+  });
+})();
+
+(function() {
+  // Outline-trace on every FAQ question, drawn in once as it scrolls into view
+  document.querySelectorAll('.faq-question').forEach(function(btn) {
+    var chevron = btn.querySelector('.chevron');
+    var textOnly = btn.textContent.replace(chevron ? chevron.textContent : '', '').trim();
+    var svgWidth = textOnly.length * 11 + 10;
+    var wrap = document.createElement('span');
+    wrap.className = 'faq-q-text';
+    wrap.innerHTML = '<svg viewBox="0 0 ' + svgWidth + ' 30" width="' + svgWidth + '" height="30">' +
+      '<text x="2" y="21" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="16" fill="none" stroke="#2f7fff" stroke-width="1" stroke-dasharray="260" stroke-dashoffset="260">' + textOnly + '</text></svg>';
+    btn.innerHTML = '';
+    btn.appendChild(wrap);
+    if (chevron) btn.appendChild(chevron);
+
+    var traceEl = wrap.querySelector('text');
+    var obs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          traceEl.style.transition = 'stroke-dashoffset 0.9s ease';
+          traceEl.style.strokeDashoffset = '0';
+          setTimeout(function() {
+            traceEl.style.transition = 'fill 0.4s ease';
+            traceEl.style.fill = '#fff';
+          }, 800);
+          obs.unobserve(btn);
+        }
+      });
+    }, { threshold: 0.5 });
+    obs.observe(btn);
+  });
+
+  // Magnetic hover on every FAQ answer's text
+  document.querySelectorAll('.faq-answer p').forEach(function(p) {
+    var words = p.textContent.split(' ');
+    p.innerHTML = '';
+    words.forEach(function(w, i) {
+      var span = document.createElement('span');
+      span.textContent = w;
+      p.appendChild(span);
+      if (i < words.length - 1) p.appendChild(document.createTextNode(' '));
+    });
+    p.addEventListener('mousemove', function(e) {
+      Array.from(p.querySelectorAll('span')).forEach(function(span) {
+        var sr = span.getBoundingClientRect();
+        var dx = (sr.left + sr.width / 2) - e.clientX;
+        var dy = (sr.top + sr.height / 2) - e.clientY;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        var force = Math.max(0, 1 - dist / 60);
+        span.style.transform = 'translate(' + (-dx * force * 0.25) + 'px,' + (-dy * force * 0.25) + 'px)';
+      });
+    });
+    p.addEventListener('mouseleave', function() {
+      Array.from(p.querySelectorAll('span')).forEach(function(span) { span.style.transform = 'translate(0,0)'; });
+    });
   });
 })();
 </script>
