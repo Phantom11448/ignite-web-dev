@@ -230,6 +230,116 @@
   #work {
     padding: 110px 56px;
   }
+  .showcase-fade {
+    position: relative;
+    margin: 0 -56px;
+    height: 640px;
+    overflow: hidden;
+    background: #050506;
+  }
+  .showcase-fade-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  .showcase-fade-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    transform: scale(0.92);
+    cursor: grab;
+  }
+  .showcase-fade-slide.is-active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1.06);
+    z-index: 2;
+  }
+  .showcase-fade-slide img,
+  .showcase-fade-slide video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .showcase-fade-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 48px 64px;
+    background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+    z-index: 3;
+  }
+  .showcase-fade-overlay h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    margin-bottom: 8px;
+  }
+  .showcase-fade-overlay p {
+    color: rgba(255,255,255,0.65);
+    max-width: 500px;
+    margin-bottom: 14px;
+  }
+  .showcase-fade-overlay a {
+    color: #2f7fff;
+    text-decoration: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(47,127,255,0.5);
+  }
+  .showcase-fade-controls {
+    position: absolute;
+    bottom: 40px;
+    right: 64px;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .showcase-fade-controls button {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
+  }
+  .showcase-fade-controls button:hover {
+    border-color: #2f7fff;
+    color: #2f7fff;
+    background: rgba(47,127,255,0.15);
+  }
+  .showcase-fade-dots {
+    display: flex;
+    gap: 8px;
+  }
+  .showcase-fade-dots button {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.3s ease;
+  }
+  .showcase-fade-dots button.active {
+    background: #2f7fff;
+    transform: scale(1.4);
+  }
+  @media (max-width: 700px) {
+    .showcase-fade { margin: 0 -20px; height: 460px; }
+    .showcase-fade-overlay { padding: 24px; }
+    .showcase-fade-controls { right: 24px; bottom: 24px; }
+  }
   .section-head {
     display: flex;
     justify-content: space-between;
@@ -410,7 +520,14 @@
     </div>
     <a href="projects.html" class="view-all">View full showcase &rarr;</a>
   </div>
-  <div class="work-grid" id="workGrid"></div>
+  <div class="showcase-fade" id="showcaseFade">
+    <div class="showcase-fade-track" id="showcaseFadeTrack"></div>
+    <div class="showcase-fade-controls">
+      <button id="fadePrevBtn" aria-label="Previous project">&#8592;</button>
+      <div class="showcase-fade-dots" id="showcaseFadeDots"></div>
+      <button id="fadeNextBtn" aria-label="Next project">&#8594;</button>
+    </div>
+  </div>
 </section>
 
 <section id="approach">
@@ -940,6 +1057,94 @@ PROJECTS.forEach((p) => {
       Array.from(p.querySelectorAll('span')).forEach(function(span) { span.style.transform = 'translate(0,0)'; });
     });
   });
+})();
+
+(function() {
+  var PROJECTS = [
+    { slug: 'coldside', title: 'ColdSide Study', desc: 'EPA 608 exam prep', src: 'https://ignitewebdev.com/images/coldside-screenshot-1.png', type: 'img', url: 'https://coldsidestudy.netlify.app' },
+    { slug: 'bizcheck', title: 'BizCheck', desc: 'Job-costing software for trade and service businesses', src: 'https://ignitewebdev.com/images/bizcheck-display-1.jpg', type: 'img', url: 'https://ignitewebdev.com/bizcheck/' },
+    { slug: 'saltline', title: 'Salt Line Kitchen', desc: 'Table-side QR ordering, no delivery-app commission taken', src: 'https://ignitewebdev.com/saltline/saltline-screenshot-1.jpg', type: 'img', url: 'https://ignitewebdev.com/saltline/demo/' },
+    { slug: '3fs', title: '3FS', desc: 'Fast-paced card game PWA built from scratch', src: 'https://ignitewebdev.com/3fs/intro.mp4', type: 'video', url: 'https://ignitewebdev.com/3fs/' },
+    { slug: 'signal-lost', title: 'Signal Lost', desc: 'HTML lessons through an interactive story', src: 'https://ignitewebdev.com/images/signal-demo.mp4', type: 'video', url: null },
+    { slug: 'neon-province', title: 'Neon Province', desc: 'Learn CSS through story', src: 'https://ignitewebdev.com/images/neon-demo.mp4', type: 'video', url: null }
+  ];
+
+  var track = document.getElementById('showcaseFadeTrack');
+  var dotsWrap = document.getElementById('showcaseFadeDots');
+  if (!track) return;
+  var slides = [];
+  var activeIndex = 0;
+
+  PROJECTS.forEach(function(p, i) {
+    var slide = document.createElement('div');
+    slide.className = 'showcase-fade-slide' + (i === 0 ? ' is-active' : '');
+
+    var media = p.type === 'video' ? document.createElement('video') : document.createElement('img');
+    if (p.type === 'video') { media.muted = true; media.autoplay = true; media.loop = true; media.playsInline = true; }
+    media.src = p.src;
+    slide.appendChild(media);
+
+    var overlay = document.createElement('div');
+    overlay.className = 'showcase-fade-overlay';
+    overlay.innerHTML = '<h3>' + p.title + '</h3><p>' + p.desc + '</p>' +
+      (p.url ? '<a href="' + p.url + '" target="_blank" rel="noopener">Visit project &rarr;</a>' : '<span style="color:rgba(255,255,255,0.4);font-size:0.85rem;font-style:italic;">Link not currently available</span>');
+    slide.appendChild(overlay);
+
+    slide.addEventListener('click', function(e) {
+      if (e.target.closest('a')) return;
+      if (dragged) return;
+      if (i === activeIndex && p.url) {
+        window.open(p.url, '_blank', 'noopener');
+      } else {
+        goTo(i);
+      }
+    });
+
+    track.appendChild(slide);
+    slides.push(slide);
+
+    var dot = document.createElement('button');
+    if (i === 0) dot.classList.add('active');
+    dot.addEventListener('click', function() { goTo(i); });
+    dotsWrap.appendChild(dot);
+  });
+
+  function goTo(i) {
+    var next = (i + PROJECTS.length) % PROJECTS.length;
+    if (next === activeIndex) return;
+    slides[activeIndex].classList.remove('is-active');
+    slides[next].classList.add('is-active');
+    Array.from(dotsWrap.children).forEach(function(d, idx) { d.classList.toggle('active', idx === next); });
+    activeIndex = next;
+  }
+
+  document.getElementById('fadePrevBtn').addEventListener('click', function() { goTo(activeIndex - 1); });
+  document.getElementById('fadeNextBtn').addEventListener('click', function() { goTo(activeIndex + 1); });
+
+  var dragging = false, dragged = false, startX = 0;
+  track.addEventListener('pointerdown', function(e) {
+    dragging = true; dragged = false; startX = e.clientX;
+  });
+  track.addEventListener('pointermove', function(e) {
+    if (!dragging) return;
+    if (Math.abs(e.clientX - startX) > 8) dragged = true;
+  });
+  window.addEventListener('pointerup', function(e) {
+    if (!dragging) return;
+    dragging = false;
+    var delta = e.clientX - startX;
+    if (Math.abs(delta) > 50) goTo(activeIndex + (delta < 0 ? 1 : -1));
+  });
+
+  var wheelLock = false;
+  track.addEventListener('wheel', function(e) {
+    if (Math.abs(e.deltaX) < 5) return;
+    e.preventDefault();
+    if (wheelLock) return;
+    wheelLock = true;
+    goTo(activeIndex + (e.deltaX > 0 ? 1 : -1));
+    setTimeout(function() { wheelLock = false; }, 500);
+  }, { passive: false });
 })();
 </script>
 
