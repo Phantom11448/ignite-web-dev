@@ -614,30 +614,39 @@ PROJECTS.forEach((p) => {
 (function() {
   var img = document.getElementById('wordmark-img');
   if (!img) return;
-  var vy = 0, vr = 0, y = 0, rot = 0, falling = false;
+  var vy = 0, vr = 0, y = 0, rot = 0, falling = false, bounces = 0;
+  var floor = 90;
   function tick() {
     if (falling) {
       vy += 1.6;
       y += vy;
       rot += vr;
+      if (y > floor) {
+        y = floor;
+        vy *= -0.45;
+        vr *= 0.6;
+        bounces++;
+        if (bounces > 4 || Math.abs(vy) < 2) {
+          falling = false;
+          setTimeout(function() {
+            img.style.transition = 'transform 0.6s ease';
+            y = 0; rot = 0; vy = 0;
+            img.style.transform = 'translateY(0) rotate(0deg)';
+            setTimeout(function() { img.style.transition = 'none'; }, 650);
+          }, 500);
+        }
+      }
       img.style.transform = 'translateY(' + y + 'px) rotate(' + rot + 'deg)';
-      if (y > 300) falling = false;
     }
     requestAnimationFrame(tick);
   }
   tick();
-  img.addEventListener('click', function() {
+  img.addEventListener('mouseenter', function() {
     if (falling) return;
     falling = true;
+    bounces = 0;
     vy = 0;
     vr = (Math.random() - 0.5) * 30;
-    setTimeout(function() {
-      falling = false;
-      y = 0; rot = 0; vy = 0;
-      img.style.transition = 'transform 0.6s ease';
-      img.style.transform = 'translateY(0) rotate(0deg)';
-      setTimeout(function() { img.style.transition = 'none'; }, 650);
-    }, 1600);
   });
 })();
 
