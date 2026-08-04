@@ -135,26 +135,11 @@
     color: rgba(255,255,255,0.8);
     margin-bottom: 12px;
   }
-  .hero-visual .overlay-text h2 {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 800;
-    font-size: clamp(3.5rem, 8vw, 7rem);
-    line-height: 1.1;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    gap: 8px;
-    padding-bottom: 0.06em;
-  }
-  .hero-visual .overlay-text h2 .logo-letter {
-    height: 2.5em;
-    width: 1em;
-    object-fit: contain;
-    margin-top: 0em;
-    margin-right: 0.15em;
-    margin-bottom: 0em;
-    margin-left: 0em;
-    filter: hue-rotate(180deg) saturate(1.4) brightness(1.05);
+  .hero-visual .overlay-text .wordmark {
+    width: min(90%, 780px);
+    height: auto;
+    display: block;
+    margin: 0 auto;
   }
 
   /* ===== WORK SECTION ===== */
@@ -325,7 +310,7 @@
   <div class="hero-visual">
     <div class="overlay-text">
       <div class="kicker">Since 2024, building real results</div>
-      <h2><img src="images/Ignite-logo.png" class="logo-letter" alt="">GNITE</h2>
+      <img src="images/ignitefullword.png" class="wordmark" alt="Ignite">
     </div>
   </div>
 </section>
