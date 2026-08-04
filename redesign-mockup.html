@@ -139,7 +139,7 @@
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 800;
     font-size: clamp(3.5rem, 8vw, 7rem);
-    line-height: 0.9;
+    line-height: 1.1;
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -147,10 +147,12 @@
     padding-bottom: 0.06em;
   }
   .hero-visual .overlay-text h2 .logo-letter {
-    height: 1.3em;
-    width: auto;
-    margin: 0 -0.12em 0 0;
+    height: 2.5em;
+    width: 1em;
+    object-fit: contain;
+    margin-right: 0.15em;
     transform: translateY(0.2em);
+    filter: hue-rotate(180deg) saturate(1.4) brightness(1.05);
   }
 
   /* ===== WORK SECTION ===== */
