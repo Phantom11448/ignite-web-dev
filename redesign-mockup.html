@@ -498,28 +498,29 @@
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 700;
     font-size: clamp(2rem, 5vw, 3.6rem);
-    max-width: 680px;
+    max-width: 900px;
     margin: 0 auto 40px;
     line-height: 1.15;
   }
   .contact-letter {
     display: inline-block;
+    position: relative;
   }
   .typewriter-cursor {
-    display: inline-block;
-    width: 3px;
-    height: 1em;
-    background: linear-gradient(45deg, #00ff00, #00ff88, #ff00ff, #ff0088);
-    animation: cursorFlash 0.4s ease-in-out infinite, cursorGlow 2s ease-in-out infinite;
-    margin: 0 2px;
+    position: absolute;
+    pointer-events: none;
+    width: 8px;
+    height: 1.2em;
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 40%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(1px);
+    box-shadow: 0 0 15px rgba(255,255,255,0.9), 0 0 30px rgba(255,255,255,0.6), 0 0 45px rgba(255,255,255,0.3);
+    animation: typewriterGlow 0.3s ease-out;
+    opacity: 0;
   }
-  @keyframes cursorFlash {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-  @keyframes cursorGlow {
-    0%, 100% { box-shadow: 0 0 10px #00ff00, 0 0 20px #ff00ff; }
-    50% { box-shadow: 0 0 20px #00ff88, 0 0 30px #ff0088; }
+  @keyframes typewriterGlow {
+    0% { opacity: 1; box-shadow: 0 0 20px rgba(255,255,255,1), 0 0 40px rgba(255,255,255,0.8), 0 0 60px rgba(255,255,255,0.5); }
+    100% { opacity: 0; box-shadow: 0 0 5px rgba(255,255,255,0.2), 0 0 15px rgba(255,255,255,0.1); }
   }
   #contact .cta-btn {
     display: inline-flex;
@@ -984,9 +985,11 @@
   var typewriterDone = false;
   
   // Create cursor
-  var cursor = document.createElement('span');
+  var cursor = document.createElement('div');
   cursor.className = 'typewriter-cursor';
   cursor.style.display = 'none';
+  cursor.style.left = '0';
+  cursor.style.top = '0';
   heading.appendChild(cursor);
   
   // Trigger typewriter on scroll
@@ -994,17 +997,29 @@
     entries.forEach(function(entry) {
       if (entry.isIntersecting && !typewriterDone) {
         typewriterDone = true;
-        cursor.style.display = 'inline-block';
         // Start typewriter animation
         letters.forEach(function(l, i) {
           setTimeout(function() {
+            // Position cursor over the letter
+            var rect = l.el.getBoundingClientRect();
+            var headingRect = heading.getBoundingClientRect();
+            cursor.style.display = 'block';
+            cursor.style.left = (rect.left - headingRect.left) + 'px';
+            cursor.style.top = (rect.top - headingRect.top - 2) + 'px';
+            
+            // Trigger glow animation
+            cursor.style.animation = 'none';
+            void cursor.offsetWidth; // Force reflow
+            cursor.style.animation = 'typewriterGlow 0.3s ease-out';
+            
+            // Show the letter
             l.el.style.opacity = '1';
-          }, i * 100); // 100ms between each letter (slower)
+          }, i * 100); // 100ms between each letter
         });
         // Hide cursor after typewriter finishes
         setTimeout(function() {
           cursor.style.display = 'none';
-        }, letters.length * 100 + 200);
+        }, letters.length * 100 + 300);
       }
     });
   }, { threshold: 0.3 });
