@@ -498,9 +498,13 @@
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 700;
     font-size: clamp(2rem, 5vw, 3.6rem);
-    max-width: 780px;
+    max-width: 680px;
     margin: 0 auto 40px;
     line-height: 1.15;
+  }
+  .contact-letter {
+    display: inline-block;
+    transition: opacity 0.05s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   #contact .cta-btn {
     display: inline-flex;
@@ -947,48 +951,54 @@
 (function() {
   var heading = document.getElementById('gravity-heading');
   if (!heading) return;
+  
   var text = heading.textContent;
   heading.innerHTML = '';
   var letters = [];
-  text.split('').forEach(function(ch) {
+  
+  // Create spans for each character
+  text.split('').forEach(function(ch, idx) {
     var span = document.createElement('span');
-    span.className = 'gravity-letter';
+    span.className = 'contact-letter';
     span.textContent = ch === ' ' ? '\u00A0' : ch;
+    span.style.opacity = '0';
     heading.appendChild(span);
-    letters.push({ el: span, vy: 0, vx: 0, y: 0, x: 0, rot: 0, vr: 0, falling: false });
+    letters.push({ el: span, idx: idx });
   });
-  var active = false;
-  function tick() {
-    if (active) {
-      letters.forEach(function(l) {
-        if (!l.falling) return;
-        l.vy += 1.4;
-        l.y += l.vy;
-        l.x += l.vx;
-        l.rot += l.vr;
-        l.el.style.transform = 'translate(' + l.x + 'px,' + l.y + 'px) rotate(' + l.rot + 'deg)';
-      });
-    }
-    requestAnimationFrame(tick);
-  }
-  tick();
-  heading.addEventListener('click', function() {
-    if (active) return;
-    active = true;
-    letters.forEach(function(l) {
-      l.falling = true;
-      l.vy = -6 - Math.random() * 4;
-      l.vx = (Math.random() - 0.5) * 6;
-      l.vr = (Math.random() - 0.5) * 20;
+  
+  var typewriterDone = false;
+  
+  // Trigger typewriter on scroll
+  var obs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting && !typewriterDone) {
+        typewriterDone = true;
+        // Start typewriter animation
+        letters.forEach(function(l, i) {
+          setTimeout(function() {
+            l.el.style.opacity = '1';
+          }, i * 40); // 40ms between each letter
+        });
+      }
     });
-    setTimeout(function() {
-      letters.forEach(function(l) {
-        l.falling = false;
-        l.y = 0; l.x = 0; l.rot = 0; l.vy = 0; l.vx = 0;
-        l.el.style.transform = 'translate(0,0) rotate(0deg)';
-      });
-      active = false;
-    }, 2400);
+  }, { threshold: 0.3 });
+  obs.observe(heading);
+  
+  // Scatter on hover
+  heading.addEventListener('mouseenter', function() {
+    letters.forEach(function(l) {
+      var angle = (Math.PI * 2 / letters.length) * l.idx;
+      var distance = 80;
+      var x = Math.cos(angle) * distance;
+      var y = Math.sin(angle) * distance;
+      l.el.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+    });
+  });
+  
+  heading.addEventListener('mouseleave', function() {
+    letters.forEach(function(l) {
+      l.el.style.transform = 'translate(0, 0)';
+    });
   });
 })();
 
