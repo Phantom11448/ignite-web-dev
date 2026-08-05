@@ -498,9 +498,11 @@
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 700;
     font-size: clamp(2rem, 5vw, 3.6rem);
-    max-width: 900px;
+    max-width: 1000px;
     margin: 0 auto 40px;
     line-height: 1.15;
+    word-spacing: normal;
+    position: relative;
   }
   .contact-letter {
     display: inline-block;
@@ -509,18 +511,18 @@
   .typewriter-cursor {
     position: absolute;
     pointer-events: none;
-    width: 8px;
-    height: 1.2em;
-    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 40%, transparent 70%);
+    width: 12px;
+    height: 1.3em;
+    background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0.6) 30%, transparent 80%);
     border-radius: 50%;
-    filter: blur(1px);
-    box-shadow: 0 0 15px rgba(255,255,255,0.9), 0 0 30px rgba(255,255,255,0.6), 0 0 45px rgba(255,255,255,0.3);
-    animation: typewriterGlow 0.3s ease-out;
+    filter: blur(0.5px);
+    box-shadow: 0 0 25px rgba(255,255,255,1), 0 0 50px rgba(255,255,255,0.9), 0 0 80px rgba(255,255,255,0.6), 0 0 120px rgba(255,255,255,0.3);
+    animation: typewriterGlow 0.35s ease-out;
     opacity: 0;
   }
   @keyframes typewriterGlow {
-    0% { opacity: 1; box-shadow: 0 0 20px rgba(255,255,255,1), 0 0 40px rgba(255,255,255,0.8), 0 0 60px rgba(255,255,255,0.5); }
-    100% { opacity: 0; box-shadow: 0 0 5px rgba(255,255,255,0.2), 0 0 15px rgba(255,255,255,0.1); }
+    0% { opacity: 1; box-shadow: 0 0 30px rgba(255,255,255,1), 0 0 60px rgba(255,255,255,1), 0 0 100px rgba(255,255,255,0.8), 0 0 150px rgba(255,255,255,0.4); }
+    100% { opacity: 0.2; box-shadow: 0 0 8px rgba(255,255,255,0.3), 0 0 20px rgba(255,255,255,0.1); }
   }
   #contact .cta-btn {
     display: inline-flex;
@@ -1000,17 +1002,23 @@
         // Start typewriter animation
         letters.forEach(function(l, i) {
           setTimeout(function() {
-            // Position cursor over the letter
-            var rect = l.el.getBoundingClientRect();
-            var headingRect = heading.getBoundingClientRect();
+            // Position cursor over the letter using offset calculations
+            var letterLeft = 0;
+            var letterTop = 0;
+            var el = l.el;
+            while (el && el !== heading) {
+              letterLeft += el.offsetLeft;
+              letterTop += el.offsetTop;
+              el = el.offsetParent;
+            }
             cursor.style.display = 'block';
-            cursor.style.left = (rect.left - headingRect.left) + 'px';
-            cursor.style.top = (rect.top - headingRect.top - 2) + 'px';
+            cursor.style.left = (letterLeft - 2) + 'px';
+            cursor.style.top = (letterTop - 4) + 'px';
             
             // Trigger glow animation
             cursor.style.animation = 'none';
             void cursor.offsetWidth; // Force reflow
-            cursor.style.animation = 'typewriterGlow 0.3s ease-out';
+            cursor.style.animation = 'typewriterGlow 0.35s ease-out';
             
             // Show the letter
             l.el.style.opacity = '1';
