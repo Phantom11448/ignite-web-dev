@@ -504,7 +504,22 @@
   }
   .contact-letter {
     display: inline-block;
-    transition: opacity 0.05s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .typewriter-cursor {
+    display: inline-block;
+    width: 3px;
+    height: 1em;
+    background: linear-gradient(45deg, #00ff00, #00ff88, #ff00ff, #ff0088);
+    animation: cursorFlash 0.4s ease-in-out infinite, cursorGlow 2s ease-in-out infinite;
+    margin: 0 2px;
+  }
+  @keyframes cursorFlash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  @keyframes cursorGlow {
+    0%, 100% { box-shadow: 0 0 10px #00ff00, 0 0 20px #ff00ff; }
+    50% { box-shadow: 0 0 20px #00ff88, 0 0 30px #ff0088; }
   }
   #contact .cta-btn {
     display: inline-flex;
@@ -968,38 +983,32 @@
   
   var typewriterDone = false;
   
+  // Create cursor
+  var cursor = document.createElement('span');
+  cursor.className = 'typewriter-cursor';
+  cursor.style.display = 'none';
+  heading.appendChild(cursor);
+  
   // Trigger typewriter on scroll
   var obs = new IntersectionObserver(function(entries) {
     entries.forEach(function(entry) {
       if (entry.isIntersecting && !typewriterDone) {
         typewriterDone = true;
+        cursor.style.display = 'inline-block';
         // Start typewriter animation
         letters.forEach(function(l, i) {
           setTimeout(function() {
             l.el.style.opacity = '1';
-          }, i * 40); // 40ms between each letter
+          }, i * 100); // 100ms between each letter (slower)
         });
+        // Hide cursor after typewriter finishes
+        setTimeout(function() {
+          cursor.style.display = 'none';
+        }, letters.length * 100 + 200);
       }
     });
   }, { threshold: 0.3 });
   obs.observe(heading);
-  
-  // Scatter on hover
-  heading.addEventListener('mouseenter', function() {
-    letters.forEach(function(l) {
-      var angle = (Math.PI * 2 / letters.length) * l.idx;
-      var distance = 80;
-      var x = Math.cos(angle) * distance;
-      var y = Math.sin(angle) * distance;
-      l.el.style.transform = 'translate(' + x + 'px,' + y + 'px)';
-    });
-  });
-  
-  heading.addEventListener('mouseleave', function() {
-    letters.forEach(function(l) {
-      l.el.style.transform = 'translate(0, 0)';
-    });
-  });
 })();
 
 (function() {
