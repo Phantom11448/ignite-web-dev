@@ -168,7 +168,16 @@
   .gravity-letter { display: inline-block; cursor: pointer; }
   #faq { padding: 100px 56px; }
   #faq .section-head { margin-bottom: 48px; }
-  #faq-heading span { display: inline-block; transition: transform 0.15s ease; }
+  #faq-heading span {
+    display: inline-block;
+    transition: transform 0.15s ease, color 0.05s;
+    color: transparent;
+    -webkit-text-stroke: 1px #2f7fff;
+  }
+  #faq-heading.revealed span {
+    color: #fff;
+    transition: transform 0.15s ease, color 0.7s ease;
+  }
   .faq-list { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
   .faq-item {
     background: rgba(12,12,14,0.75);
@@ -223,7 +232,18 @@
     transition: filter 0.5s ease, opacity 0.5s ease;
   }
   .faq-item.open .faq-answer p { filter: blur(0); opacity: 1; }
-  .faq-q-text svg { overflow: visible; vertical-align: middle; }
+  .faq-q-shimmer {
+    background: linear-gradient(90deg, #fff 0%, #fff 40%, #2f7fff 50%, #fff 60%, #fff 100%);
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: faqShimmer 3s linear infinite;
+  }
+  @keyframes faqShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -50% 0; }
+  }
   .faq-answer p span { display: inline-block; transition: transform 0.15s ease; }
 
   /* ===== WORK SECTION ===== */
@@ -689,6 +709,12 @@
   heading.addEventListener('mouseleave', function() {
     Array.from(heading.children).forEach(function(span) { span.style.transform = 'translate(0,0)'; });
   });
+  var headingObs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      heading.classList.toggle('revealed', entry.isIntersecting);
+    });
+  }, { threshold: 0.5 });
+  headingObs.observe(heading);
 })();
 
 (function() {
@@ -967,37 +993,16 @@
 })();
 
 (function() {
-  // Outline-trace on every FAQ question, drawn in once as it scrolls into view
+  // Shimmer sweep on every FAQ question, continuous
   document.querySelectorAll('.faq-question').forEach(function(btn) {
     var chevron = btn.querySelector('.chevron');
     var textOnly = btn.textContent.replace(chevron ? chevron.textContent : '', '').trim();
-    var svgWidth = textOnly.length * 11 + 10;
     var wrap = document.createElement('span');
-    wrap.className = 'faq-q-text';
-    wrap.innerHTML = '<svg viewBox="0 0 ' + svgWidth + ' 30" width="' + svgWidth + '" height="30">' +
-      '<text x="2" y="21" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="16" fill="none" stroke="#2f7fff" stroke-width="1" stroke-dasharray="260" stroke-dashoffset="260">' + textOnly + '</text></svg>';
+    wrap.className = 'faq-q-shimmer';
+    wrap.textContent = textOnly;
     btn.innerHTML = '';
     btn.appendChild(wrap);
     if (chevron) btn.appendChild(chevron);
-
-    var traceEl = wrap.querySelector('text');
-    var obs = new IntersectionObserver(function(entries) {
-      entries.forEach(function(entry) {
-        if (entry.isIntersecting) {
-          traceEl.style.transition = 'none';
-          traceEl.style.fill = 'none';
-          traceEl.style.strokeDashoffset = '260';
-          void traceEl.getBoundingClientRect();
-          traceEl.style.transition = 'stroke-dashoffset 0.9s ease';
-          traceEl.style.strokeDashoffset = '0';
-          setTimeout(function() {
-            traceEl.style.transition = 'fill 0.4s ease';
-            traceEl.style.fill = '#fff';
-          }, 800);
-        }
-      });
-    }, { threshold: 0.5 });
-    obs.observe(btn);
   });
 
   // Magnetic hover on every FAQ answer's text
