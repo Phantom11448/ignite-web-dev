@@ -48,14 +48,88 @@
   nav ul a { text-decoration: none; color: rgba(255,255,255,0.65); font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem; transition: color 0.25s ease; }
   nav ul a:hover { color: #fff; }
   nav .talk-btn {
-    background: #2f7fff;
+    background: none;
     color: #fff;
     text-decoration: none;
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 700;
     font-size: 0.9rem;
     padding: 12px 26px;
-    border-radius: 999px;
+    border-radius: 8px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+  }
+  nav .talk-btn::before,
+  nav .talk-btn::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #2f7fff;
+    box-shadow: 0 0 10px rgba(47,127,255,0.8);
+  }
+  nav .talk-btn::before {
+    top: 0;
+    left: 0;
+    border-right: none;
+    border-bottom: none;
+    border-radius: 4px 0 0 0;
+    transition: inset 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    inset: 0 auto auto 0;
+  }
+  nav .talk-btn::after {
+    top: 0;
+    right: 0;
+    border-left: none;
+    border-bottom: none;
+    border-radius: 0 4px 0 0;
+    transition: inset 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    inset: 0 0 auto auto;
+  }
+  nav .talk-btn .bracket-bottom-left {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #2f7fff;
+    border-right: none;
+    border-top: none;
+    border-radius: 0 0 0 4px;
+    box-shadow: 0 0 10px rgba(47,127,255,0.8);
+    transition: inset 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    inset: auto auto 0 0;
+    pointer-events: none;
+  }
+  nav .talk-btn .bracket-bottom-right {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #2f7fff;
+    border-left: none;
+    border-top: none;
+    border-radius: 0 0 4px 0;
+    box-shadow: 0 0 10px rgba(47,127,255,0.8);
+    transition: inset 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    inset: auto 0 0 auto;
+    pointer-events: none;
+  }
+  nav .talk-btn:hover::before {
+    inset: -6px auto auto -6px;
+  }
+  nav .talk-btn:hover::after {
+    inset: -6px -6px auto auto;
+  }
+  nav .talk-btn:hover .bracket-bottom-left {
+    inset: auto auto -6px -6px;
+  }
+  nav .talk-btn:hover .bracket-bottom-right {
+    inset: auto -6px -6px auto;
   }
 
   /* ===== SPLIT HERO ===== */
@@ -102,18 +176,91 @@
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    background: #fff;
-    color: #0c0c0e;
+    background: none;
+    color: #fff;
     text-decoration: none;
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 700;
     font-size: 0.95rem;
     padding: 16px 30px;
-    border-radius: 999px;
+    border-radius: 8px;
     width: fit-content;
     transition: transform 0.25s ease;
+    position: relative;
+    overflow: visible;
   }
-  .hero-panel .cta-btn:hover { transform: translateY(-2px); }
+  .hero-panel .cta-btn::before,
+  .hero-panel .cta-btn::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #2f7fff;
+    box-shadow: 0 0 14px rgba(47,127,255,0.9);
+  }
+  .hero-panel .cta-btn::before {
+    top: 0;
+    left: 0;
+    border-right: none;
+    border-bottom: none;
+    border-radius: 5px 0 0 0;
+    transition: inset 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    inset: 0 auto auto 0;
+  }
+  .hero-panel .cta-btn::after {
+    top: 0;
+    right: 0;
+    border-left: none;
+    border-bottom: none;
+    border-radius: 0 5px 0 0;
+    transition: inset 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    inset: 0 0 auto auto;
+  }
+  .hero-panel .cta-btn .bracket-bottom-left {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #2f7fff;
+    border-right: none;
+    border-top: none;
+    border-radius: 0 0 0 5px;
+    box-shadow: 0 0 14px rgba(47,127,255,0.9);
+    transition: inset 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    inset: auto auto 0 0;
+    pointer-events: none;
+  }
+  .hero-panel .cta-btn .bracket-bottom-right {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #2f7fff;
+    border-left: none;
+    border-top: none;
+    border-radius: 0 0 5px 0;
+    box-shadow: 0 0 14px rgba(47,127,255,0.9);
+    transition: inset 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    inset: auto 0 0 auto;
+    pointer-events: none;
+  }
+  .hero-panel .cta-btn:hover {
+    transform: translateY(-2px);
+  }
+  .hero-panel .cta-btn:hover::before {
+    inset: -8px auto auto -8px;
+  }
+  .hero-panel .cta-btn:hover::after {
+    inset: -8px -8px auto auto;
+  }
+  .hero-panel .cta-btn:hover .bracket-bottom-left {
+    inset: auto auto -8px -8px;
+  }
+  .hero-panel .cta-btn:hover .bracket-bottom-right {
+    inset: auto -8px -8px auto;
+  }
 
   .hero-visual {
     position: relative;
@@ -268,10 +415,11 @@
     left: 50%;
     width: min(70%, 780px);
     height: 480px;
-    transform: translate(-50%, -50%) scale(0.9);
+    transform: translate(-50%, -50%) scale(0.6);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    filter: blur(12px);
+    transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1), filter 0.8s ease;
     cursor: grab;
     touch-action: pan-y;
     border-radius: 14px;
@@ -282,6 +430,7 @@
     opacity: 1;
     pointer-events: auto;
     transform: translate(-50%, -50%) scale(1);
+    filter: blur(0);
     z-index: 2;
   }
   .showcase-fade-slide img,
@@ -303,11 +452,27 @@
     font-family: 'Space Grotesk', sans-serif;
     font-size: clamp(1.6rem, 3vw, 2.4rem);
     margin-bottom: 8px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .showcase-fade-slide.is-active .showcase-fade-overlay h3 {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.3s;
   }
   .showcase-fade-overlay p {
     color: rgba(255,255,255,0.65);
     max-width: 500px;
     margin-bottom: 14px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .showcase-fade-slide.is-active .showcase-fade-overlay p {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.4s;
   }
   .showcase-fade-overlay a {
     color: #2f7fff;
@@ -316,6 +481,15 @@
     font-weight: 600;
     font-size: 0.9rem;
     border-bottom: 1px solid rgba(47,127,255,0.5);
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .showcase-fade-slide.is-active .showcase-fade-overlay a {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.5s;
   }
   #fadePrevBtn, #fadeNextBtn {
     position: absolute;
@@ -528,17 +702,90 @@
     display: inline-flex;
     align-items: center;
     gap: 12px;
-    background: #2f7fff;
+    background: none;
     color: #fff;
     text-decoration: none;
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 700;
     font-size: 1rem;
     padding: 18px 36px;
-    border-radius: 999px;
+    border-radius: 8px;
     transition: transform 0.25s ease;
+    position: relative;
+    overflow: visible;
   }
-  #contact .cta-btn:hover { transform: translateY(-2px); }
+  #contact .cta-btn::before,
+  #contact .cta-btn::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #2f7fff;
+    box-shadow: 0 0 18px rgba(47,127,255,1);
+  }
+  #contact .cta-btn::before {
+    top: 0;
+    left: 0;
+    border-right: none;
+    border-bottom: none;
+    border-radius: 6px 0 0 0;
+    transition: inset 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    inset: 0 auto auto 0;
+  }
+  #contact .cta-btn::after {
+    top: 0;
+    right: 0;
+    border-left: none;
+    border-bottom: none;
+    border-radius: 0 6px 0 0;
+    transition: inset 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    inset: 0 0 auto auto;
+  }
+  #contact .cta-btn .bracket-bottom-left {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #2f7fff;
+    border-right: none;
+    border-top: none;
+    border-radius: 0 0 0 6px;
+    box-shadow: 0 0 18px rgba(47,127,255,1);
+    transition: inset 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    inset: auto auto 0 0;
+    pointer-events: none;
+  }
+  #contact .cta-btn .bracket-bottom-right {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #2f7fff;
+    border-left: none;
+    border-top: none;
+    border-radius: 0 0 6px 0;
+    box-shadow: 0 0 18px rgba(47,127,255,1);
+    transition: inset 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    inset: auto 0 0 auto;
+    pointer-events: none;
+  }
+  #contact .cta-btn:hover {
+    transform: translateY(-2px);
+  }
+  #contact .cta-btn:hover::before {
+    inset: -10px auto auto -10px;
+  }
+  #contact .cta-btn:hover::after {
+    inset: -10px -10px auto auto;
+  }
+  #contact .cta-btn:hover .bracket-bottom-left {
+    inset: auto auto -10px -10px;
+  }
+  #contact .cta-btn:hover .bracket-bottom-right {
+    inset: auto -10px -10px auto;
+  }
 
   footer {
     padding: 32px 56px;
@@ -573,7 +820,7 @@
     <li><a href="#faq">FAQ</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
-  <a href="#contact" class="talk-btn">Let's Talk</a>
+  <a href="#contact" class="talk-btn">Let's Talk<div class="bracket-bottom-left"></div><div class="bracket-bottom-right"></div></a>
 </nav>
 
 <section id="hero">
@@ -581,7 +828,7 @@
     <div class="eyebrow" id="hero-eyebrow">Houston, TX &middot; Freelance Web Developer</div>
     <h1 id="hero-heading">Custom websites that actually bring in customers.</h1>
     <p id="hero-para">Real code, no templates, no shortcuts. Built fast, built right, for small businesses that need a site that works as hard as they do.</p>
-    <a href="#contact" class="cta-btn" id="hero-cta">Request a Quote &rarr;</a>
+    <a href="#contact" class="cta-btn" id="hero-cta">Request a Quote &rarr;<div class="bracket-bottom-left"></div><div class="bracket-bottom-right"></div></a>
   </div>
   <div class="hero-visual">
     <div class="overlay-text">
@@ -672,7 +919,7 @@
 <section id="contact">
   <div class="eyebrow">02 &mdash; Get In Touch</div>
   <h2 id="gravity-heading">Let's build something that actually gets you customers.</h2>
-  <a href="#contact" class="cta-btn">Get a Free Quote &rarr;</a>
+  <a href="#contact" class="cta-btn">Get a Free Quote &rarr;<div class="bracket-bottom-left"></div><div class="bracket-bottom-right"></div></a>
 </section>
 
 <footer>
