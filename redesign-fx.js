@@ -396,8 +396,11 @@
     activeIndex = next;
   }
 
-  document.getElementById('fadePrevBtn').addEventListener('click', function() { goTo(activeIndex - 1); });
-  document.getElementById('fadeNextBtn').addEventListener('click', function() { goTo(activeIndex + 1); });
+  var prevBtn = document.getElementById('fadePrevBtn');
+  var nextBtn = document.getElementById('fadeNextBtn');
+  if (!prevBtn || !nextBtn) return;
+  prevBtn.addEventListener('click', function() { goTo(activeIndex - 1); });
+  nextBtn.addEventListener('click', function() { goTo(activeIndex + 1); });
 
   var dragging = false, dragged = false, startX = 0;
   track.addEventListener('pointerdown', function(e) {

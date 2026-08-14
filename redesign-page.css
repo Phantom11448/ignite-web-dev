@@ -1,0 +1,233 @@
+/* ============================================================
+   Sub-page styles — loaded AFTER redesign.css on work/approach/
+   faq/contact. Homepage does not load this file.
+   ============================================================ */
+
+body.subpage {
+  background:
+    radial-gradient(120% 80% at 20% -10%, rgba(47,127,255,0.16), rgba(0,0,0,0) 60%),
+    #0c0c0e;
+  min-height: 100vh;
+}
+body.subpage #bg-overlay {
+  background: linear-gradient(180deg, rgba(12,12,14,0.0) 0%, rgba(12,12,14,0.55) 100%);
+}
+
+/* --- nav active state --- */
+nav ul a.is-active {
+  color: #fff;
+}
+nav ul a.is-active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -7px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #2f7fff, #cfe4ff);
+  opacity: 1;
+  transform: none;
+  animation: none;
+  color: transparent;
+}
+nav .logo-link { display: inline-flex; align-items: center; text-decoration: none; }
+
+/* --- page header --- */
+.page-hero {
+  padding: 90px 56px 54px;
+  max-width: 900px;
+}
+.page-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  line-height: 1.04;
+  color: #fff;
+  margin: 14px 0 18px;
+  letter-spacing: -0.02em;
+}
+.page-lead {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: rgba(255,255,255,0.68);
+  max-width: 620px;
+}
+.page-section { padding: 20px 56px 90px; }
+
+/* --- work grid --- */
+.proj-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 26px;
+}
+.proj-card {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(0.34,1.2,0.64,1),
+              border-color 0.35s ease, box-shadow 0.35s ease;
+}
+.proj-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(47,127,255,0.5);
+  box-shadow: 0 22px 50px rgba(0,0,0,0.45);
+}
+.proj-media {
+  aspect-ratio: 16 / 10;
+  background: #06070b;
+  overflow: hidden;
+}
+.proj-media img,
+.proj-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.proj-body { padding: 22px 24px 26px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.proj-body h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: #fff;
+}
+.proj-short {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: rgba(47,127,255,0.95);
+}
+.proj-long {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.62);
+  flex: 1;
+}
+.proj-link {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: #cfe4ff;
+  text-decoration: none;
+  margin-top: 4px;
+  transition: color 0.25s ease;
+}
+.proj-link:hover { color: #2f7fff; }
+.proj-nolink {
+  font-size: 0.85rem;
+  font-style: italic;
+  color: rgba(255,255,255,0.35);
+  margin-top: 4px;
+}
+
+/* --- approach steps --- */
+.step-list { display: flex; flex-direction: column; gap: 10px; max-width: 900px; }
+.step-row {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 8px;
+  padding: 34px 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.step-row:last-child { border-bottom: 1px solid rgba(255,255,255,0.08); }
+.step-num {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: rgba(47,127,255,0.85);
+}
+.step-copy h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: 1.9rem;
+  color: #fff;
+  margin-bottom: 10px;
+}
+.step-short {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.02rem;
+  color: rgba(255,255,255,0.82);
+  margin-bottom: 12px;
+}
+.step-long {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.97rem;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.55);
+  max-width: 640px;
+}
+
+/* --- contact extras --- */
+.next-steps {
+  max-width: 520px;
+  margin: 46px auto 0;
+  padding-top: 30px;
+  border-top: 1px solid rgba(255,255,255,0.09);
+}
+.next-steps h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 16px;
+}
+.next-steps ol { padding-left: 20px; display: flex; flex-direction: column; gap: 12px; }
+.next-steps li {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.97rem;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.66);
+}
+
+/* --- bottom CTA --- */
+.page-cta {
+  text-align: center;
+  padding: 76px 56px 90px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.page-cta h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  color: #fff;
+  margin-bottom: 14px;
+}
+.page-cta p {
+  font-family: 'Inter', sans-serif;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 30px;
+}
+.page-cta .cta-btn,
+#contact .contact-form button.cta-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 36px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #fff;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 700px) {
+  .page-hero { padding: 70px 22px 40px; }
+  .page-section { padding: 16px 22px 70px; }
+  .page-cta { padding: 60px 22px 74px; }
+  .proj-grid { grid-template-columns: 1fr; }
+  .step-row { grid-template-columns: 1fr; gap: 6px; padding: 28px 0; }
+  .step-num { font-size: 1.1rem; }
+  .step-copy h3 { font-size: 1.5rem; }
+}
