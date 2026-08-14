@@ -56,77 +56,6 @@ nav .logo-link { display: inline-flex; align-items: center; text-decoration: non
 }
 .page-section { padding: 20px 56px 90px; }
 
-/* --- work grid --- */
-.proj-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 26px;
-}
-.proj-card {
-  display: flex;
-  flex-direction: column;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.09);
-  border-radius: 16px;
-  overflow: hidden;
-  transition: transform 0.35s cubic-bezier(0.34,1.2,0.64,1),
-              border-color 0.35s ease, box-shadow 0.35s ease;
-}
-.proj-card:hover {
-  transform: translateY(-5px);
-  border-color: rgba(47,127,255,0.5);
-  box-shadow: 0 22px 50px rgba(0,0,0,0.45);
-}
-.proj-media {
-  aspect-ratio: 16 / 10;
-  background: #06070b;
-  overflow: hidden;
-}
-.proj-media img,
-.proj-media video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.proj-body { padding: 22px 24px 26px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
-.proj-body h3 {
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700;
-  font-size: 1.3rem;
-  color: #fff;
-}
-.proj-short {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.78rem;
-  letter-spacing: 0.10em;
-  text-transform: uppercase;
-  color: rgba(47,127,255,0.95);
-}
-.proj-long {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: rgba(255,255,255,0.62);
-  flex: 1;
-}
-.proj-link {
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 600;
-  font-size: 0.92rem;
-  color: #cfe4ff;
-  text-decoration: none;
-  margin-top: 4px;
-  transition: color 0.25s ease;
-}
-.proj-link:hover { color: #2f7fff; }
-.proj-nolink {
-  font-size: 0.85rem;
-  font-style: italic;
-  color: rgba(255,255,255,0.35);
-  margin-top: 4px;
-}
-
 /* --- approach steps --- */
 .step-list { display: flex; flex-direction: column; gap: 10px; max-width: 900px; }
 .step-row {
@@ -230,4 +159,309 @@ nav .logo-link { display: inline-flex; align-items: center; text-decoration: non
   .step-row { grid-template-columns: 1fr; gap: 6px; padding: 28px 0; }
   .step-num { font-size: 1.1rem; }
   .step-copy h3 { font-size: 1.5rem; }
+}
+
+/* ============================================================
+   MOTION LAYER
+   ============================================================ */
+
+/* --- cross-document view transitions: nav + footer persist --- */
+nav    { view-transition-name: site-nav; }
+footer { view-transition-name: site-footer; }
+
+::view-transition-old(root) {
+  animation: vt-out 0.30s cubic-bezier(0.4, 0, 1, 1) both;
+}
+::view-transition-new(root) {
+  animation: vt-in 0.44s cubic-bezier(0, 0, 0.2, 1) both;
+}
+@keyframes vt-out {
+  to { opacity: 0; transform: translateY(-16px) scale(0.985); filter: blur(7px); }
+}
+@keyframes vt-in {
+  from { opacity: 0; transform: translateY(26px) scale(1.012); filter: blur(9px); }
+}
+
+/* --- ambient cursor glow --- */
+#page-glow {
+  position: fixed;
+  width: 620px;
+  height: 620px;
+  left: 0; top: 0;
+  margin: -310px 0 0 -310px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  background: radial-gradient(circle, rgba(47,127,255,0.14), rgba(47,127,255,0.05) 42%, rgba(47,127,255,0) 70%);
+  transition: opacity 0.6s ease;
+  will-change: transform;
+}
+body.subpage.glow-on #page-glow { opacity: 1; }
+
+/* --- scroll reveal --- */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  filter: blur(5px);
+  transition: opacity 0.7s cubic-bezier(0.2, 0.7, 0.3, 1),
+              transform 0.7s cubic-bezier(0.2, 0.7, 0.3, 1),
+              filter 0.7s ease;
+}
+.reveal.in { opacity: 1; transform: none; filter: none; }
+
+/* --- page title: canvas particle disintegration --- */
+.page-title { position: relative; }
+.page-title.particle-on {
+  color: transparent;
+}
+.page-title .pt-canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+}
+
+/* --- eyebrow + lead entrance --- */
+.page-hero .eyebrow { position: relative; }
+.page-hero .eyebrow::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -10px;
+  height: 1px; width: 132px;
+  background-image: linear-gradient(100deg,
+    rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.08) 40%,
+    rgba(47,127,255,0.9) 47%, rgba(207,228,255,1) 50%, rgba(47,127,255,0.9) 53%,
+    rgba(255,255,255,0.08) 60%, rgba(255,255,255,0.08) 100%);
+  background-size: 280% 100%;
+  animation: nav-spark 6s linear infinite;
+}
+
+/* --- approach: ghost number parallax --- */
+.step-row { position: relative; overflow: hidden; }
+.step-ghost {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: clamp(4.5rem, 11vw, 9rem);
+  line-height: 1;
+  color: rgba(255,255,255,0.035);
+  pointer-events: none;
+  user-select: none;
+  will-change: transform;
+}
+.step-row:hover .step-copy h3 { color: #cfe4ff; }
+.step-copy h3 { transition: color 0.35s ease; }
+
+/* --- faq page: stagger + hover lift --- */
+.page-section .faq-item {
+  transition: transform 0.35s cubic-bezier(0.34, 1.2, 0.64, 1), border-color 0.35s ease;
+}
+.page-section .faq-item:hover { transform: translateX(6px); }
+
+/* --- next steps: counter pop --- */
+.next-steps li { transition: color 0.3s ease, transform 0.3s ease; }
+.next-steps li:hover { color: rgba(255,255,255,0.92); transform: translateX(4px); }
+
+/* --- bottom CTA heading --- */
+.page-cta h2 .cta-letter {
+  display: inline-block;
+  transition: transform 0.3s cubic-bezier(0.34, 1.5, 0.64, 1), color 0.3s ease, text-shadow 0.3s ease;
+}
+.page-cta h2:hover .cta-letter {
+  transform: translateY(-6px);
+  color: #cfe4ff;
+  text-shadow: 0 0 12px rgba(47,127,255,0.85);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; filter: none; transition: none; }
+  .page-title.particle-on { color: #fff; }
+  .page-title .pt-canvas { display: none; }
+  .page-hero .eyebrow::after { animation: none; }
+  #page-glow { display: none; }
+  .step-ghost { display: none; }
+}
+
+/* ============================================================
+   SHOWCASE — hover-preview list (desktop) / bento grid (mobile)
+   Same markup both ways; the breakpoint swaps the layout.
+   ============================================================ */
+
+.showcase { position: relative; }
+.sc-list { display: flex; flex-direction: column; }
+
+.sc-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto 40px;
+  align-items: baseline;
+  gap: 20px;
+  padding: 26px 6px;
+  border-top: 1px solid rgba(255,255,255,0.09);
+  text-decoration: none;
+  cursor: pointer;
+  transition: padding-left 0.45s cubic-bezier(0.2,0.8,0.3,1);
+}
+.sc-row:last-child { border-bottom: 1px solid rgba(255,255,255,0.09); }
+.sc-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3.4vw, 2.6rem);
+  color: rgba(255,255,255,0.62);
+  transition: color 0.32s ease;
+  line-height: 1.1;
+}
+.sc-meta {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.76rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.26);
+  transition: color 0.32s ease;
+}
+.sc-arrow {
+  font-size: 1.3rem;
+  color: rgba(255,255,255,0.18);
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.35s ease, transform 0.4s cubic-bezier(0.2,1,0.3,1), color 0.3s ease;
+  justify-self: end;
+}
+.showcase.hot .sc-name { color: rgba(255,255,255,0.16); }
+.showcase.hot .sc-meta { color: rgba(255,255,255,0.10); }
+.sc-row:hover { padding-left: 26px; }
+.showcase.hot .sc-row:hover .sc-name { color: #fff; }
+.showcase.hot .sc-row:hover .sc-meta { color: #2f7fff; }
+.sc-row:hover .sc-arrow { opacity: 1; transform: none; color: #2f7fff; }
+
+/* the cursor-following preview */
+.sc-media {
+  position: fixed;
+  left: 0; top: 0;
+  width: 280px;
+  height: 182px;
+  margin: -91px 0 0 -140px;
+  border-radius: 12px;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 40;
+  transform: scale(0.86) rotate(-3deg);
+  transition: opacity 0.3s ease, transform 0.45s cubic-bezier(0.2,1,0.3,1);
+  box-shadow: 0 26px 60px rgba(0,0,0,0.62), 0 0 0 1px rgba(47,127,255,0.4);
+  will-change: transform;
+}
+.sc-media.on { opacity: 1; transform: scale(1) rotate(0deg); }
+.sc-media img, .sc-media video {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+
+/* ---------- mobile: bento grid ---------- */
+@media (max-width: 900px) {
+  .sc-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 132px;
+    gap: 10px;
+  }
+  .sc-row {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0;
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #06070b;
+  }
+  .sc-row:last-child { border-bottom: 1px solid rgba(255,255,255,0.10); }
+  .sc-row:hover { padding-left: 0; }
+  .sc-row.b-a { grid-column: span 2; grid-row: span 2; }
+  .sc-row.b-e { grid-column: span 2; }
+  .sc-media {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    margin: 0;
+    opacity: 1;
+    transform: none;
+    border-radius: 0;
+    box-shadow: none;
+    z-index: 0;
+  }
+  .sc-media::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 42%, rgba(0,0,0,0.82));
+  }
+  .sc-name {
+    position: relative; z-index: 2;
+    font-size: 1.05rem;
+    color: #fff;
+    padding: 0 12px 4px;
+  }
+  .sc-meta {
+    position: relative; z-index: 2;
+    font-size: 0.62rem;
+    color: #7cc4ff;
+    padding: 0 12px 12px;
+  }
+  .sc-arrow { display: none; }
+  .showcase.hot .sc-name { color: #fff; }
+  .showcase.hot .sc-meta { color: #7cc4ff; }
+}
+
+/* ============================================================
+   HOMEPAGE MOBILE FIXES
+   This file loads after redesign.css on every page, so these
+   override the base rules. Scoped so sub-pages are untouched.
+   ============================================================ */
+
+@media (max-width: 950px) {
+  /* nav: bring the links back instead of hiding them outright */
+  nav {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px 18px;
+    padding: 18px 20px 22px;
+  }
+  nav ul {
+    display: flex !important;
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px 22px;
+  }
+  nav ul a { font-size: 0.9rem; }
+  nav ul a.is-active::after { bottom: -5px; }
+  nav .logo-link { order: 1; margin-right: auto; }
+  nav .talk-btn { order: 2; margin-left: auto; padding: 12px 22px; font-size: 0.85rem; }
+
+  /* hero: kill the diagonal clip and the desktop padding */
+  #hero { min-height: 0; }
+  .hero-panel {
+    clip-path: none !important;
+    padding: 46px 22px 52px !important;
+  }
+  .hero-visual { min-height: 300px; }
+
+  /* sections the base breakpoint missed */
+  #faq { padding-left: 24px !important; padding-right: 24px !important; }
+}
+
+@media (max-width: 700px) {
+  .hero-panel { padding: 38px 18px 44px !important; }
+  .hero-visual { min-height: 240px; }
+  .hero-visual .overlay-text .kicker { font-size: 0.72rem; letter-spacing: 0.1em; }
+  #hero-cta { padding: 16px 24px; font-size: 0.88rem; letter-spacing: 0.02em; }
+  nav .talk-btn { padding: 10px 18px; font-size: 0.8rem; }
+  nav ul { gap: 6px 16px; }
+
+  #contact { padding-left: 18px !important; padding-right: 18px !important; }
+  .contact-form { padding: 26px 20px 24px; }
+  footer { flex-direction: column; gap: 6px; text-align: center; padding: 26px 20px; }
 }

@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="redesign.css?v=1">
-<link rel="stylesheet" href="redesign-page.css?v=1">
+<link rel="stylesheet" href="redesign-page.css?v=3">
 </head>
 <body class="subpage">
 
@@ -18,7 +18,7 @@
 
 <nav>
   <canvas id="nav-spark-canvas" aria-hidden="true"></canvas>
-  <a href="redesign-mockup.html" class="logo-link" aria-label="Ignite Web Dev home"><img src="https://ignitewebdev.com/images/ignite-logo.png" class="logo" alt="Ignite Web Dev"></a>
+  <a href="index.html" class="logo-link" aria-label="Ignite Web Dev home"><img src="https://ignitewebdev.com/images/ignite-logo.png" class="logo" alt="Ignite Web Dev"></a>
   <ul>
     <li><a href="work.html" data-t="Work" class="is-active">Work</a></li>
     <li><a href="approach.html" data-t="Approach">Approach</a></li>
@@ -35,61 +35,45 @@
 </header>
 
 <section id="work" class="page-section">
-  <div class="proj-grid">
-    <article class="proj-card">
-      <div class="proj-media"><video src="https://ignitewebdev.com/3fs/intro.mp4" muted autoplay loop playsinline></video></div>
-      <div class="proj-body">
-        <h3>3FS</h3>
-        <p class="proj-short">Fast-paced card game PWA built from scratch</p>
-        <p class="proj-long">A full progressive web app — installable, playable offline, and built without a game engine. Custom card logic, animation, and state handling written from the ground up.</p>
-        <a href="https://ignitewebdev.com/3fs/" target="_blank" rel="noopener" class="proj-link">Visit project &rarr;</a>
+  <div class="showcase" id="showcase">
+    <div class="sc-list">
+      <a class="sc-row b-a" href="https://ignitewebdev.com/3fs/" target="_blank" rel="noopener">
+        <div class="sc-media"><video src="https://ignitewebdev.com/3fs/intro.mp4" muted loop playsinline preload="none"></video></div>
+        <span class="sc-name">3FS</span>
+        <span class="sc-meta">Card game PWA</span>
+        <span class="sc-arrow">&rarr;</span>
+      </a>
+      <div class="sc-row b-b">
+        <div class="sc-media"><video src="https://ignitewebdev.com/images/signal-demo.mp4" muted loop playsinline preload="none"></video></div>
+        <span class="sc-name">Signal Lost</span>
+        <span class="sc-meta">Interactive HTML course</span>
+        <span class="sc-arrow">&rarr;</span>
       </div>
-    </article>
-    <article class="proj-card">
-      <div class="proj-media"><video src="https://ignitewebdev.com/images/signal-demo.mp4" muted autoplay loop playsinline></video></div>
-      <div class="proj-body">
-        <h3>Signal Lost</h3>
-        <p class="proj-short">HTML lessons through an interactive story</p>
-        <p class="proj-long">Sixteen missions that teach real HTML by making you use it. An alien-transmission narrative where each lesson unlocks by writing working markup, not by clicking Next.</p>
-        <span class="proj-nolink">Link not currently available</span>
+      <div class="sc-row b-c">
+        <div class="sc-media"><video src="https://ignitewebdev.com/images/neon-demo.mp4" muted loop playsinline preload="none"></video></div>
+        <span class="sc-name">Neon Province</span>
+        <span class="sc-meta">CSS through story</span>
+        <span class="sc-arrow">&rarr;</span>
       </div>
-    </article>
-    <article class="proj-card">
-      <div class="proj-media"><video src="https://ignitewebdev.com/images/neon-demo.mp4" muted autoplay loop playsinline></video></div>
-      <div class="proj-body">
-        <h3>Neon Province</h3>
-        <p class="proj-short">Learn CSS through story</p>
-        <p class="proj-long">The companion to Signal Lost, for CSS. Layout, color, and animation taught inside a story instead of a reference manual.</p>
-        <span class="proj-nolink">Link not currently available</span>
-      </div>
-    </article>
-    <article class="proj-card">
-      <div class="proj-media"><img src="https://ignitewebdev.com/images/bizcheck-display-1.jpg" alt="BizCheck" loading="lazy"></div>
-      <div class="proj-body">
-        <h3>BizCheck</h3>
-        <p class="proj-short">Job-costing software for trade and service businesses</p>
-        <p class="proj-long">Built for moving, HVAC, and construction crews who need to know whether a job actually made money. Tracks labor, materials, and margin per job instead of guessing at the end of the month.</p>
-        <a href="https://ignitewebdev.com/bizcheck/" target="_blank" rel="noopener" class="proj-link">Visit project &rarr;</a>
-      </div>
-    </article>
-    <article class="proj-card">
-      <div class="proj-media"><img src="https://ignitewebdev.com/saltline/saltline-screenshot-1.jpg" alt="Salt Line Kitchen" loading="lazy"></div>
-      <div class="proj-body">
-        <h3>Salt Line Kitchen</h3>
-        <p class="proj-short">Table-side QR ordering, no delivery-app commission taken</p>
-        <p class="proj-long">Guests scan, browse, and order from the table. The restaurant keeps the full ticket instead of handing 20-30% to a delivery platform.</p>
-        <a href="https://ignitewebdev.com/saltline/demo/" target="_blank" rel="noopener" class="proj-link">Visit project &rarr;</a>
-      </div>
-    </article>
-    <article class="proj-card">
-      <div class="proj-media"><img src="https://ignitewebdev.com/images/coldside-screenshot-1.png" alt="ColdSide Study" loading="lazy"></div>
-      <div class="proj-body">
-        <h3>ColdSide Study</h3>
-        <p class="proj-short">EPA 608 exam prep</p>
-        <p class="proj-long">A study PWA for HVAC techs working toward EPA 608 certification. Practice questions, section drills, and progress tracking that works offline on a job site.</p>
-        <a href="https://coldsidestudy.netlify.app" target="_blank" rel="noopener" class="proj-link">Visit project &rarr;</a>
-      </div>
-    </article>
+      <a class="sc-row b-d" href="https://ignitewebdev.com/bizcheck/" target="_blank" rel="noopener">
+        <div class="sc-media"><img src="https://ignitewebdev.com/images/bizcheck-display-1.jpg" alt="BizCheck" loading="lazy"></div>
+        <span class="sc-name">BizCheck</span>
+        <span class="sc-meta">Job-costing software</span>
+        <span class="sc-arrow">&rarr;</span>
+      </a>
+      <a class="sc-row b-e" href="https://ignitewebdev.com/saltline/demo/" target="_blank" rel="noopener">
+        <div class="sc-media"><img src="https://ignitewebdev.com/saltline/saltline-screenshot-1.jpg" alt="Salt Line Kitchen" loading="lazy"></div>
+        <span class="sc-name">Salt Line Kitchen</span>
+        <span class="sc-meta">Table-side QR ordering</span>
+        <span class="sc-arrow">&rarr;</span>
+      </a>
+      <a class="sc-row b-f" href="https://coldsidestudy.netlify.app" target="_blank" rel="noopener">
+        <div class="sc-media"><img src="https://ignitewebdev.com/images/coldside-screenshot-1.png" alt="ColdSide Study" loading="lazy"></div>
+        <span class="sc-name">ColdSide Study</span>
+        <span class="sc-meta">EPA 608 exam prep</span>
+        <span class="sc-arrow">&rarr;</span>
+      </a>
+    </div>
   </div>
 </section>
 
@@ -106,5 +90,6 @@
 
 <script src="redesign-fx.js?v=2"></script>
 <script src="redesign-nav.js?v=1"></script>
+<script src="redesign-page-fx.js?v=1"></script>
 </body>
 </html>
