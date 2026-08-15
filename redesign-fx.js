@@ -239,13 +239,34 @@
   var letters = [];
   
   // Create spans for each character
-  text.split('').forEach(function(ch, idx) {
-    var span = document.createElement('span');
-    span.className = 'contact-letter';
-    span.textContent = ch === ' ' ? '\u00A0' : ch;
-    span.style.opacity = '0';
-    heading.appendChild(span);
-    letters.push({ el: span, idx: idx });
+  /* Group letters into per-word wrappers. Each letter is inline-block, which
+     creates a break opportunity between every character - that is what split
+     words mid-way ("yo / u customers"). A nowrap wrapper per word means the
+     line can only break at real spaces. */
+  var li = 0;
+  var words = text.split(' ');
+  words.forEach(function(word, wi) {
+    var wordEl = document.createElement('span');
+    wordEl.className = 'contact-word';
+    word.split('').forEach(function(ch) {
+      var span = document.createElement('span');
+      span.className = 'contact-letter';
+      span.textContent = ch;
+      span.style.opacity = '0';
+      wordEl.appendChild(span);
+      letters.push({ el: span, idx: li });
+      li++;
+    });
+    heading.appendChild(wordEl);
+    if (wi < words.length - 1) {
+      var sp = document.createElement('span');
+      sp.className = 'contact-letter';
+      sp.textContent = '\u00A0';
+      sp.style.opacity = '0';
+      heading.appendChild(sp);
+      letters.push({ el: sp, idx: li });
+      li++;
+    }
   });
   
   var typewriterDone = false;

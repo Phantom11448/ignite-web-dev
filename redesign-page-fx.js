@@ -23,7 +23,7 @@
 
 /* --- 2. scroll reveal, replays on every entry --- */
 (function() {
-  var sel = '.proj-card, .step-row, .page-section .faq-item, .next-steps, .contact-form, .contact-direct, .page-cta h2, .page-cta p, .page-cta .cta-btn';
+  var sel = '.sc-row, .step-row, .page-section .faq-item, .next-steps, .contact-form, .contact-direct, .page-cta h2, .page-cta p, .page-cta .cta-btn';
   var els = Array.prototype.slice.call(document.querySelectorAll(sel));
   if (!els.length) return;
   els.forEach(function(el, i) {
@@ -165,32 +165,85 @@
   });
 })();
 
-/* --- 4. project cards: 3D tilt + spotlight position + corner brackets --- */
+/* --- 4. showcase: cursor-following preview (desktop) / in-tile media (mobile) --- */
 (function() {
-  var cards = Array.prototype.slice.call(document.querySelectorAll('.proj-card'));
-  if (!cards.length) return;
+  var wrap = document.getElementById('showcase');
+  if (!wrap) return;
+  var rows = Array.prototype.slice.call(wrap.querySelectorAll('.sc-row'));
+  if (!rows.length) return;
+
+  var desktop = window.matchMedia('(min-width: 901px)');
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  cards.forEach(function(card) {
-    ['c-tl', 'c-br'].forEach(function(cls) {
-      var d = document.createElement('div');
-      d.className = 'corner ' + cls;
-      card.appendChild(d);
+
+  var vidObs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(en) {
+      var v = en.target;
+      if (en.isIntersecting) { v.play().catch(function(){}); }
+      else { v.pause(); }
     });
-    if (reduce) return;
-    card.addEventListener('pointermove', function(e) {
-      var r = card.getBoundingClientRect();
-      var px = (e.clientX - r.left) / r.width;
-      var py = (e.clientY - r.top) / r.height;
-      card.style.setProperty('--mx', (px * 100).toFixed(1) + '%');
-      card.style.setProperty('--my', (py * 100).toFixed(1) + '%');
-      card.style.transform =
-        'translateY(-5px) perspective(900px) rotateX(' + ((0.5 - py) * 7).toFixed(2) +
-        'deg) rotateY(' + ((px - 0.5) * 9).toFixed(2) + 'deg)';
+  }, { threshold: 0.25 });
+
+  function bindMobile() {
+    rows.forEach(function(r) {
+      var v = r.querySelector('video');
+      if (v) { v.preload = 'auto'; vidObs.observe(v); }
     });
-    card.addEventListener('pointerleave', function() {
-      card.style.transform = '';
+  }
+  function unbindMobile() {
+    rows.forEach(function(r) {
+      var v = r.querySelector('video');
+      if (v) { vidObs.unobserve(v); v.pause(); }
     });
-  });
+  }
+
+  var tx = 0, ty = 0, cx = 0, cy = 0, active = null, raf = null;
+  function follow() {
+    cx += (tx - cx) * 0.16;
+    cy += (ty - cy) * 0.16;
+    if (active) {
+      active.style.left = cx.toFixed(1) + 'px';
+      active.style.top  = cy.toFixed(1) + 'px';
+    }
+    raf = requestAnimationFrame(follow);
+  }
+
+  function bindDesktop() {
+    rows.forEach(function(r) {
+      var media = r.querySelector('.sc-media');
+      var v = r.querySelector('video');
+      if (!media) return;
+      r.addEventListener('mouseenter', function(e) {
+        wrap.classList.add('hot');
+        media.classList.add('on');
+        active = media;
+        /* seed the position from this event so the card never sits at 0,0
+           while waiting for the first mousemove */
+        tx = cx = e.clientX; ty = cy = e.clientY;
+        media.style.left = cx + 'px';
+        media.style.top  = cy + 'px';
+        if (!raf) raf = requestAnimationFrame(follow);
+        if (v) { v.currentTime = 0; v.play().catch(function(){}); }
+      });
+      r.addEventListener('mouseleave', function() {
+        media.classList.remove('on');
+        if (active === media) active = null;
+        if (v) v.pause();
+      });
+    });
+    wrap.addEventListener('mouseleave', function() { wrap.classList.remove('hot'); });
+    wrap.addEventListener('mousemove', function(e) {
+      tx = e.clientX; ty = e.clientY;
+      if (!raf) { cx = tx; cy = ty; raf = requestAnimationFrame(follow); }
+    });
+  }
+
+  function apply() {
+    if (desktop.matches && !reduce) { unbindMobile(); }
+    else { bindMobile(); }
+  }
+  if (!reduce) bindDesktop();
+  apply();
+  if (desktop.addEventListener) desktop.addEventListener('change', apply);
 })();
 
 /* --- 5. approach: ghost numbers with scroll parallax --- */

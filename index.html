@@ -10,11 +10,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="redesign.css?v=1">
-<link rel="stylesheet" href="redesign-page.css?v=3">
+<link rel="stylesheet" href="redesign-page.css?v=4">
+<link rel="preload" as="image" href="images/skyline-poster.jpg">
 </head>
 <body>
 
-<video id="bg-video" src="images/skyline2.mp4" autoplay muted loop playsinline></video>
+<video id="bg-video" src="images/skyline2.mp4" autoplay muted loop playsinline poster="images/skyline-poster.jpg" preload="auto"></video>
 <div id="bg-overlay"></div>
 <canvas id="flame-canvas"></canvas>
 
@@ -33,7 +34,7 @@
 <section id="hero">
   <div class="hero-panel">
     <div class="eyebrow" id="hero-eyebrow">Houston, TX &middot; Freelance Web Developer</div>
-    <h1 id="hero-heading">Custom websites that actually bring in customers.</h1>
+    <h1 id="hero-heading">Custom websites that bring in customers.</h1>
     <p id="hero-para">Real code, no templates, no shortcuts. Built fast, built right, for small businesses that need a site that works as hard as they do.</p>
     <a href="#contact" class="cta-btn" id="hero-cta">Request a Quote &rarr;</a>
   </div>
@@ -125,7 +126,7 @@
 
 <section id="contact">
   <div class="eyebrow">02 &mdash; Get In Touch</div>
-  <h2 id="gravity-heading">Let's build something that actually gets you customers.</h2>
+  <h2 id="gravity-heading">Let's build something that gets you customers.</h2>
   <form name="contact" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" class="contact-form">
     <input type="hidden" name="form-name" value="contact">
     <p class="hp"><label>Don't fill this out: <input name="bot-field"></label></p>
@@ -161,5 +162,7 @@
 <script src="redesign-flame.js?v=1"></script>
 <script src="redesign-nav.js?v=1"></script>
 <script src="redesign-kicker.js?v=1"></script>
+<script src="redesign-wordfire.js?v=1"></script>
+<script src="redesign-cursor.js?v=1"></script>
 </body>
 </html>
