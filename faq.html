@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ — Ignite Web Dev</title>
+<meta name="description" content="Common questions about cost, timelines, web apps vs websites, branding, and site maintenance.">
+<link rel="canonical" href="https://ignitewebdev.com/faq.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="redesign.css?v=1">
+<link rel="stylesheet" href="redesign-page.css?v=4">
+<script>
+(function () {
+  try {
+    if (!window.matchMedia) return;
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    document.documentElement.classList.add('torch-cursor');
+    /* safety net: if the cursor canvas never appears, give the pointer back */
+    setTimeout(function () {
+      if (!document.getElementById('torch-cursor-canvas')) {
+        document.documentElement.classList.remove('torch-cursor');
+      }
+    }, 3000);
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="subpage">
+
+<div id="bg-overlay"></div>
+
+<nav>
+  <canvas id="nav-spark-canvas" aria-hidden="true"></canvas>
+  <a href="index.html" class="logo-link" aria-label="Ignite Web Dev home"><img src="https://ignitewebdev.com/images/ignite-logo.png" class="logo" alt="Ignite Web Dev"></a>
+  <ul>
+    <li><a href="work.html" data-t="Work">Work</a></li>
+    <li><a href="approach.html" data-t="Approach">Approach</a></li>
+    <li><a href="faq.html" data-t="FAQ" class="is-active">FAQ</a></li>
+    <li><a href="contact.html" data-t="Contact">Contact</a></li>
+  </ul>
+  <a href="contact.html" class="talk-btn">Let's Talk</a>
+</nav>
+
+<header class="page-hero">
+  <div class="eyebrow">03 — Common Questions</div>
+  <h1 class="page-title">Questions worth asking before you hire anyone.</h1>
+  <p class="page-lead">Straight answers on cost, timing, and what you actually get.</p>
+</header>
+
+<section id="faq" class="page-section">
+<div class="faq-list">
+    <div class="faq-item open">
+      <button class="faq-question">How much does a website cost?<span class="chevron">+</span></button>
+      <div class="faq-answer"><p>It depends on what you need, but every project starts with a free quote call so you know the real number upfront — no templates, no surprise fees, no agency markup.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question">How long does it take to build a website?<span class="chevron">+</span></button>
+      <div class="faq-answer"><p>Most small business sites take a few weeks from kickoff to launch, depending on scope. You'll get a real timeline during the free quote call, not a vague estimate.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question">What's the difference between a website and a web app?<span class="chevron">+</span></button>
+      <div class="faq-answer"><p>A website mainly shows information. A web app lets people actually do something — book a table, place an order, log in and track a job. Most businesses need both, and I build either one custom to your needs.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question">Can you recover data from a broken phone or computer?<span class="chevron">+</span></button>
+      <div class="faq-answer"><p>In most cases, yes. If a device won't boot or a drive's failing, I can usually pull your files off before you write it off as a loss.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question">Do you offer logo and branding design?<span class="chevron">+</span></button>
+      <div class="faq-answer"><p>Yes — logo and graphic design is available alongside web work, so your site and your brand actually match instead of looking like they came from two different places.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question">How often should a website be updated?<span class="chevron">+</span></button>
+      <div class="faq-answer"><p>Content and security updates are worth checking a few times a year at minimum. A full redesign is usually more like every 3-5 years, or whenever your business outgrows the old site.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="page-cta">
+  <h2>Ready to start?</h2>
+  <p>Every project begins with a free quote call. No pressure, no obligation.</p>
+  <a href="contact.html" class="cta-btn">Get a Free Quote &rarr;</a>
+</section>
+
+<footer>
+  <span>Ignite Web Dev &copy; 2026</span>
+  <span>Houston, TX</span>
+</footer>
+
+<script src="redesign-fx.js?v=2"></script>
+<script src="redesign-nav.js?v=1"></script>
+<script src="redesign-page-fx.js?v=1"></script>
+<script src="redesign-cursor.js?v=1"></script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Approach — Ignite Web Dev</title>
+<meta name="description" content="How a website gets built at Ignite Web Dev: discovery, design, build, and launch — with support after go-live.">
+<link rel="canonical" href="https://ignitewebdev.com/approach.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="redesign.css?v=1">
+<link rel="stylesheet" href="redesign-page.css?v=4">
+<script>
+(function () {
+  try {
+    if (!window.matchMedia) return;
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    document.documentElement.classList.add('torch-cursor');
+    /* safety net: if the cursor canvas never appears, give the pointer back */
+    setTimeout(function () {
+      if (!document.getElementById('torch-cursor-canvas')) {
+        document.documentElement.classList.remove('torch-cursor');
+      }
+    }, 3000);
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="subpage">
+
+<div id="bg-overlay"></div>
+
+<nav>
+  <canvas id="nav-spark-canvas" aria-hidden="true"></canvas>
+  <a href="index.html" class="logo-link" aria-label="Ignite Web Dev home"><img src="https://ignitewebdev.com/images/ignite-logo.png" class="logo" alt="Ignite Web Dev"></a>
+  <ul>
+    <li><a href="work.html" data-t="Work">Work</a></li>
+    <li><a href="approach.html" data-t="Approach" class="is-active">Approach</a></li>
+    <li><a href="faq.html" data-t="FAQ">FAQ</a></li>
+    <li><a href="contact.html" data-t="Contact">Contact</a></li>
+  </ul>
+  <a href="contact.html" class="talk-btn">Let's Talk</a>
+</nav>
+
+<header class="page-hero">
+  <div class="eyebrow">02 — How It Works</div>
+  <h1 class="page-title">From first call to live site.</h1>
+  <p class="page-lead">Four stages, no mystery. Here's exactly what happens between hiring me and having a site that works.</p>
+</header>
+
+<section id="approach" class="page-section">
+  <div class="step-list">
+    <div class="step-row">
+      <div class="step-num">01</div>
+      <div class="step-copy">
+        <h3 class="trace-heading">Discovery</h3>
+        <p class="step-short">A free quote call — what you need, who it's for, what "done" looks like.</p>
+        <p class="step-long">We start with a conversation, not a contract. I want to know who your customers are, what they need to be able to do on the site, and what problem the current setup is causing you. You leave that call with a real number and a real timeline — not a range designed to get you in the door.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">02</div>
+      <div class="step-copy">
+        <h3 class="trace-heading">Design</h3>
+        <p class="step-short">A real layout built around your brand, not a recycled template.</p>
+        <p class="step-long">No theme marketplace, no drag-and-drop builder that looks like every other site in your industry. The layout gets built around your actual content and your actual brand. You see it before a single line of production code gets written, and changes at this stage cost nothing but time.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">03</div>
+      <div class="step-copy">
+        <h3 class="trace-heading">Build</h3>
+        <p class="step-short">Fast, clean, hand-coded — fully responsive, no bloat.</p>
+        <p class="step-long">Everything is written by hand. That means no plugin stack to maintain, no bloated page weight, and no mystery code you can never get out from under. Responsive from the first breakpoint, tested on real devices, and built to score well on the performance metrics Google actually measures.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">04</div>
+      <div class="step-copy">
+        <h3 class="trace-heading">Launch</h3>
+        <p class="step-short">Deployed, tested, and handed off with support after go-live.</p>
+        <p class="step-long">Deployment, DNS, SSL, search console, sitemap — handled. You get walked through how to make basic updates yourself, and I don't vanish the day it goes live. If something breaks in week three, you have someone to call.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="page-cta">
+  <h2>Ready to start?</h2>
+  <p>Every project begins with a free quote call. No pressure, no obligation.</p>
+  <a href="contact.html" class="cta-btn">Get a Free Quote &rarr;</a>
+</section>
+
+<footer>
+  <span>Ignite Web Dev &copy; 2026</span>
+  <span>Houston, TX</span>
+</footer>
+
+<script src="redesign-fx.js?v=2"></script>
+<script src="redesign-nav.js?v=1"></script>
+<script src="redesign-page-fx.js?v=1"></script>
+<script src="redesign-cursor.js?v=1"></script>
+</body>
+</html>
