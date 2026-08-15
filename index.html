@@ -12,6 +12,22 @@
 <link rel="stylesheet" href="redesign.css?v=1">
 <link rel="stylesheet" href="redesign-page.css?v=4">
 <link rel="preload" as="image" href="images/skyline-poster.jpg">
+<script>
+(function () {
+  try {
+    if (!window.matchMedia) return;
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    document.documentElement.classList.add('torch-cursor');
+    /* safety net: if the cursor canvas never appears, give the pointer back */
+    setTimeout(function () {
+      if (!document.getElementById('torch-cursor-canvas')) {
+        document.documentElement.classList.remove('torch-cursor');
+      }
+    }, 3000);
+  } catch (e) {}
+})();
+</script>
 </head>
 <body>
 
