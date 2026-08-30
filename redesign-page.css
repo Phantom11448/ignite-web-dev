@@ -538,3 +538,90 @@ body.subpage.glow-on #page-glow { opacity: 1; }
 .sc-media {
   background: #06070b;
 }
+
+/* ── AREAS WE SERVE ───────────────────────────────────────── */
+.areas-intro {
+  max-width: 640px;
+  margin: 0 auto 2rem;
+  text-align: center;
+  color: rgba(255,255,255,0.68);
+  font-family: 'Inter', sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+.areas-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.9rem;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.areas-grid a {
+  display: inline-block;
+  padding: 0.75rem 1.4rem;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 10px;
+  color: #fff;
+  text-decoration: none;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+.areas-grid a:hover {
+  border-color: #2f7fff;
+  color: #cfe4ff;
+  box-shadow: 0 0 14px rgba(47,127,255,0.5);
+}
+
+/* Footer area links */
+.footer-areas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem 1.1rem;
+  max-width: 700px;
+  margin: 0 auto 1rem;
+}
+.footer-areas a {
+  color: rgba(255,255,255,0.5);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-family: 'Inter', sans-serif;
+  transition: color 0.25s ease;
+}
+.footer-areas a:hover { color: #2f7fff; }
+
+/* Service list on location pages */
+.service-list {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0 0;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.service-list li {
+  position: relative;
+  padding-left: 26px;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.02rem;
+  line-height: 1.65;
+  color: rgba(255,255,255,0.72);
+}
+.service-list li::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 0.6em;
+  width: 8px;
+  height: 8px;
+  background: #2f7fff;
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(47,127,255,0.7);
+}
+.service-list li strong {
+  color: #fff;
+}
